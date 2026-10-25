@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/nominatim-amenity-search",
+  "properties": {
+    "amenity": {
+      "type": "string",
+      "maxLength": 50,
+      "minLength": 1,
+      "description": "Place type, e.g. museum, theatre, cinema, zoo, park, restaurant."
+    },
+    "city": {
+      "type": "string",
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "country": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "jsonv2",
+        "geojson"
+      ]
+    },
+    "limit": {
+      "type": "integer",
+      "maximum": 40,
+      "minimum": 1
+    },
+    "accept-language": {
+      "type": "string",
+      "maxLength": 20
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "amenity",
+    "city",
+    "format"
+  ],
+  "title": "nominatim.search_amenity request parameters"
+}

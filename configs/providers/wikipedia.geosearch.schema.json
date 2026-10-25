@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/wikipedia-geosearch",
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "query"
+      ]
+    },
+    "generator": {
+      "type": "string",
+      "enum": [
+        "geosearch"
+      ]
+    },
+    "ggscoord": {
+      "type": "string",
+      "pattern": "^-?[0-9.]+\\|-?[0-9.]+$",
+      "description": "lat|lon, e.g. 55.7987|49.1059."
+    },
+    "ggsradius": {
+      "type": "integer",
+      "maximum": 10000,
+      "minimum": 10,
+      "description": "Meters (MediaWiki allows 10-10000)."
+    },
+    "ggslimit": {
+      "type": "integer",
+      "maximum": 50,
+      "minimum": 1,
+      "description": "Our cap of 50 keeps a photo for every page (pageimages returns at most 50).",
+      "default": 20
+    },
+    "prop": {
+      "type": "string",
+      "maxLength": 100,
+      "default": "coordinates|pageimages|description|info"
+    },
+    "inprop": {
+      "type": "string",
+      "enum": [
+        "url"
+      ],
+      "description": "url adds fullurl (link to the article)."
+    },
+    "piprop": {
+      "type": "string",
+      "enum": [
+        "thumbnail",
+        "original"
+      ]
+    },
+    "pithumbsize": {
+      "type": "integer",
+      "maximum": 1000,
+      "minimum": 50,
+      "description": "Thumbnail width in px."
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json"
+      ]
+    },
+    "formatversion": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ],
+      "description": "2 returns pages as a list.",
+      "default": 2
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "action",
+    "generator",
+    "ggscoord",
+    "ggsradius",
+    "format"
+  ],
+  "title": "wikipedia.geosearch request parameters"
+}

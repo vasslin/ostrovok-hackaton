@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/rasp-copyright",
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "xml"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "title": "yandex_rasp.copyright request parameters"
+}

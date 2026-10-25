@@ -1,0 +1,4 @@
+{"checkin": "2026-12-12", "checkout": "2026-12-14", "residency": "ru", "language": "ru", "currency": "RUB",
+ "region_id": 1001, "hotels_limit": 20,
+ "guests": [{"adults": 2, "children": []}],
+ "filter": {"star_rating": [3, 4, 5], "meal_type": "breakfast", "price_to": 16000}}

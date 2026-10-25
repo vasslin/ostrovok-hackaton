@@ -1,0 +1,123 @@
+{
+  "aviasales": {
+    "description": "Travelpayouts Aviasales Data API: cached flight prices Aviasales users found recently (not live seats).",
+    "base_url": "https://api.travelpayouts.com",
+    "auth": {"type": "header", "name": "X-Access-Token", "env": "TRAVELPAYOUTS_TOKEN"},
+    "rps": 5, "timeout_ms": 8000, "cache_ttl_s": 3600,
+    "endpoints": {
+      "prices_for_dates": {"method": "GET", "path": "/aviasales/v3/prices_for_dates", "params_in": "query"}
+    }
+  },
+  "travelpayouts_places": {
+    "description": "City or airport name -> IATA code, coordinates, Russian word forms. No key.",
+    "base_url": "https://autocomplete.travelpayouts.com",
+    "auth": {"type": "none"},
+    "rps": 5, "timeout_ms": 5000, "cache_ttl_s": 604800,
+    "endpoints": {
+      "places2": {"method": "GET", "path": "/places2", "params_in": "query"}
+    }
+  },
+  "yandex_rasp": {
+    "description": "Yandex Rasp API v3.0: schedules for plane, train, suburban, bus, water, helicopter. Use the yandex-net.ru domain.",
+    "base_url": "https://api.rasp.yandex-net.ru",
+    "auth": {"type": "query", "name": "apikey", "env": "YANDEX_RASP_API_KEY"},
+    "rps": 2, "timeout_ms": 8000, "cache_ttl_s": 21600,
+    "attribution": "Данные: Яндекс Расписания (баннер, текст и ссылка из /v3.0/copyright/)",
+    "endpoints": {
+      "search":             {"method": "GET", "path": "/v3.0/search/",             "params_in": "query"},
+      "nearest_settlement": {"method": "GET", "path": "/v3.0/nearest_settlement/", "params_in": "query"},
+      "thread":             {"method": "GET", "path": "/v3.0/thread/",             "params_in": "query"},
+      "copyright":          {"method": "GET", "path": "/v3.0/copyright/",          "params_in": "query"}
+    }
+  },
+  "hotels_mock": {
+    "description": "Our hotel service with the ETG / RateHawk B2B API v3 contract: real hotels, synthetic rates.",
+    "base_url": "http://provider-service:8080/hotels",
+    "auth": {"type": "basic", "env_user": "HOTELS_KEY_ID", "env_pass": "HOTELS_KEY"},
+    "rps": 10, "timeout_ms": 5000, "cache_ttl_s": 0,
+    "endpoints": {
+      "multicomplete":  {"method": "POST", "path": "/api/b2b/v3/search/multicomplete/",               "params_in": "json"},
+      "search_region":  {"method": "POST", "path": "/api/b2b/v3/search/serp/region/",                 "params_in": "json"},
+      "search_geo":     {"method": "POST", "path": "/api/b2b/v3/search/serp/geo/",                    "params_in": "json"},
+      "search_hotels":  {"method": "POST", "path": "/api/b2b/v3/search/serp/hotels/",                 "params_in": "json"},
+      "hotelpage":      {"method": "POST", "path": "/api/b2b/v3/search/hp/",                          "params_in": "json"},
+      "prebook":        {"method": "POST", "path": "/api/b2b/v3/hotel/prebook/",                      "params_in": "json"},
+      "booking_form":   {"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/form/",           "params_in": "json"},
+      "booking_finish": {"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/finish/",         "params_in": "json"},
+      "booking_status": {"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/finish/status/",  "params_in": "json"},
+      "cancel":         {"method": "POST", "path": "/api/b2b/v3/hotel/order/cancel/",                 "params_in": "json"}
+    }
+  },
+  "wikipedia": {
+    "description": "Primary leisure source: Wikipedia articles near a point, with description, photo and link. No key.",
+    "base_url": "https://ru.wikipedia.org",
+    "auth": {"type": "none"},
+    "headers": {"User-Agent": "godnota-hackathon/0.1 (https://github.com/ostrovok-hackathon-2026/godnota)"},
+    "rps": 5, "timeout_ms": 8000, "cache_ttl_s": 604800,
+    "attribution": "Википедия (CC BY-SA 4.0)",
+    "endpoints": {
+      "geosearch": {"method": "GET", "path": "/w/api.php", "params_in": "query"}
+    }
+  },
+  "nominatim": {
+    "description": "OSM geocoding. Policy: at most 1 request per second, identifying User-Agent, cache results.",
+    "base_url": "https://nominatim.openstreetmap.org",
+    "auth": {"type": "none"},
+    "headers": {"User-Agent": "godnota-hackathon/0.1"},
+    "rps": 1, "timeout_ms": 8000, "cache_ttl_s": 2592000,
+    "attribution": "© OpenStreetMap contributors",
+    "endpoints": {
+      "search":         {"method": "GET", "path": "/search", "params_in": "query"},
+      "search_amenity": {"method": "GET", "path": "/search", "params_in": "query"}
+    }
+  },
+  "osrm": {
+    "description": "OSRM demo server: drive time and distance for transfers. Light use only.",
+    "base_url": "https://router.project-osrm.org",
+    "auth": {"type": "none"},
+    "headers": {"User-Agent": "godnota-hackathon/0.1"},
+    "rps": 1, "timeout_ms": 8000, "cache_ttl_s": 2592000,
+    "endpoints": {
+      "route": {"method": "GET", "path": "/route/v1/driving/{coordinates}", "params_in": "query"}
+    }
+  },
+  "open_meteo": {
+    "description": "Open-Meteo weather, history and sea temperature. Free non-commercial: <10000 calls/day, 5000/h, 600/min.",
+    "base_url": "https://api.open-meteo.com",
+    "auth": {"type": "none"},
+    "rps": 5, "timeout_ms": 8000, "cache_ttl_s": 21600,
+    "attribution": "Weather data by Open-Meteo.com (CC BY 4.0)",
+    "endpoints": {
+      "forecast": {"method": "GET", "path": "/v1/forecast", "params_in": "query"}
+    }
+  },
+  "open_meteo_archive": {
+    "description": "Open-Meteo historical weather (ERA5, 1940 onwards).",
+    "base_url": "https://archive-api.open-meteo.com",
+    "auth": {"type": "none"},
+    "rps": 5, "timeout_ms": 8000, "cache_ttl_s": 2592000,
+    "attribution": "Weather data by Open-Meteo.com (CC BY 4.0)",
+    "endpoints": {
+      "archive": {"method": "GET", "path": "/v1/archive", "params_in": "query"}
+    }
+  },
+  "open_meteo_marine": {
+    "description": "Open-Meteo marine: sea_surface_temperature (forecast 0-8 days, history from 2022).",
+    "base_url": "https://marine-api.open-meteo.com",
+    "auth": {"type": "none"},
+    "rps": 5, "timeout_ms": 8000, "cache_ttl_s": 21600,
+    "attribution": "Weather data by Open-Meteo.com (CC BY 4.0)",
+    "endpoints": {
+      "marine": {"method": "GET", "path": "/v1/marine", "params_in": "query"}
+    }
+  },
+  "cbr": {
+    "description": "Bank of Russia daily exchange rates (XML, windows-1251).",
+    "base_url": "https://www.cbr.ru",
+    "auth": {"type": "none"},
+    "rps": 1, "timeout_ms": 8000, "cache_ttl_s": 43200,
+    "endpoints": {
+      "daily": {"method": "GET", "path": "/scripts/XML_daily.asp", "params_in": "query"}
+    }
+  }
+}

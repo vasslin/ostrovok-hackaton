@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "locale": "ru",
+  "currency": "RUB",
+  "origin": {"city": "Москва", "country_code": "RU"},
+  "destination": {"city": "Сочи", "country_code": "RU"},
+  "dates": {"departure_date": "2026-12-28", "return_date": "2027-01-04", "nights": 7},
+  "travelers": {"adults": 2, "children_ages": [9], "pets": [{"kind": "dog", "weight_kg": 12}], "residency": "ru"},
+  "transport": {"modes": ["train"], "round_trip": true, "max_transfers": 0},
+  "hotel": {"needed": true, "rooms": 1, "meal": "half_board", "amenities": ["pet_friendly", "pool"], "location": ["quiet"]},
+  "leisure": {"interests": ["nature", "parks", "kids"]},
+  "budget": {"total": 250000, "scope": "total", "is_hard": true},
+  "ai_context": {"trip_purpose": "family", "must_avoid": ["шумные районы"]},
+  "completeness": {"missing_required": []}
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/rasp-search",
+  "properties": {
+    "from": {
+      "type": "string",
+      "maxLength": 20,
+      "minLength": 2,
+      "description": "Yandex code: c213 (city) or s9600213 (station); other systems via system."
+    },
+    "to": {
+      "type": "string",
+      "maxLength": 20,
+      "minLength": 2
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Without a date only direct threads for all dates are returned."
+    },
+    "transport_types": {
+      "type": "string",
+      "enum": [
+        "plane",
+        "train",
+        "suburban",
+        "bus",
+        "water",
+        "helicopter"
+      ],
+      "description": "Omit for all types."
+    },
+    "system": {
+      "type": "string",
+      "enum": [
+        "yandex",
+        "iata",
+        "sirena",
+        "express",
+        "esr"
+      ],
+      "default": "yandex"
+    },
+    "transfers": {
+      "type": "boolean",
+      "description": "Add routes with transfers."
+    },
+    "limit": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 1,
+      "default": 100
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "lang": {
+      "type": "string",
+      "enum": [
+        "ru_RU",
+        "uk_UA"
+      ],
+      "default": "ru_RU"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "xml"
+      ],
+      "default": "json"
+    },
+    "result_timezone": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "IANA time zone; default is each station's own zone."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "from",
+    "to"
+  ],
+  "title": "yandex_rasp.search request parameters"
+}

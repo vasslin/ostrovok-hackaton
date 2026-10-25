@@ -1,0 +1,3 @@
+{"action": "query", "generator": "geosearch", "ggscoord": "55.7987|49.1059", "ggsradius": 3000, "ggslimit": 20,
+ "prop": "coordinates|pageimages|description|info", "inprop": "url", "piprop": "thumbnail", "pithumbsize": 400,
+ "format": "json", "formatversion": 2}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/osrm-route",
+  "properties": {
+    "coordinates": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "lon,lat;lon,lat — longitude first."
+    },
+    "overview": {
+      "type": "string",
+      "enum": [
+        "false",
+        "simplified",
+        "full"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "coordinates"
+  ],
+  "title": "osrm.route request parameters"
+}

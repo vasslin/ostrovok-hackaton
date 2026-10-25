@@ -1,0 +1,483 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/trip/trip-request",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "locale": {
+      "type": "string",
+      "enum": [
+        "ru",
+        "en"
+      ],
+      "default": "ru"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 code for all money fields.",
+      "default": "RUB"
+    },
+    "origin": {
+      "properties": {
+        "city": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "description": "City name as the traveler said it, e.g. Москва."
+        },
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "city"
+      ]
+    },
+    "destination": {
+      "properties": {
+        "city": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "candidates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 5,
+          "description": "Cities the AI suggests when the destination is vague."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Omit (or null) when the traveler doesn't know where to go: inspiration mode."
+    },
+    "dates": {
+      "anyOf": [
+        {
+          "required": [
+            "departure_date"
+          ]
+        },
+        {
+          "required": [
+            "departure_month"
+          ]
+        }
+      ],
+      "properties": {
+        "departure_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "departure_month": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+          "description": "Use when only the month is known (YYYY-MM)."
+        },
+        "return_date": {
+          "type": "string",
+          "format": "date",
+          "description": "After departure_date and at most 30 days later (hotel API limit)."
+        },
+        "nights": {
+          "type": "integer",
+          "maximum": 30,
+          "minimum": 1
+        },
+        "flexible_days": {
+          "type": "integer",
+          "maximum": 7,
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "travelers": {
+      "properties": {
+        "adults": {
+          "type": "integer",
+          "maximum": 9,
+          "minimum": 1
+        },
+        "children_ages": {
+          "items": {
+            "type": "integer",
+            "maximum": 17,
+            "minimum": 0
+          },
+          "type": "array",
+          "maxItems": 8
+        },
+        "pets": {
+          "items": {
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "dog",
+                  "cat",
+                  "other"
+                ]
+              },
+              "weight_kg": {
+                "type": "number",
+                "maximum": 100,
+                "exclusiveMinimum": 0
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "kind"
+            ]
+          },
+          "type": "array",
+          "maxItems": 3
+        },
+        "residency": {
+          "type": "string",
+          "pattern": "^[a-z]{2}$",
+          "description": "Citizenship, ISO 3166-1 alpha-2 lowercase (hotel API format).",
+          "default": "ru"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "adults"
+      ]
+    },
+    "transport": {
+      "properties": {
+        "modes": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "plane",
+              "train",
+              "suburban",
+              "bus",
+              "water",
+              "helicopter"
+            ]
+          },
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "round_trip": {
+          "type": "boolean",
+          "default": true
+        },
+        "direct_only": {
+          "type": "boolean",
+          "default": false
+        },
+        "max_transfers": {
+          "type": "integer",
+          "maximum": 3,
+          "minimum": 0
+        },
+        "max_duration_hours": {
+          "type": "number",
+          "maximum": 48,
+          "minimum": 0.5
+        },
+        "departure_time_from": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "HH:MM, local time."
+        },
+        "departure_time_to": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "hotel": {
+      "properties": {
+        "needed": {
+          "type": "boolean",
+          "default": true
+        },
+        "rooms": {
+          "type": "integer",
+          "maximum": 9,
+          "minimum": 1
+        },
+        "star_rating_min": {
+          "type": "integer",
+          "maximum": 5,
+          "minimum": 0
+        },
+        "kinds": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "hotel",
+              "hostel",
+              "apartment",
+              "guest_house",
+              "resort"
+            ]
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "meal": {
+          "type": "string",
+          "enum": [
+            "nomeal",
+            "breakfast",
+            "half_board",
+            "full_board",
+            "all_inclusive"
+          ]
+        },
+        "free_cancellation": {
+          "type": "boolean"
+        },
+        "price_per_night_max": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "In TripRequest.currency."
+        },
+        "amenities": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "pool",
+              "kids_club",
+              "pet_friendly",
+              "parking",
+              "wifi",
+              "spa",
+              "beach",
+              "accessible"
+            ]
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "location": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "center",
+              "beach",
+              "quiet",
+              "walkable",
+              "near_station",
+              "near_airport"
+            ]
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "near_place": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "A landmark to stay close to, e.g. Казанский Кремль."
+        },
+        "early_checkin": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "late_checkout": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "leisure": {
+      "properties": {
+        "interests": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "museums",
+              "cinemas",
+              "theatres",
+              "concerts",
+              "festivals",
+              "parks",
+              "nature",
+              "architecture",
+              "history",
+              "food",
+              "kids",
+              "sport",
+              "nightlife"
+            ]
+          },
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "during_layovers": {
+          "type": "boolean",
+          "default": true
+        },
+        "min_layover_hours": {
+          "type": "number",
+          "maximum": 24,
+          "minimum": 2,
+          "default": 4
+        },
+        "max_items_per_stop": {
+          "type": "integer",
+          "maximum": 20,
+          "minimum": 1,
+          "default": 5
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "budget": {
+      "properties": {
+        "total": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "In TripRequest.currency."
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "total",
+            "per_person",
+            "per_night"
+          ],
+          "default": "total"
+        },
+        "is_hard": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ai_context": {
+      "properties": {
+        "trip_purpose": {
+          "type": "string",
+          "enum": [
+            "leisure",
+            "business",
+            "family",
+            "romantic",
+            "friends",
+            "other"
+          ]
+        },
+        "walkable_area": {
+          "type": "boolean",
+          "description": "«прогулочный район»"
+        },
+        "events_wanted": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 5
+        },
+        "must_have": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 10
+        },
+        "must_avoid": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 10
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "assumptions": {
+          "items": {
+            "properties": {
+              "field": {
+                "type": "string",
+                "pattern": "^/",
+                "description": "JSON path of the assumed field, e.g. /origin/city."
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "reason": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "field",
+              "value",
+              "reason"
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "completeness": {
+      "properties": {
+        "missing_required": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "JSON paths of required fields that are still empty."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "missing_required"
+      ],
+      "description": "Filled by the backend after validation, never by the AI."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "schema_version",
+    "locale",
+    "currency",
+    "origin",
+    "dates",
+    "travelers"
+  ],
+  "title": "TripRequest: unified trip config filled by the AI agent"
+}

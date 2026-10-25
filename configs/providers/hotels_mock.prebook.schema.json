@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/hotels-prebook",
+  "properties": {
+    "hash": {
+      "type": "string",
+      "maxLength": 256,
+      "minLength": 1,
+      "description": "book_hash from the hotel page; valid 24 hours."
+    },
+    "price_increase_percent": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "hash"
+  ],
+  "title": "hotels_mock.prebook request parameters"
+}

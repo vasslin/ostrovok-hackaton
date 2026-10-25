@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/cbr-daily",
+  "properties": {
+    "date_req": {
+      "type": "string",
+      "pattern": "^[0-9]{2}/[0-9]{2}/[0-9]{4}$",
+      "description": "DD/MM/YYYY; omit for today."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "title": "cbr.daily request parameters"
+}

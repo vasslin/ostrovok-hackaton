@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/rasp-thread",
+  "properties": {
+    "uid": {
+      "type": "string",
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "lang": {
+      "type": "string",
+      "enum": [
+        "ru_RU",
+        "uk_UA"
+      ]
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "xml"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "uid"
+  ],
+  "title": "yandex_rasp.thread request parameters"
+}
