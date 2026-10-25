@@ -1,0 +1,23 @@
+[
+  {
+    "place_id": 424696783,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "relation",
+    "osm_id": 3437391,
+    "lat": "55.7946485",
+    "lon": "49.1115022",
+    "category": "place",
+    "type": "city",
+    "place_rank": 16,
+    "importance": 0.704145277324411,
+    "addresstype": "city",
+    "name": "Казань",
+    "display_name": "Казань, городской округ Казань, Татарстан, Приволжский федеральный округ, Россия",
+    "boundingbox": [
+      "55.6031357",
+      "55.9307390",
+      "48.8205846",
+      "49.3812469"
+    ]
+  }
+]
