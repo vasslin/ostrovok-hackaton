@@ -1,0 +1,768 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Travel AI API",
+    "version": "1.1.0",
+    "description": "AI-компонент: заполнение конфига и ранжирование переданных отелей"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Текущий сервер"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Travel AI"
+    },
+    {
+      "name": "System"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Проверить работу процесса",
+        "tags": [
+          "System"
+        ],
+        "responses": {
+          "200": {
+            "description": "Процесс работает",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                },
+                "example": {
+                  "status": "ok"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "readiness",
+        "summary": "Проверить наличие настройки модели",
+        "description": "Проверяет наличие ключа, но не делает запрос к провайдеру и не проверяет квоту.",
+        "tags": [
+          "System"
+        ],
+        "responses": {
+          "200": {
+            "description": "Ключ задан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Readiness"
+                },
+                "example": {
+                  "status": "configured",
+                  "model": "openai/gpt-oss-20b"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Не настроен ключ модели",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "LLM_API_KEY is not configured"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/config": {
+      "post": {
+        "operationId": "extractConfig",
+        "summary": "Извлечь или обновить параметры поездки",
+        "description": "Один вызов модели. Авторизация обязательна только если настроен SERVICE_API_KEY. Все цены и наличие проверяются backend.",
+        "tags": [
+          "Travel AI"
+        ],
+        "security": [
+          {
+            "serviceKey": []
+          },
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtractInput"
+              },
+              "example": {
+                "message": "Из Москвы в Сочи с 10 по 17 ноября 2026, двое взрослых, до 80000 рублей, тихий отель у моря",
+                "config": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный ответ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractOutput"
+                },
+                "example": {
+                  "config": {
+                    "origin": "Москва",
+                    "destination": "Сочи",
+                    "departure_date": "2026-11-10",
+                    "return_date": "2026-11-17",
+                    "adults": 2,
+                    "children_ages": [],
+                    "budget": 80000,
+                    "currency": "RUB",
+                    "preferences": [
+                      "тихий отель",
+                      "у моря"
+                    ]
+                  },
+                  "missing_fields": [],
+                  "questions": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный JSON, типы или значения полей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "invalid JSON"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный или отсутствующий SERVICE_API_KEY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "unauthorized"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Тело запроса превышает 32 KiB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "body exceeds 32 KiB"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Неподдерживаемый Content-Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Content-Type must be application/json"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Исчерпана квота модели. Учитывайте Retry-After, если присутствует",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "provider quota exceeded; retry later"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Рекомендуемая провайдером задержка в секундах или HTTP-date",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Провайдер недоступен или вернул невалидные данные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "model unavailable or returned invalid data"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Не настроен ключ модели",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "LLM_API_KEY is not configured"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Истекло время ожидания модели",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "model request timed out"
+                }
+              }
+            }
+          },
+          "499": {
+            "description": "Клиент отменил запрос",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/rank": {
+      "post": {
+        "operationId": "rankHotels",
+        "summary": "Ранжировать переданные отели",
+        "description": "Один вызов модели. Авторизация обязательна только если настроен SERVICE_API_KEY. Все цены и наличие проверяются backend.",
+        "tags": [
+          "Travel AI"
+        ],
+        "security": [
+          {
+            "serviceKey": []
+          },
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RankInput"
+              },
+              "example": {
+                "config": {
+                  "origin": "Москва",
+                  "destination": "Сочи",
+                  "departure_date": "2026-11-10",
+                  "return_date": "2026-11-17",
+                  "adults": 2,
+                  "children_ages": [],
+                  "budget": 80000,
+                  "currency": "RUB",
+                  "preferences": [
+                    "тихий отель",
+                    "у моря"
+                  ]
+                },
+                "hotels": [
+                  {
+                    "id": "hotel-1",
+                    "details": {
+                      "total_price": 75000,
+                      "currency": "RUB",
+                      "distance_to_beach_m": 200,
+                      "cancellation": "non-refundable",
+                      "check_in": "2026-11-10",
+                      "check_out": "2026-11-17"
+                    },
+                    "name": "Морской отель"
+                  },
+                  {
+                    "id": "hotel-2",
+                    "details": {
+                      "total_price": 78000,
+                      "currency": "RUB",
+                      "distance_to_beach_m": 500,
+                      "cancellation": "free until 2026-11-08",
+                      "check_in": "2026-11-10",
+                      "check_out": "2026-11-17"
+                    },
+                    "name": "Тихая бухта"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный ответ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankOutput"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "id": "hotel-2",
+                      "score": 90,
+                      "reason": "Укладывается в бюджет и допускает бесплатную отмену до указанной даты",
+                      "risks": [
+                        "Не подтверждена звукоизоляция"
+                      ]
+                    },
+                    {
+                      "id": "hotel-1",
+                      "score": 82,
+                      "reason": "Дешевле и ближе к пляжу",
+                      "risks": [
+                        "Не подтверждена звукоизоляция"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный JSON, типы или значения полей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "invalid JSON"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный или отсутствующий SERVICE_API_KEY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "unauthorized"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Тело запроса превышает 32 KiB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "body exceeds 32 KiB"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Неподдерживаемый Content-Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Content-Type must be application/json"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Исчерпана квота модели. Учитывайте Retry-After, если присутствует",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "provider quota exceeded; retry later"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Рекомендуемая провайдером задержка в секундах или HTTP-date",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Провайдер недоступен или вернул невалидные данные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "model unavailable or returned invalid data"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Не настроен ключ модели",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "LLM_API_KEY is not configured"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Истекло время ожидания модели",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "model request timed out"
+                }
+              }
+            }
+          },
+          "499": {
+            "description": "Клиент отменил запрос",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Config": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "origin": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "Москва"
+          },
+          "destination": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "Сочи"
+          },
+          "departure_date": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-11-10"
+          },
+          "return_date": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-11-17",
+            "description": "Не раньше departure_date"
+          },
+          "adults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "nullable": true
+          },
+          "children_ages": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 17
+            },
+            "maxItems": 20,
+            "nullable": true
+          },
+          "budget": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "nullable": true,
+            "description": "Бюджет всей поездки"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "nullable": true,
+            "example": "RUB"
+          },
+          "preferences": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "maxItems": 30,
+            "nullable": true
+          }
+        }
+      },
+      "ExtractInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000,
+            "description": "Непустой текст; длина в Unicode-символах"
+          },
+          "config": {
+            "$ref": "#/components/schemas/Config"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ExtractOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/Config"
+          },
+          "missing_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "origin",
+                "destination",
+                "departure_date",
+                "return_date",
+                "adults"
+              ]
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2
+          }
+        },
+        "required": [
+          "config",
+          "missing_fields",
+          "questions"
+        ]
+      },
+      "RankInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/Config"
+          },
+          "hotels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Hotel"
+            },
+            "minItems": 1,
+            "maxItems": 10,
+            "description": "Уникальные непустые id"
+          }
+        },
+        "required": [
+          "hotels"
+        ]
+      },
+      "Ranked": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "score",
+          "reason",
+          "risks"
+        ]
+      },
+      "RankOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ranked"
+            },
+            "minItems": 1,
+            "maxItems": 10,
+            "description": "Все переданные ID отелей ровно по одному разу; score по убыванию"
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "Readiness": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "configured"
+            ]
+          },
+          "model": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "model"
+        ]
+      },
+      "Hotel": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true,
+            "description": "Параметры отеля от поставщика: total_price за весь период проживания, currency, check_in, check_out, rating, stars, amenities, cancellation, distance_to_beach_m. Отсутствующие факты модель не выдумывает."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "example": "Морской отель"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "serviceKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "SERVICE_API_KEY из .env. Не LLM_API_KEY."
+      }
+    }
+  }
+}

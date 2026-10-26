@@ -1,0 +1,25 @@
+syntax = "proto3";
+package travel.v1;
+option go_package = "ai-service/api/travel/v1;travelv1";
+import "google/protobuf/struct.proto";
+service TravelAI {
+ rpc ExtractConfig(ExtractConfigRequest) returns (ExtractConfigResponse);
+ rpc RankHotels(RankHotelsRequest) returns (RankHotelsResponse);
+}
+message Config {
+ optional string origin = 1;
+ optional string destination = 2;
+ optional string departure_date = 3;
+ optional string return_date = 4;
+ optional int32 adults = 5;
+ repeated int32 children_ages = 6;
+ optional double budget = 7;
+ optional string currency = 8;
+ repeated string preferences = 9;
+}
+message ExtractConfigRequest { string message = 1; Config config = 2; }
+message ExtractConfigResponse { Config config = 1; repeated string missing_fields = 2; repeated string questions = 3; }
+message Hotel { string id = 1; string name = 2; google.protobuf.Struct details = 3; }
+message RankHotelsRequest { Config config = 1; repeated Hotel hotels = 2; }
+message RankedHotel { string id = 1; double score = 2; string reason = 3; repeated string risks = 4; }
+message RankHotelsResponse { repeated RankedHotel results = 1; }

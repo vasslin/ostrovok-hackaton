@@ -1,0 +1,14 @@
+services:
+  ai-service:
+    platform: linux/amd64
+    build: ./ai-service
+    env_file: .env
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    stop_grace_period: 55s
+    healthcheck:
+      test: ["CMD", "/server", "healthcheck"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
