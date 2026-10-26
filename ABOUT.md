@@ -291,6 +291,7 @@ flowchart TD
     GEN --> VALIDATE["travel-service:<br/>финальная валидация конфига"]
     VALIDATE -->|Конфиг валиден| NEXT([Передать конфиг на этап 2])
     VALIDATE -->|Конфиг невалиден| TS1
+    VALIDATE <--> |Пустые обязательные поля<br/>Заполнение через ai| AI1
 
     classDef ai fill:#EDE4FF,stroke:#805AD5,color:#30205A
     classDef service fill:#DCEBFF,stroke:#3978C6,color:#12345A
