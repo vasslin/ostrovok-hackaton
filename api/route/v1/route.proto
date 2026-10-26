@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package godnota.route.v1;
+
+option go_package = "github.com/godnota/pkg/generated/route/v1;routev1";
+
+// RouteService ищет предложения и собирает согласованные маршруты.
+// Сообщения намеренно пустые: поля контракта будут добавлены позже.
+service RouteService {
+  rpc SearchRoutes(SearchRoutesRequest) returns (SearchRoutesResponse);
+}
+
+message SearchRoutesRequest {}
+message SearchRoutesResponse {}

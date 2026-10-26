@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package godnota.provider.v1;
+
+option go_package = "github.com/godnota/pkg/generated/provider/v1;providerv1";
+
+// ProviderService — адаптеры внешних API транспорта, отелей и досуга.
+// Сообщения намеренно пустые: поля контракта будут добавлены позже.
+service ProviderService {
+  rpc SearchTransport(SearchTransportRequest) returns (SearchTransportResponse);
+  rpc SearchHotels(SearchHotelsRequest) returns (SearchHotelsResponse);
+  rpc SearchActivities(SearchActivitiesRequest) returns (SearchActivitiesResponse);
+}
+
+message SearchTransportRequest {}
+message SearchTransportResponse {}
+
+message SearchHotelsRequest {}
+message SearchHotelsResponse {}
+
+message SearchActivitiesRequest {}
+message SearchActivitiesResponse {}

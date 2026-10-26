@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package godnota.user.v1;
+
+option go_package = "github.com/godnota/pkg/generated/user/v1;userv1";
+
+// UserService отдаёт профиль и персональные настройки путешественника.
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse);
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  string user_id = 1;
+  string language = 2;
+  string currency = 3;
+}
+
+message UpdatePreferencesRequest {
+  string user_id = 1;
+  string language = 2;
+  string currency = 3;
+}
+
+message UpdatePreferencesResponse {
+  string user_id = 1;
+}

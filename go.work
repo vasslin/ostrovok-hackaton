@@ -1,0 +1,14 @@
+go 1.27.1
+
+use (
+	./ai-service
+	./gateway
+	./map-service
+	./order-service
+	./pkg
+	./provider-service
+	./route-service
+	./session-service
+	./travel-service
+	./user-service
+)
