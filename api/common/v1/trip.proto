@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package godnota.common.v1;
+
+option go_package = "github.com/godnota/pkg/generated/common/v1;commonv1";
+
+// TripConfig — единый конфиг путешествия, который заполняет AI и подтверждает пользователь.
+message TripConfig {
+  string version = 1;
+  Trip trip = 2;
+}
+
+message Trip {
+  Place origin = 1;
+  repeated Place destinations = 2;
+  DateRange date_range = 3;
+  Travelers travelers = 4;
+  Budget budget = 5;
+  TransportPreferences transport = 6;
+  AccommodationPreferences accommodation = 7;
+  ActivityPreferences activities = 8;
+  Preferences preferences = 9;
+}
+
+message Place {
+  string city = 1;
+  string country_code = 2;
+}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+  bool flexible_dates = 3;
+}
+
+message Travelers {
+  int32 adults = 1;
+  int32 children = 2;
+  repeated int32 children_ages = 3;
+}
+
+message Budget {
+  double amount = 1;
+  string currency = 2;
+  string scope = 3;
+  bool is_hard_limit = 4;
+}
+
+message TransportPreferences {
+  repeated string modes = 1;
+  int32 max_transfers = 2;
+  int32 max_wait_hours = 3;
+}
+
+message AccommodationPreferences {
+  bool required = 1;
+  int32 min_stars = 2;
+  double max_price_per_night = 3;
+  repeated string preferred_types = 4;
+}
+
+message ActivityPreferences {
+  repeated string interests = 1;
+  string pace = 2;
+}
+
+message Preferences {
+  string language = 1;
+  bool avoid_overnight_transfers = 2;
+}
+
+message Question {
+  string id = 1;
+  string field = 2;
+  string text = 3;
+  bool required = 4;
+  string input_type = 5;
+}
+
+message Answer {
+  string question_id = 1;
+  string text = 2;
+}

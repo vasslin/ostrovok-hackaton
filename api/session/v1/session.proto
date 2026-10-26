@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package godnota.session.v1;
+
+option go_package = "github.com/godnota/pkg/generated/session/v1;sessionv1";
+
+import "api/common/v1/trip.proto";
+
+// SessionService хранит сессию, историю диалога и текущий конфиг поездки.
+service SessionService {
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+  rpc GetContext(GetContextRequest) returns (GetContextResponse);
+  rpc SaveContext(SaveContextRequest) returns (SaveContextResponse);
+}
+
+message DialogMessage {
+  string role = 1;
+  string text = 2;
+  string created_at = 3;
+}
+
+message CreateSessionRequest {
+  string user_id = 1;
+}
+
+message CreateSessionResponse {
+  string session_id = 1;
+}
+
+message GetSessionRequest {
+  string session_id = 1;
+}
+
+message GetSessionResponse {
+  string session_id = 1;
+  string user_id = 2;
+  string status = 3;
+  string summary = 4;
+  godnota.common.v1.TripConfig trip_config = 5;
+  repeated DialogMessage messages = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message GetContextRequest {
+  string session_id = 1;
+}
+
+message GetContextResponse {
+  string session_id = 1;
+  string user_id = 2;
+  string status = 3;
+  string summary = 4;
+  godnota.common.v1.TripConfig trip_config = 5;
+  repeated DialogMessage messages = 6;
+}
+
+message SaveContextRequest {
+  string session_id = 1;
+  string summary = 2;
+  string status = 3;
+  godnota.common.v1.TripConfig trip_config = 4;
+  repeated DialogMessage messages = 5;
+}
+
+message SaveContextResponse {
+  string session_id = 1;
+}

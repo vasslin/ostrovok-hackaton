@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package godnota.order.v1;
+
+option go_package = "github.com/godnota/pkg/generated/order/v1;orderv1";
+
+// OrderService ведёт жизненный цикл заказа: бронь, оплата, отмена.
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+  rpc PayOrder(PayOrderRequest) returns (PayOrderResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  string session_id = 2;
+  string route_id = 3;
+}
+
+message CreateOrderResponse {
+  string order_id = 1;
+  string status = 2;
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message GetOrderResponse {
+  string order_id = 1;
+  string user_id = 2;
+  string session_id = 3;
+  string route_id = 4;
+  string status = 5;
+}
+
+message PayOrderRequest {
+  string order_id = 1;
+}
+
+message PayOrderResponse {
+  string order_id = 1;
+  string status = 2;
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+}
+
+message CancelOrderResponse {
+  string order_id = 1;
+  string status = 2;
+}

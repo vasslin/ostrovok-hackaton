@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package godnota.ai.v1;
+
+option go_package = "github.com/godnota/pkg/generated/ai/v1;aiv1";
+
+// AIService инкапсулирует вызовы модели.
+// Сообщения намеренно пустые: поля контракта будут добавлены позже.
+service AIService {
+  rpc GenerateOrUpdateConfig(GenerateOrUpdateConfigRequest) returns (GenerateOrUpdateConfigResponse);
+  rpc UpdateConfig(UpdateConfigRequest) returns (UpdateConfigResponse);
+  rpc RefineConfig(RefineConfigRequest) returns (RefineConfigResponse);
+  rpc RankRoutes(RankRoutesRequest) returns (RankRoutesResponse);
+}
+
+message GenerateOrUpdateConfigRequest {}
+message GenerateOrUpdateConfigResponse {}
+
+message UpdateConfigRequest {}
+message UpdateConfigResponse {}
+
+message RefineConfigRequest {}
+message RefineConfigResponse {}
+
+message RankRoutesRequest {}
+message RankRoutesResponse {}
