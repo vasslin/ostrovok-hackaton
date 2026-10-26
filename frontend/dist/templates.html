@@ -1,0 +1,829 @@
+<!-- button -->
+<template id="button-button">
+<button class="{{cls}}" data-action="{{action}}" {{attrs}}>{{text}}</button>
+</template>
+
+<template id="cost-breakdown-cost-breakdown">
+<dl class="cost-breakdown">
+  <div>
+    <dt>
+      Перелёты
+    </dt>
+    <dd>
+      {{price}}
+    </dd>
+  </div>
+  <div>
+    <dt>
+      Проживание
+    </dt>
+    <dd>
+      {{price2}}
+    </dd>
+  </div>
+  <div>
+    <dt>
+      Трансферы
+    </dt>
+    <dd>
+      {{price3}}
+    </dd>
+  </div>
+  <div>
+    <dt>
+      Прогулки без билетов
+    </dt>
+    <dd>
+      {{price4}}
+    </dd>
+  </div>
+</dl>
+</template>
+
+<template id="hotel-offer-hotel-offer">
+<article class="hotel-offer {{conditional}}">
+  <div class="hotel-art {{oCover}}">
+    {{landscape}}<span class="photo-label">Иллюстрация</span><span class="hotel-rating">{{oRating}}</span>
+  </div>
+  <div class="hotel-offer-body">
+    <div class="hotel-stars">
+      {{repeat}}
+    </div>
+    <h4>
+      {{oName}}
+    </h4>
+    <p>
+      {{pinIcon}} {{oDistance}}
+    </p>
+    <p>
+      {{checkIcon}} {{oMeals}}
+    </p>
+    <p class="{{conditional2}}">
+      {{shieldIcon}} {{oCancellation}}
+    </p>
+    {{conditional3}}
+    <div class="hotel-offer-footer">
+      <span><strong>{{price}}</strong><small>за {{sNights}} ноч. на всех</small></span>{{selectHotelButton}}
+    </div>
+  </div>
+</article>
+</template>
+
+<template id="hotel-offer-p">
+<p>
+  {{petIcon}} Можно с питомцем · доплата уточняется
+</p>
+</template>
+
+<template id="landscape-svg">
+<svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="360" height="180" fill="#edcbb4"/><circle cx="285" cy="42" r="26" fill="#fff0d5"/><path d="M0 114 360 104V180H0" fill="#9db9c1"/><path d="M0 126h360v14H0" fill="#d3dad4"/><g fill="#bc8f79"><path d="M20 62h54v78H20zM80 85h34v55H80zM123 68h55v72h-55zM192 88h49v52h-49zM259 72h70v68h-70z"/></g><g fill="#8e6a66"><path d="m14 62 33-25 33 25M119 68l32-20 32 20M253 72l41-23 41 23"/></g><g fill="#fbe9cb"><path d="M29 79h10v16H29zM52 79h10v16H52zM133 84h12v18h-12zM156 84h12v18h-12zM270 89h12v16h-12zM304 89h12v16h-12z"/></g><path d="M177 140V41h6v99m-16-87h26m-18-15 5-14 5 14" stroke="#8b7972" fill="none" stroke-width="3"/><path d="M0 156q70-8 140 0t140 0 80 0" stroke="#c6dbdd" fill="none" stroke-width="3"/></svg>
+</template>
+
+<template id="landscape-svg-2">
+<svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="360" height="180" fill="#cddfe2"/><circle cx="285" cy="38" r="24" fill="#fff1cf"/><path d="m-20 140 125-118 81 90 50-67 144 115" fill="#9aafa9"/><path d="m72 54 33-32 27 30-23-8-12 17Z" fill="#f3f4e9"/><path d="M0 138q90-60 180-3t180-8v53H0" fill="#689e8e"/><path d="M0 164q120-40 360 3v13H0" fill="#96c5b6"/><path d="M78 120h94v48H78z" fill="#f4e9d4"/><path d="m65 122 60-36 60 36" fill="#867a6a"/><path d="M91 137h15v18H91m17-18h15v18h-15m17-18h15v18h-15" fill="#a9c8c3"/></svg>
+</template>
+
+<template id="landscape-svg-3">
+<svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="360" height="180" fill="#c8e1e4"/><circle cx="280" cy="40" r="25" fill="#fff1d6"/><path d="M0 83h360v97H0" fill="#79b6bf"/><path d="M0 122q110-24 192 6t168-7v59H0" fill="#9acbd0"/><path d="M0 151q90-35 173-8t187-5v42H0" fill="#f1ddbb"/><path d="M30 89h113v57H30z" fill="#f6ecdc"/><path d="M19 89h136v9H19z" fill="#ece0cb"/><path d="M44 108h18v25H44m15-25h18v25H59m15-25h18v25H74m15-25h18v25H89m15-25h18v25h-18" fill="#adc9c6"/><path d="M217 145q8-52 4-83" stroke="#8d9278" stroke-width="5" fill="none"/><path d="M221 65q-29-25-48 3 27-10 48-3m0 0q16-30 39-6-22-5-39 6m0 0q-28-5-36 23 21-20 36-23m0 0q23-7 38 16-24-10-38-16" fill="#658f7e"/></svg>
+</template>
+
+<template id="render-app-shell">
+<div class="app-shell">
+  <aside class="rail" aria-label="Основная навигация">
+    <a class="brand-mark" href="#planner" aria-label="О!дин запрос — главная">О!</a>
+    <div class="rail-links">
+      {{plannerButton}}{{historyButton}}{{profileButton}}
+    </div>
+    <div class="rail-bottom">
+      <span class="rail-word">ПОРА<br>В ПУТЬ</span>{{profileButton2}}
+    </div>
+  </aside>
+  <div class="app-main">
+    <header class="header">
+      <a class="wordmark" href="#planner">О!дин запрос<span>Путешествие, которое складывается</span></a>
+      <div class="header-right">
+        <span class="demo-tag"><span></span>{{conditional}}</span>{{profileButton3}}
+      </div>
+    </header>
+    {{conditional2}}
+    <footer class="footer">
+      <span>Одна идея — целое путешествие.</span><span>{{conditional3}}</span>
+    </footer>
+    <nav class="mobile-bottom-nav" aria-label="Навигация на телефоне">
+      {{plannerButton2}}{{historyButton2}}{{profileButton4}}
+    </nav>
+  </div>
+</div>
+{{renderedDrawer}}{{renderedModal}}
+</template>
+
+<template id="render-budget-warning-notice">
+<div class="notice warning">
+  {{infoIcon}}<span>Выше бюджета на <b>{{price}}</b>. Попробуйте другой отель, даты или направление.</span>{{quickButton}}
+</div>
+</template>
+
+<template id="render-drawer-activity-detail">
+<div class="activity-detail">
+  <span>{{sunIcon}}</span>
+  <div>
+    <h4>
+      {{aName}}
+    </h4>
+    <p>
+      {{aDuration}} · {{aNote}}
+    </p>
+  </div>
+</div>
+</template>
+
+<template id="render-drawer-eyebrow">
+<span class="eyebrow">{{sCountry}} · {{conditional}}</span>
+<div class="stop-times">
+  <div>
+    {{planeIcon}}<span>Прибытие<strong>{{date}}, {{localTime}}</strong><small>Местное время {{slice}}</small></span>
+  </div>
+  <div>
+    {{arrowIcon}}<span>Отправление<strong>{{date2}}, {{localTime2}}</strong><small>Местное время {{slice2}}</small></span>
+  </div>
+</div>
+{{conditional2}}
+</template>
+
+<template id="render-drawer-eyebrow-2">
+<span class="eyebrow">ВЫБОР ПЕРЕЛЁТА · {{date}}</span>
+<p class="muted">
+  Цена на всех гостей. Время отправления и прибытия — местное.
+</p>
+<div class="drawer-tickets">
+  {{sOptions}}
+</div>
+<div class="notice">
+  {{infoIcon}}<span>Рейсы и тарифы демонстрационные. Линия на карте показывает связь городов, а не фактическую траекторию полёта.</span>
+</div>
+</template>
+
+<template id="render-drawer-muted">
+<p class="muted">
+  {{dateRange}} · {{guestsLabel}}
+</p>
+{{costBreakdown}}
+<div class="checkout-total">
+  <span>Вся поездка</span><strong>{{price}}</strong>
+</div>
+<div class="notice">
+  {{infoIcon}}<span>Все суммы рассчитаны на группу. Входные билеты, доплаты за питомцев и другие дополнительные услуги не включены.</span>
+</div>
+</template>
+
+<template id="render-drawer-notice">
+<div class="notice">
+  {{infoIcon}}<span>Это {{conditional}} поездки. Проживание здесь не включено.</span>
+</div>
+</template>
+
+<template id="render-drawer-overlay">
+<div class="overlay" data-action="close-overlay">
+  <section class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div class="drawer-head">
+      <h2 id="drawer-title">
+        {{title}}
+      </h2>
+      {{closeOverlayButton}}
+    </div>
+    <div class="drawer-body">
+      {{content}}
+    </div>
+  </section>
+</div>
+</template>
+
+<template id="render-drawer-section-label">
+<h3 class="section-label">
+  Где остановимся
+</h3>
+<div class="hotel-art drawer-art {{cover}}">
+  {{landscape}}
+</div>
+<h3>
+  {{name}}
+</h3>
+<p class="muted">
+  <span class="rating">{{rating}}</span> {{meals}} · {{distance}}
+</p>
+<p class="small-muted">
+  {{cancellation}}. Данные синтетические; условия реального отеля нужно подтвердить.
+</p>
+{{drawerHotelsButton}}
+<h3 class="section-label">
+  Чем заняться
+</h3>
+{{sActivities}}
+</template>
+
+<template id="render-history-draft-banner">
+<section class="draft-banner">
+  <span class="draft-icon">{{mapIcon}}</span>
+  <div>
+    <h3>
+      Ваше следующее путешествие
+    </h3>
+    <p>
+      {{origin}} → {{destination}} · {{dateRange}}
+    </p>
+  </div>
+  {{plannerButton}}
+</section>
+</template>
+
+<template id="render-history-empty-state">
+<div class="empty-state history-empty">
+  {{bagIcon}}
+  <h2>
+    Здесь будут ваши путешествия
+  </h2>
+  <p>
+    Соберите первую поездку и оформите тестовую бронь.
+  </p>
+  {{plannerButton}}
+</div>
+</template>
+
+<template id="render-history-history-card">
+<article class="history-card">
+  <div class="history-art {{cover}}">
+    {{landscape}}<span class="history-status">{{checkIcon}} {{conditional}}</span>
+  </div>
+  <div class="history-body">
+    <span class="small-muted">{{dateRange}}</span>
+    <h2>
+      {{stops}}
+    </h2>
+    <p>
+      {{guestsLabel}} · {{nights}} ночей
+    </p>
+    <div>
+      <strong>{{amount}}</strong>{{openHistoryButton}}
+    </div>
+    <small>Заказ {{id}}</small>
+  </div>
+</article>
+</template>
+
+<template id="render-history-history-grid">
+<div class="history-grid">
+  {{history}}
+</div>
+</template>
+
+<template id="render-history-page-content">
+<main class="page-content">
+  <div class="page-title row">
+    <div>
+      <span class="eyebrow">ПЛАНЫ И ВОСПОМИНАНИЯ</span>
+      <h1>
+        Мои поездки
+      </h1>
+      <p>
+        {{conditional}}
+      </p>
+    </div>
+    {{newTripButton}}
+  </div>
+  {{conditional2}}{{conditional3}}
+</main>
+</template>
+
+<template id="render-hotels-hotel-groups">
+<div class="hotel-groups">
+  {{stops}}
+</div>
+</template>
+
+<template id="render-hotels-offer-group">
+<section class="offer-group">
+  <h3>
+    {{sCity}} <span>{{sNights}} ноч. · {{rooms}} номер{{conditional}}</span>
+  </h3>
+  <div class="hotel-options">
+    {{sHotelOptions}}
+  </div>
+</section>
+</template>
+
+<template id="render-itinerary-hotel-mini">
+<div class="hotel-mini">
+  <div class="hotel-art {{cover}}" aria-hidden="true">
+    {{landscape}}
+  </div>
+  <div>
+    <span class="hotel-kicker">{{hotelIcon}} ПРОЖИВАНИЕ</span>
+    <h4>
+      {{name}}
+    </h4>
+    <p>
+      <span class="rating">{{rating}}</span> {{meals}}{{cPetBadge}}
+    </p>
+  </div>
+  <div class="hotel-mini-price">
+    <strong>{{price}}</strong><span>за {{sNights}} ноч.</span>
+  </div>
+</div>
+<div class="activity-row">
+  {{sunIcon}} {{sActivities}}
+</div>
+</template>
+
+<template id="render-itinerary-itinerary">
+<div class="itinerary">
+  {{tStops}}
+</div>
+</template>
+
+<template id="render-itinerary-stop-card">
+{{conditional}}
+<article class="stop-card {{conditional2}}">
+  <div class="stop-number {{conditional3}}">
+    {{conditional4}}
+  </div>
+  <div class="stop-main">
+    <div class="stop-heading">
+      <div>
+        <h3>
+          {{sCity}} <span>{{sCountry}}</span>
+        </h3>
+        <p>
+          {{conditional5}}
+        </p>
+      </div>
+      {{stopButton}}
+    </div>
+    {{conditional6}}
+  </div>
+</article>
+</template>
+
+<template id="render-itinerary-transport-line">
+<button class="transport-line" data-action="segment" data-id="{{id}}"><span class="transport-icon">{{planeIcon}}</span><span>{{carrier}} · {{number}}</span><span class="transport-duration">{{duration}} · {{price}}</span>{{chevronIcon}}</button>
+</template>
+
+<template id="render-modal-eyebrow">
+<span class="eyebrow">ПОДСТРОИМ ПОД ВАС</span>
+<h2 id="modal-title">
+  Параметры поездки
+</h2>
+<p class="muted">
+  Изменения обновят маршрут, билеты и стоимость.
+</p>
+<form id="criteria-form">
+  <div class="form-grid">
+    <label>Откуда<select name="origin">{{value}}</select></label><label>Куда<select name="destination">{{value2}}</select></label><label>Дата отправления<input type="date" name="startDate" value="{{cStartDate}}" required></label><label>Ночей<input type="number" name="nights" min="2" max="21" value="{{cNights}}" required></label><label>Взрослых<input type="number" name="adults" min="1" max="6" value="{{cAdults}}" required></label><label>Возраст детей через запятую<input name="childrenAges" value="{{cChildrenAges}}" placeholder="Например: 4, 7" maxlength="30"></label>
+  </div>
+  <label>Бюджет на всех, ₽<input type="number" name="budget" min="1000" max="10000000" value="{{round}}" required></label><label class="checkbox-label"><input type="checkbox" name="pets" {{conditional}}> С нами питомец</label><button class="primary full" type="submit" {{conditional2}}>Обновить поездку {{arrowIcon}}</button>
+</form>
+</template>
+
+<template id="render-modal-eyebrow-2">
+<span class="eyebrow">С ЧИСТОГО ЛИСТА</span>
+<h2 id="modal-title">
+  Новое путешествие?
+</h2>
+<p class="muted">
+  Текущий черновик и переписка будут заменены. Оформленные демозаказы останутся в истории.
+</p>
+<div class="modal-actions">
+  {{closeOverlayButton}}{{confirmNewButton}}
+</div>
+</template>
+
+<template id="render-modal-modal-illustration">
+<div class="modal-illustration">
+  {{bagIcon}}
+</div>
+<span class="eyebrow">ПРОВЕРИМ ПОСЛЕДНИЙ РАЗ</span>
+<h2 id="modal-title">
+  Готовы отправиться?
+</h2>
+<p class="muted">
+  {{origin}} → {{destination}}<br>{{dateRange}} · {{guestsLabel}}
+</p>
+<div class="confirm-price">
+  {{price}}<span>на всех гостей</span>
+</div>
+<div class="notice">
+  {{shieldIcon}}<span>Это демобронирование. Деньги не списываются, билеты и номера не резервируются.</span>
+</div>
+<div id="booking-error" role="alert">
+</div>
+{{confirmBookButton}}
+</template>
+
+<template id="render-modal-option">
+<option {{conditional}}>{{city}}</option>
+</template>
+
+<template id="render-modal-option-2">
+<option {{conditional}}>{{city}}</option>
+</template>
+
+<template id="render-modal-overlay">
+<div class="overlay modal-overlay" data-action="close-overlay">
+  <section class="modal {{conditional}}" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    {{closeOverlayButton}}
+    <div>
+      {{content}}
+    </div>
+  </section>
+</div>
+</template>
+
+<template id="render-modal-success-icon">
+<div class="success-icon">
+  {{checkIcon}}
+</div>
+<span class="eyebrow">ВСЁ СЛОЖИЛОСЬ!</span>
+<h2 id="modal-title">
+  Можно мечтать о поездке.
+</h2>
+<p class="muted">
+  Тестовый заказ создан и добавлен в историю путешествий.
+</p>
+<div class="success-booking">
+  <span>Номер демозаказа</span><strong>{{id}}</strong><small>{{dateRange}} · {{price}}</small>
+</div>
+{{historyButton}}
+<p class="small-muted center">
+  Реальное бронирование и оплата не производились.
+</p>
+</template>
+
+<template id="render-planner-empty-state">
+<div class="empty-state">
+  {{mapIcon}}
+  <h1>
+    Начнём с вашей идеи
+  </h1>
+  <p>
+    Опишите поездку в чате — здесь появится маршрут.
+  </p>
+  {{mobileChatButton}}
+</div>
+</template>
+
+<template id="render-planner-inline-error">
+<div class="inline-error" role="alert">
+  {{infoIcon}}<span>{{stateError}}</span>{{retryButton}}
+</div>
+</template>
+
+<template id="render-planner-message">
+<article class="message {{mRole}}">
+  {{conditional}}
+  <div>
+    <div class="bubble">
+      {{replace}}
+    </div>
+    {{conditional2}}<span class="message-byline">{{conditional3}}</span>
+  </div>
+</article>
+</template>
+
+<template id="render-planner-message-actions">
+<div class="message-actions">
+  {{mActions}}
+</div>
+</template>
+
+<template id="render-planner-message-avatar">
+<span class="message-avatar">{{sparkIcon}}</span>
+</template>
+
+<template id="render-planner-thinking">
+<div class="thinking" role="status">
+  <span></span><span></span><span></span>Собираем варианты…
+</div>
+</template>
+
+<template id="render-planner-workspace">
+<main class="workspace {{conditional}}">
+  <div class="mobile-switch" role="group" aria-label="Вид планировщика">
+    {{mobileChatButton}}{{mobileRouteButton}}
+  </div>
+  <section class="chat-panel" aria-label="Чат планирования">
+    <div class="chat-heading">
+      <div class="assistant-avatar">
+        {{sparkIcon}}
+      </div>
+      <div>
+        <h2>
+          Ваш попутчик
+        </h2>
+        <p>
+          {{conditional2}}
+        </p>
+      </div>
+      <span class="online-dot"></span>
+    </div>
+    <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Сообщения">
+      {{stateMessages}}{{conditional3}}
+    </div>
+    <div class="chat-bottom">
+      {{conditional4}}
+      <div class="quick-label">
+        Попробуйте изменить поездку
+      </div>
+      <div class="quick-chips">
+        {{quickButton}}{{quickButton2}}{{quickButton3}}
+      </div>
+      <form id="chat-form">
+        <label class="sr-only" for="chat-input">Опишите поездку</label><textarea id="chat-input" name="message" rows="2" maxlength="1500" placeholder="Хочу к морю, но пока не знаю куда…" {{conditional5}}>{{stateDraftText}}</textarea><button class="send-button" type="submit" aria-label="Отправить сообщение" {{conditional6}}>{{arrowIcon}}</button>
+      </form>
+      <p class="chat-note">
+        {{shieldIcon}} {{conditional7}}
+      </p>
+    </div>
+  </section>
+  <section class="trip-panel" aria-label="План поездки">
+    {{conditional8}}
+  </section>
+</main>
+</template>
+
+<template id="render-profile-page-content">
+<main class="page-content">
+  <div class="page-title">
+    <span class="eyebrow">ВАШ УГОЛОК</span>
+    <h1>
+      Личный кабинет
+    </h1>
+    <p>
+      Немного о вас — для следующих путешествий.
+    </p>
+  </div>
+  <div class="profile-grid">
+    <section class="profile-card">
+      <div class="profile-card-head">
+        <div class="large-avatar">
+          {{toUpperCase}}
+        </div>
+        <div>
+          <h2>
+            {{name}}
+          </h2>
+          <p>
+            {{conditional}}
+          </p>
+        </div>
+      </div>
+      <form id="profile-form">
+        <label>Как к вам обращаться<input name="name" value="{{name2}}" required maxlength="60" autocomplete="given-name"></label><label>Email<input name="email" type="email" value="{{email}}" placeholder="you@example.com" autocomplete="email" maxlength="120"></label><label>Телефон<input name="phone" type="tel" value="{{phone}}" placeholder="+7 999 123-45-67" autocomplete="tel" maxlength="30"></label><button class="primary" type="submit" {{conditional2}}>{{conditional3}}</button>
+      </form>
+      <div class="notice">
+        {{infoIcon}}<span>{{conditional4}}</span>
+      </div>
+    </section>
+    <aside class="profile-side">
+      <span class="mini-illustration">{{bagIcon}}</span>
+      <h2>
+        Воспоминания начинаются с планов.
+      </h2>
+      <p>
+        Сохранённые поездки и тестовые бронирования — в одном месте.
+      </p>
+      {{historyButton}}
+    </aside>
+  </div>
+</main>
+</template>
+
+<template id="render-span">
+{{userIcon}}<span>{{name}}</span>
+</template>
+
+<template id="render-span-2">
+{{sparkIcon}}<span>Спланировать</span>
+</template>
+
+<template id="render-span-3">
+{{bagIcon}}<span>Мои поездки</span>
+</template>
+
+<template id="render-span-4">
+{{userIcon}}<span>Профиль</span>
+</template>
+
+<template id="render-summary-booking-number">
+<div class="booking-number">
+  Заказ <b>{{id}}</b>
+</div>
+</template>
+
+<template id="render-summary-notice">
+<div class="notice">
+  {{infoIcon}}<span>{{w}}</span>
+</div>
+</template>
+
+<template id="render-summary-page-content">
+<main class="page-content">
+  <div class="empty-state">
+    <h1>
+      Сначала соберём поездку
+    </h1>
+    {{plannerButton}}
+  </div>
+</main>
+</template>
+
+<template id="render-summary-page-content-2">
+<main class="page-content summary-page">
+  <div class="page-breadcrumb">
+    {{plannerButton}}<span>Последний шаг</span>
+  </div>
+  <div class="page-title">
+    <span class="eyebrow">МОЖНО НАЧИНАТЬ ПРЕДВКУШАТЬ</span>
+    <h1>
+      Ваша поездка сложилась.
+    </h1>
+    <p>
+      Проверьте детали. До нового приключения — одно подтверждение.
+    </p>
+  </div>
+  <div class="summary-grid">
+    <section>
+      <div class="summary-route">
+        <div class="summary-route-art {{tCover}}">
+          {{landscape}}
+        </div>
+        <div>
+          <span class="eyebrow">{{origin}} → {{destination}}</span>
+          <h2>
+            {{tStops}}
+          </h2>
+          <p>
+            {{dateRange}} · {{nights}} ночей · {{guestsLabel}}
+          </p>
+        </div>
+      </div>
+      <div class="summary-items">
+        {{tSegments}}{{tStops2}}
+        <div class="summary-item">
+          {{bagIcon}}
+          <div>
+            <h3>
+              Трансферы в поездке
+            </h3>
+            <p>
+              Общая демонстрационная стоимость на группу
+            </p>
+          </div>
+          <strong>{{price}}</strong>
+        </div>
+        <div class="summary-item">
+          {{sunIcon}}
+          <div>
+            <h3>
+              Самостоятельные прогулки
+            </h3>
+            <p>
+              Развлечения из маршрута · входные билеты не включены
+            </p>
+          </div>
+          <strong>Бесплатно</strong>
+        </div>
+      </div>
+      {{renderedBudgetWarning}}{{tWarnings}}
+    </section>
+    <aside class="checkout-card">
+      <span class="eyebrow">ВСЁ В ОДНОЙ ПОЕЗДКЕ</span>
+      <h2>
+        Счастливого пути!
+      </h2>
+      {{costBreakdown}}
+      <div class="checkout-total">
+        <span>Итого на всех</span><strong>{{price2}}</strong>
+      </div>
+      <p class="checkout-guests">
+        {{guestsLabel2}} · {{nights2}} ночей
+      </p>
+      {{bookButton}}
+      <p class="checkout-note">
+        {{shieldIcon}} Это тестовое бронирование. Оплата и реальные заказы не создаются.
+      </p>
+      {{conditional}}
+    </aside>
+  </div>
+</main>
+</template>
+
+<template id="render-summary-summary-item">
+<div class="summary-item">
+  {{planeIcon}}
+  <div>
+    <h3>
+      {{sFrom}} → {{sTo}}
+    </h3>
+    <p>
+      {{date}}, {{localTime}} — {{localTime2}} · {{carrier}}
+    </p>
+  </div>
+  <strong>{{price}}</strong>
+</div>
+</template>
+
+<template id="render-summary-summary-item-2">
+<div class="summary-item">
+  {{hotelIcon}}
+  <div>
+    <h3>
+      {{name}}
+    </h3>
+    <p>
+      {{sCity}} · {{sNights}} ноч. · {{meals}}
+    </p>
+  </div>
+  <strong>{{price}}</strong>
+</div>
+</template>
+
+<template id="render-tickets-offer-group">
+<section class="offer-group">
+  <h3>
+    {{sFrom}} {{arrowIcon}} {{sTo}} <span>{{date}}</span>
+  </h3>
+  {{sOptions}}
+</section>
+</template>
+
+<template id="render-tickets-offer-groups">
+<div class="offer-groups">
+  {{segments}}
+</div>
+</template>
+
+<template id="render-trip-notice">
+<div class="notice">
+  {{infoIcon}}<span>{{w}}</span>
+</div>
+</template>
+
+<template id="render-trip-span">
+<span>{{length}}</span>
+</template>
+
+<template id="render-trip-span-2">
+<span>{{length}}</span>
+</template>
+
+<template id="render-trip-trip-intro">
+<div class="trip-intro">
+  <div>
+    <span class="eyebrow">ВАША СЛЕДУЮЩАЯ ИСТОРИЯ</span>
+    <h1>
+      {{tTitle}}
+    </h1>
+    <p>
+      {{tSubtitle}}
+    </p>
+  </div>
+  {{newTripButton}}
+</div>
+<div class="criteria-bar">
+  {{editCriteriaButton}}{{editCriteriaButton2}}{{editCriteriaButton3}}{{editCriteriaButton4}}
+</div>
+<div class="route-steps" aria-label="Этапы поездки">
+  <span class="active"><b>1</b> Собираем маршрут</span><i></i><span class="{{conditional}}"><b>2</b> Выбираем детали</span><i></i><span><b>3</b> Отправляемся</span>
+</div>
+<div class="map-card">
+  <div id="route-map">
+  </div>
+  <div class="map-legend">
+    <span><i class="legend-origin"></i> Отправление</span><span><i></i> Остановка</span><span>{{planeIcon}} Перелёт</span><span class="legend-action">Нажмите на точку, чтобы узнать больше</span>
+  </div>
+</div>
+<div class="route-toolbar">
+  <div class="tabs" role="tablist" aria-label="Состав поездки">
+    {{value}}
+  </div>
+  <span class="small-muted">{{nights}} ночей · {{length}} {{conditional2}}</span>
+</div>
+<div class="trip-content">
+  {{conditional3}}
+</div>
+{{renderedBudgetWarning}}{{tWarnings}}
+<div class="trip-total">
+  <div>
+    <span class="small-muted">Вся поездка на {{expression}} чел.</span><strong>{{price}}</strong><span class="total-detail">Перелёты, проживание и трансферы</span>
+  </div>
+  <div class="total-actions">
+    {{showCostButton}}{{summaryButton}}
+  </div>
+</div>
+<p class="demo-caption">
+  {{infoIcon}} Все предложения — примеры, а не действующие тарифы. Стоимость указана на всю группу.
+</p>
+</template>
+
+<template id="ticket-offer-ticket-offer">
+<button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>—</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
+</template>

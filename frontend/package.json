@@ -1,0 +1,14 @@
+{
+  "name": "odin-zapros-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Travel planner frontend with chat, geographic route, hotel and ticket selection, profile and demo checkout",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "start": "node serve.mjs",
+    "standalone": "node build-standalone.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check dist/app.js && node --check dist/templates.js && node --check dist/api.js && node --check dist/map.js && node --check dist/model.js"
+  }
+}
