@@ -64,7 +64,7 @@ type NominatimAmenitySearch struct {
 // OSRMRoute is GET /route/v1/driving/{coordinates}: drive time and distance.
 // The public demo server is for light use only, so cache the results.
 type OSRMRoute struct {
-	Coordinates string `json:"coordinates" url:"-" path:"coordinates" validate:"required,max=200" jsonschema:"required,maxLength=200" jsonschema_description:"lon,lat;lon,lat — longitude first."`
+	Coordinates string `json:"coordinates" url:"-" path:"coordinates" validate:"required,max=200" jsonschema:"required,maxLength=200" jsonschema_description:"lon,lat;lon,lat - longitude first."`
 	Overview    string `json:"overview,omitempty" url:"overview,omitempty" validate:"omitempty,oneof=false simplified full" jsonschema:"enum=false,enum=simplified,enum=full"`
 }
 

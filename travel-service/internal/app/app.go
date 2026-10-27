@@ -5,6 +5,7 @@ import (
 
 	aiv1 "github.com/godnota/pkg/generated/ai/v1"
 	mapv1 "github.com/godnota/pkg/generated/map/v1"
+	providerv1 "github.com/godnota/pkg/generated/provider/v1"
 	routev1 "github.com/godnota/pkg/generated/route/v1"
 	sessionv1 "github.com/godnota/pkg/generated/session/v1"
 	travelv1 "github.com/godnota/pkg/generated/travel/v1"
@@ -45,6 +46,14 @@ func New(cfg *config.Config) (*grpcapp.App, error) {
 		return nil, fmt.Errorf("dial route-service: %w", err)
 	}
 
+	providerConn, err := dial(cfg.Clients.ProviderAddr)
+	if err != nil {
+		_ = sessionConn.Close()
+		_ = aiConn.Close()
+		_ = mapConn.Close()
+		_ = routeConn.Close()
+		return nil, err
+	}
 	service := traveluc.New(
 		travelrepo.New(),
 		sessiongrpc.New(sessionv1.NewSessionServiceClient(sessionConn)),
@@ -58,10 +67,11 @@ func New(cfg *config.Config) (*grpcapp.App, error) {
 		_ = aiConn.Close()
 		_ = mapConn.Close()
 		_ = routeConn.Close()
+		_ = providerConn.Close()
 	}
 
 	return grpcapp.New(cfg.GRPC.Port, closeFn, func(server *grpc.Server) {
-		travelv1.RegisterTravelServiceServer(server, travelctrl.New(service))
+		travelv1.RegisterTravelServiceServer(server, travelctrl.New(service).WithPlanning(sessionv1.NewSessionServiceClient(sessionConn), providerv1.NewProviderServiceClient(providerConn), routev1.NewRouteServiceClient(routeConn)))
 	}), nil
 }
 

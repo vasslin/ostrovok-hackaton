@@ -3,11 +3,16 @@ syntax = "proto3";
 package godnota.common.v1;
 
 option go_package = "github.com/godnota/pkg/generated/common/v1;commonv1";
+import "google/protobuf/struct.proto";
 
-// TripConfig — единый конфиг путешествия, который заполняет AI и подтверждает пользователь.
+// TripConfig - единый конфиг путешествия, который заполняет AI и подтверждает пользователь.
 message TripConfig {
   string version = 1;
   Trip trip = 2;
+  // Canonical AI document (configs/trip_request.schema.json). Use request OR trip.
+  google.protobuf.Struct request = 3;
+  // Codes verified by backend/caller, kept separate from AI requirements.
+  google.protobuf.Struct resolved = 4;
 }
 
 message Trip {

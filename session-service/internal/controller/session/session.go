@@ -2,8 +2,8 @@ package session
 
 import (
 	"context"
-
 	pb "github.com/godnota/pkg/generated/session/v1"
+	"github.com/godnota/session-service/internal/entity"
 	usecase "github.com/godnota/session-service/internal/usecase/session"
 )
 
@@ -13,43 +13,50 @@ type sessionService interface {
 	GetContext(context.Context, usecase.GetRequest) (usecase.GetResponse, error)
 	SaveContext(context.Context, usecase.SaveRequest) error
 }
+type Controller struct{ service sessionService }
 
-type Controller struct {
-	service sessionService
-}
-
-func New(service sessionService) *Controller { return &Controller{service: service} }
+func New(s sessionService) *Controller { return &Controller{service: s} }
 
 var _ pb.SessionServiceServer = (*Controller)(nil)
 
-func (c *Controller) CreateSession(ctx context.Context, req *pb.CreateSessionRequest) (*pb.CreateSessionResponse, error) {
-	if req != nil {
-		_, _ = c.service.CreateSession(ctx, usecase.CreateRequest{UserID: req.GetUserId()})
+func (c *Controller) CreateSession(ctx context.Context, r *pb.CreateSessionRequest) (*pb.CreateSessionResponse, error) {
+	s, e := c.service.CreateSession(ctx, usecase.CreateRequest{UserID: r.GetUserId()})
+	if e != nil {
+		return nil, e
 	}
-	return &pb.CreateSessionResponse{}, nil
+	return &pb.CreateSessionResponse{SessionId: s.SessionID}, nil
 }
-
-func (c *Controller) GetSession(ctx context.Context, req *pb.GetSessionRequest) (*pb.GetSessionResponse, error) {
-	if req != nil {
-		_, _ = c.service.GetSession(ctx, usecase.GetRequest{SessionID: req.GetSessionId()})
+func (c *Controller) GetSession(ctx context.Context, r *pb.GetSessionRequest) (*pb.GetSessionResponse, error) {
+	s, e := c.service.GetSession(ctx, usecase.GetRequest{SessionID: r.GetSessionId()})
+	if e != nil {
+		return nil, e
 	}
-	return &pb.GetSessionResponse{}, nil
+	v := s.Session
+	return &pb.GetSessionResponse{SessionId: v.ID, UserId: v.UserID, Status: v.Status, Summary: v.Summary, TripConfig: v.Config, Messages: messages(v.Messages), CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}, nil
 }
-
-func (c *Controller) GetContext(ctx context.Context, req *pb.GetContextRequest) (*pb.GetContextResponse, error) {
-	if req != nil {
-		_, _ = c.service.GetContext(ctx, usecase.GetRequest{SessionID: req.GetSessionId()})
+func (c *Controller) GetContext(ctx context.Context, r *pb.GetContextRequest) (*pb.GetContextResponse, error) {
+	s, e := c.service.GetContext(ctx, usecase.GetRequest{SessionID: r.GetSessionId()})
+	if e != nil {
+		return nil, e
 	}
-	return &pb.GetContextResponse{}, nil
+	v := s.Session
+	return &pb.GetContextResponse{SessionId: v.ID, UserId: v.UserID, Status: v.Status, Summary: v.Summary, TripConfig: v.Config, Messages: messages(v.Messages)}, nil
 }
-
-func (c *Controller) SaveContext(ctx context.Context, req *pb.SaveContextRequest) (*pb.SaveContextResponse, error) {
-	if req != nil {
-		_ = c.service.SaveContext(ctx, usecase.SaveRequest{
-			SessionID: req.GetSessionId(),
-			Summary:   req.GetSummary(),
-			Status:    req.GetStatus(),
-		})
+func (c *Controller) SaveContext(ctx context.Context, r *pb.SaveContextRequest) (*pb.SaveContextResponse, error) {
+	var v []entity.Message
+	for _, m := range r.GetMessages() {
+		v = append(v, entity.Message{Role: m.GetRole(), Text: m.GetText(), CreatedAt: m.GetCreatedAt()})
 	}
-	return &pb.SaveContextResponse{}, nil
+	err := c.service.SaveContext(ctx, usecase.SaveRequest{SessionID: r.GetSessionId(), Summary: r.GetSummary(), Status: r.GetStatus(), Config: r.GetTripConfig(), Messages: v})
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SaveContextResponse{SessionId: r.GetSessionId()}, nil
+}
+func messages(input []entity.Message) []*pb.DialogMessage {
+	out := make([]*pb.DialogMessage, 0, len(input))
+	for _, m := range input {
+		out = append(out, &pb.DialogMessage{Role: m.Role, Text: m.Text, CreatedAt: m.CreatedAt})
+	}
+	return out
 }

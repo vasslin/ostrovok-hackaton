@@ -1,8 +1,8 @@
-# aviasales — цены на авиабилеты
+# aviasales - цены на авиабилеты
 
 **Travelpayouts / Aviasales Data API v3.** Возвращает найденные пользователями Aviasales цены за последние 48 часов. Это **кэш**, а не живое наличие мест; для демо бронирование имитируется. [Официальное описание метода](https://support.travelpayouts.com/hc/en-us/articles/203956163-Aviasales-Data-API).
 
-**Статус:** ✓ проверено 2026-10-25, HTTP 200, 6 рейсов Москва → Казань на 12–14 декабря.
+**Статус:** ✓ проверено 2026-10-25, HTTP 200, 6 рейсов Москва → Казань на 12-14 декабря.
 
 ## Доступ
 
@@ -22,11 +22,11 @@
 | `departure_at` | нет | `YYYY-MM-DD` или `YYYY-MM` (весь месяц) | `2026-12-12` |
 | `return_at` | нет | то же; не передавать для билета в одну сторону | `2026-12-14` |
 | `one_way` | нет | `true`/`false`; `true` даёт по одному билету на группу дат | `false` |
-| `direct` | нет | `true` — только прямые | `true` |
+| `direct` | нет | `true` - только прямые | `true` |
 | `currency` | да | ISO 4217 **строчными** | `rub` |
 | `sorting` | нет | `price` \| `route` | `price` |
 | `unique` | нет | bool | |
-| `limit` | нет | 1–100 в нашей схеме; максимум API — 1000 | `30` |
+| `limit` | нет | 1-100 в нашей схеме; максимум API - 1000 | `30` |
 | `page` | нет | ≥1 | `1` |
 
 Конфиг: `configs/examples/aviasales.prices_for_dates.json`. Схема: `configs/providers/aviasales.prices_for_dates.schema.json`.
@@ -36,7 +36,7 @@ curl -s -H "X-Access-Token: $TRAVELPAYOUTS_TOKEN" \
   "https://api.travelpayouts.com/aviasales/v3/prices_for_dates?origin=MOW&destination=KZN&departure_at=2026-12-12&return_at=2026-12-14&one_way=false&direct=true&currency=rub&sorting=price&limit=30&page=1"
 ```
 
-### Ответ (настоящий, сокращён; полный — `testdata/aviasales/prices_for_dates.json`)
+### Ответ (настоящий, сокращён; полный - `testdata/aviasales/prices_for_dates.json`)
 
 ```json
 {
@@ -62,17 +62,17 @@ curl -s -H "X-Access-Token: $TRAVELPAYOUTS_TOKEN" \
 | Поле | Значение |
 |---|---|
 | `departure_at`, `return_at` | ISO 8601; разбирать по смещению в ответе и сохранять исходное значение |
-| `price` | целое в `currency`; при заданном `return_at` — цена **туда-обратно** |
-| `duration_to`, `duration_back` | **минуты** в пути туда и обратно; `duration` — их сумма |
+| `price` | целое в `currency`; при заданном `return_at` - цена **туда-обратно** |
+| `duration_to`, `duration_back` | **минуты** в пути туда и обратно; `duration` - их сумма |
 | `transfers`, `return_transfers` | число пересадок |
-| `airline` | IATA-код авиакомпании (`N4` — Nordwind, `SU` — Аэрофлот) |
+| `airline` | IATA-код авиакомпании (`N4` - Nordwind, `SU` - Аэрофлот) |
 | `link` | относительный путь поиска; для внешнего перехода использовать домен Aviasales, соответствующий рынку, и проверять назначение URL. Официальный пример использует `https://www.aviasales.com/` |
 
 ## Маппинг из `TripRequest`
 
 | Поле `TripRequest` | Параметр |
 |---|---|
-| `origin.city` | `origin` — IATA через [travelpayouts_places](travelpayouts_places.md) |
+| `origin.city` | `origin` - IATA через [travelpayouts_places](travelpayouts_places.md) |
 | `destination.city` | `destination` |
 | `dates.departure_date` | `departure_at`, или `departure_month` → `departure_at=YYYY-MM` |
 | `dates.return_date` | `return_at`, `one_way=false` |

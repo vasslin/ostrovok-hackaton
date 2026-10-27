@@ -5,6 +5,7 @@ package godnota.travel.v1;
 option go_package = "github.com/godnota/pkg/generated/travel/v1;travelv1";
 
 import "api/common/v1/trip.proto";
+import "api/provider/v1/parts.proto";
 
 // TravelService оркестрирует сценарий: конфиг, уточнения, поиск и выдача маршрутов.
 service TravelService {
@@ -90,6 +91,7 @@ message SearchRoutesRequest {
 
 message SearchRoutesResponse {
   string session_id = 1;
+  godnota.provider.v1.SearchPartsResponse parts = 2;
 }
 
 message GetRoutesRequest {
@@ -98,4 +100,5 @@ message GetRoutesRequest {
 
 message GetRoutesResponse {
   string session_id = 1;
+  godnota.provider.v1.SearchPartsResponse parts = 2;
 }

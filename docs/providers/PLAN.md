@@ -29,13 +29,13 @@ External API examples were queried on **2026-10-25**; these are historical probe
 | `aviasales` | Travelpayouts / Aviasales Data API v3 | flight prices users found recently (cache, not live seats), airline, transfers, deep link | real, cached | free partner token | 401 without token: endpoint alive ✓ |
 | `travelpayouts_places` | Travelpayouts autocomplete + static `cities.json` | city or airport → IATA code, coordinates, time zone, Russian word forms («в Казань») | real | none | 200 ✓ (Казань → `KZN`) |
 | `yandex_rasp` | Yandex Rasp API v3.0 (Яндекс Расписания) | schedules for **plane, train, suburban, bus, water (ships, ferries), helicopter**; prices for some segments | real | free key | 400 «Не указан ключ» on `api.rasp.yandex-net.ru`: alive ✓ |
-| `transport_mock` | our generator | prices where Rasp and Aviasales have none (most trains, buses, ferries) | synthetic | — | to build |
+| `transport_mock` | our generator | prices where Rasp and Aviasales have none (most trains, buses, ferries) | synthetic | - | to build |
 
 ### Hotels
 
 | Config key | Provider | What it gives | Data | Access | Probe result |
 |---|---|---|---|---|---|
-| — | ETG / RateHawk B2B API | real inventory and booking | real | partner contract and credentials | documented, not configured |
+| - | ETG / RateHawk B2B API | real inventory and booking | real | partner contract and credentials | documented, not configured |
 
 No suitable free hotel-price API was found for this prototype. Hotellook was [disabled](https://support.travelpayouts.com/hc/en-us/articles/29534131568530-FAQ-on-the-closure-of-Hotellook). ETG's real inventory requires a contract and uses HTTPS + HTTP Basic. The previous mock was removed; see [hotel API research](hotels.md). [ETG authorization](https://docs.emergingtravel.com/docs/fundamentals/authorization/).
 
@@ -46,7 +46,7 @@ No suitable free hotel-price API was found for this prototype. Hotellook was [di
 | **`wikipedia`** | **Wikipedia API, `generator=geosearch`** | nearby articles and coordinates; description/photo when present, each image needs its own license attribution | real | none | **200 ✓**: 20 articles around the Kazan Kremlin in saved response |
 | `nominatim.search_amenity` | Nominatim structured search (`amenity` + `city`) | best text matches only; **not a permitted source for systematic POI collection on the public server** | real (OSM) | none | example 200, excluded from catalog-building flow |
 | `osm_overpass` | OSM Overpass API | any OSM object (hotels, museums, cinemas) | real | none | public server: «at capacity… for automated use run a local instance» ⚠ **offline seeding only** |
-| `events_mock` | our generator | festivals and showtimes for the demo | synthetic | — | to build |
+| `events_mock` | our generator | festivals and showtimes for the demo | synthetic | - | to build |
 
 **Checked and not working (2026-10-25), not used:** Hotellook (404, shut down), KudaGo (anti-bot page), OpenTripMap (the registration email never arrives), Timepad (token only).
 
@@ -81,7 +81,7 @@ Rules that keep it reliable:
 
 - **The AI fills human values only** (city names, dates, counts, wishes). It never writes provider codes (`KZN`, `c213`, hotel ids). The Resolver produces those, so the model can't hallucinate a code.
 - **Provider requests are built in Go**, deterministically, from `TripRequest` + resolved codes. Same input gives the same calls, which makes them easy to test.
-- **The board's «> незаполненных полей — через агента, < — сами»**: the backend fills `completeness.missing_required` (JSON paths). If the count is at or above a threshold (config value), the agent asks in chat; below it, the frontend shows just those fields as a form.
+- **The board's «> незаполненных полей - через агента, < - сами»**: the backend fills `completeness.missing_required` (JSON paths). If the count is at or above a threshold (config value), the agent asks in chat; below it, the frontend shows just those fields as a form.
 
 ---
 
@@ -94,28 +94,28 @@ One JSON object per search. The AI fills it; the backend validates it and adds `
 | `schema_version`* | string | const `"1.0"` | `"1.0"` |
 | `locale`* | string | `ru` \| `en` | `"ru"` |
 | `currency`* | string | ISO 4217, `^[A-Z]{3}$` | `"RUB"` |
-| `origin.city`* | string | 1–100 chars | `"Москва"` |
+| `origin.city`* | string | 1-100 chars | `"Москва"` |
 | `origin.country_code` | string | ISO 3166-1 alpha-2, `^[A-Z]{2}$` | `"RU"` |
-| `destination.city` | string \| null | 1–100 chars; `null` = "don't know where", inspiration mode | `"Казань"` |
+| `destination.city` | string \| null | 1-100 chars; `null` = "don't know where", inspiration mode | `"Казань"` |
 | `destination.candidates` | string[] | ≤5 items, when the AI suggests options | `["Хургада","Анталья"]` |
 | `dates.departure_date` | string | `YYYY-MM-DD`, ≥ today, ≤ today + 365 d | `"2026-12-12"` |
 | `dates.departure_month` | string | `YYYY-MM`, used when only a month is known | `"2026-11"` |
 | `dates.return_date` | string | `YYYY-MM-DD`, after departure, ≤ departure + 30 d (hotel API limit) | `"2026-12-14"` |
-| `dates.nights` | int | 1–30 | `2` |
-| `dates.flexible_days` | int | 0–7 | `0` |
-| `travelers.adults`* | int | 1–9 | `2` |
-| `travelers.children_ages` | int[] | each 0–17, ≤8 items | `[6]` |
-| `travelers.pets` | object[] | `{kind: dog\|cat\|other, weight_kg: 0.1–100}`, ≤3 | `[]` |
+| `dates.nights` | int | 1-30 | `2` |
+| `dates.flexible_days` | int | 0-7 | `0` |
+| `travelers.adults`* | int | 1-9 | `2` |
+| `travelers.children_ages` | int[] | each 0-17, ≤8 items | `[6]` |
+| `travelers.pets` | object[] | `{kind: dog\|cat\|other, weight_kg: 0.1-100}`, ≤3 | `[]` |
 | `travelers.residency` | string | ISO alpha-2 **lowercase** (ETG format) | `"ru"` |
 | `transport.modes` | string[] | `plane` \| `train` \| `suburban` \| `bus` \| `water` \| `helicopter` (Rasp enum) | `["train","plane"]` |
 | `transport.round_trip` | bool | default `true` | `true` |
 | `transport.direct_only` | bool | default `false` | `false` |
-| `transport.max_transfers` | int | 0–3 | `1` |
-| `transport.max_duration_hours` | number | 0.5–48 | `12` |
+| `transport.max_transfers` | int | 0-3 | `1` |
+| `transport.max_duration_hours` | number | 0.5-48 | `12` |
 | `transport.departure_time_from` / `_to` | string | `HH:MM` local, `^([01]\d\|2[0-3]):[0-5]\d$` | `"08:00"` |
 | `hotel.needed` | bool | default `true` | `true` |
-| `hotel.rooms` | int | 1–9 | `1` |
-| `hotel.star_rating_min` | int | 0–5 | `3` |
+| `hotel.rooms` | int | 1-9 | `1` |
+| `hotel.star_rating_min` | int | 0-5 | `3` |
 | `hotel.kinds` | string[] | `hotel` \| `hostel` \| `apartment` \| `guest_house` \| `resort` | `["hotel"]` |
 | `hotel.meal` | string | `nomeal` \| `breakfast` \| `half_board` \| `full_board` \| `all_inclusive` | `"breakfast"` |
 | `hotel.free_cancellation` | bool | | `true` |
@@ -125,8 +125,8 @@ One JSON object per search. The AI fills it; the backend validates it and adds `
 | `hotel.near_place` | string | ≤100 chars | `"Казанский Кремль"` |
 | `leisure.interests` | string[] | `museums` \| `cinemas` \| `theatres` \| `concerts` \| `festivals` \| `parks` \| `nature` \| `architecture` \| `history` \| `food` \| `kids` \| `sport` \| `nightlife`; ≤8 | `["museums","theatres","food"]` |
 | `leisure.during_layovers` | bool | default `true` | `true` |
-| `leisure.min_layover_hours` | number | 2–24, default 4 | `4` |
-| `leisure.max_items_per_stop` | int | 1–20, default 5 | `5` |
+| `leisure.min_layover_hours` | number | 2-24, default 4 | `4` |
+| `leisure.max_items_per_stop` | int | 1-20, default 5 | `5` |
 | `budget.total` | int | > 0, in `currency` | `40000` |
 | `budget.scope` | string | `total` \| `per_person` \| `per_night` | `"total"` |
 | `budget.is_hard` | bool | default `false` | `false` |
@@ -140,7 +140,7 @@ One JSON object per search. The AI fills it; the backend validates it and adds `
 
 Also: at least one of `dates.departure_date` / `dates.departure_month` is required (`anyOf` in the schema).
 
-Example, exact request («Москва → Казань на выходные 12–14 декабря, вдвоём, поездом или самолётом, отель у Кремля с завтраком до 8 000 за ночь, музеи и театры»):
+Example, exact request («Москва → Казань на выходные 12-14 декабря, вдвоём, поездом или самолётом, отель у Кремля с завтраком до 8 000 за ночь, музеи и театры»):
 
 ```json
 {
@@ -283,20 +283,20 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
 | Currency | ISO 4217: Aviasales param **lowercase** (`rub`), ETG uppercase (`RUB`) | |
 | Language | Rasp `ru_RU`; ETG `ru`; places `locale=ru`; Wikipedia host `ru.wikipedia.org` | |
 | Coordinates | decimal degrees, lat −90..90, lon −180..180; **OSRM order is `lon,lat`** | all geo |
-| Hotel guests | ≤9 rooms (1 object = 1 room); adults 1–6 per room; children: ages 0–17, ≤4 per room; ≤10 guests per room | ETG |
+| Hotel guests | ≤9 rooms (1 object = 1 room); adults 1-6 per room; children: ages 0-17, ≤4 per room; ≤10 guests per room | ETG |
 | Hotel stay | `checkin` ≤ today + 730 days; `checkout` ≤ `checkin` + 30 days | ETG |
 | Rate ids | hotelpage `book_hash` → `/hotel/prebook/` (24 h); SERP `search_hash` → `/serp/prebook/` (prebook recommended within 38 min); paths are not interchangeable | ETG |
 | Booking id | ETG `partner_order_id` is a string up to 256 chars; keep it unique for each booking attempt | ETG |
-| Text limits | ETG `user.comment` 1–256 chars; Rasp `stops` ≤1000; Rasp `thread.uid` ≤100 | |
+| Text limits | ETG `user.comment` 1-256 chars; Rasp `stops` ≤1000; Rasp `thread.uid` ≤100 | |
 | Paging | Rasp `limit` ≤100 in our schema; Nominatim `limit` ≤40 in our schema; Aviasales `limit` ≤100 in our schema, API maximum 1000 | |
 | Money | Rasp `price: {whole, cents}` integers; ETG amounts are strings | |
-| Weather range | Open-Meteo forecast ≤16 days ahead; marine forecast 0–8 days; history from 1940 (sea temperature from 2022) | |
+| Weather range | Open-Meteo forecast ≤16 days ahead; marine forecast 0-8 days; history from 1940 (sea temperature from 2022) | |
 
 ---
 
 ## 6. Deliverable 2: API descriptions
 
-> **Done:** one file per provider, in Russian, with working `curl` commands and real responses — see [README.md](README.md). This section stays as the compact English reference.
+> **Done:** one file per provider, in Russian, with working `curl` commands and real responses - see [README.md](README.md). This section stays as the compact English reference.
 
 **Template** for each `docs/providers/<provider>.md`:
 
@@ -374,7 +374,7 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
   - `copyright` → the attribution text, link and logo to show.
   - Yandex documents immediate key activation; if the API says `429 «Ключ не активен»`, inspect the product/key status in the Developer Cabinet. [Access guide](https://yandex.ru/dev/rasp/doc/ru/concepts/access).
 - **Gotchas:**
-  - No month search: for `departure_month`, query 2–3 sample dates.
+  - No month search: for `departure_month`, query 2-3 sample dates.
   - Prices are often missing, so fall back to `transport_mock` for the price but keep the real times.
 
 ### Hotels: no configured provider
@@ -388,7 +388,7 @@ Hotel preferences remain in the AI-facing `TripRequest`, but this branch has no 
   - Params:
     - `action=query`*, `generator=geosearch`*, `format=json`*, `formatversion=2` (pages come as a list)
     - `ggscoord`*: `lat|lon`, e.g. `55.7987|49.1059`
-    - `ggsradius`*: meters, 10–10000
+    - `ggsradius`*: meters, 10-10000
     - `ggslimit`: up to 50 (our cap, so every page keeps its photo)
     - `prop=coordinates|pageimages|description|info`, `inprop=url`, `piprop=thumbnail`, `pithumbsize=400`
   - Response `query.pages[]`: `title`, `description` (e.g. «мечеть в Казани, Россия»), `coordinates[0].lat/lon`, `thumbnail.source`, `fullurl`, `pageid`. A `continue` object means more pages are available.
@@ -410,7 +410,7 @@ Hotel preferences remain in the AI-facing `TripRequest`, but this branch has no 
 - **`open_meteo`** (all verified):
   - Forecast `GET https://api.open-meteo.com/v1/forecast`: `latitude`*, `longitude`*, `daily=temperature_2m_max,temperature_2m_min,precipitation_sum`, `timezone=auto`, ≤16 days.
   - History `GET https://archive-api.open-meteo.com/v1/archive`: `start_date`*, `end_date`*. Use the same dates last year for trips beyond the forecast.
-  - Sea `GET https://marine-api.open-meteo.com/v1/marine`: `hourly=sea_surface_temperature`, `start_date` / `end_date` or `forecast_days` 0–8.
+  - Sea `GET https://marine-api.open-meteo.com/v1/marine`: `hourly=sea_surface_temperature`, `start_date` / `end_date` or `forecast_days` 0-8.
 - **`osrm`**:
   - `GET https://router.project-osrm.org/route/v1/driving/{lon},{lat};{lon},{lat}?overview=false` → `routes[0].duration` (s), `distance` (m).
   - Demo server allows reasonable non-commercial use up to 1 req/s and gives no availability guarantee. Attribute OSM and OSRM. [Demo policy](https://github.com/Project-OSRM/osrm-backend/wiki/Demo-server).
@@ -426,19 +426,19 @@ Hotel preferences remain in the AI-facing `TripRequest`, but this branch has no 
 
 | `TripRequest` | `aviasales` | `yandex_rasp.search` | hotels (not configured) | `wikipedia` / offline OSM POI index | `open_meteo` |
 |---|---|---|---|---|---|
-| `origin.city` | `origin` = IATA (places2) | `from` = `c…` (nearest_settlement on city coords) | — | — | — |
-| `destination.city` | `destination` = IATA | `to` = `c…` | — | `ggscoord` = `lat\|lon` of stop; local POI index by city/area | `latitude`, `longitude` |
-| `dates.departure_date` | `departure_at` | `date` (outbound) | — | — | `start_date` |
-| `dates.departure_month` | `departure_at` = `YYYY-MM` | 2–3 sample dates | — | — | archive: same month last year |
-| `dates.return_date` | `return_at`, `one_way=false` | `date` of return leg, `from`/`to` swapped | — | — | `end_date` |
-| `travelers.*` | price × passengers (per-person prices) | — | — | — | — |
-| `travelers.residency` | — | — | — | — | — |
-| `transport.modes` | call only if `plane` is in modes | `transport_types` (one call per mode) | — | — | — |
-| `transport.direct_only` | `direct=true` | `transfers=false` | — | — | — |
-| `hotel.*` | — | — | preserved in `TripRequest`; not sent to a provider | — | — |
-| `leisure.interests` | — | — | — | sources by interest (below) | — |
-| `currency` | `currency` (lowercase) | — | `currency` | — | — |
-| `locale` | `locale` (places2) | `lang=ru_RU` | `language` | `ru.wikipedia.org` / `accept-language` | — |
+| `origin.city` | `origin` = IATA (places2) | `from` = `c…` (nearest_settlement on city coords) | - | - | - |
+| `destination.city` | `destination` = IATA | `to` = `c…` | - | `ggscoord` = `lat\|lon` of stop; local POI index by city/area | `latitude`, `longitude` |
+| `dates.departure_date` | `departure_at` | `date` (outbound) | - | - | `start_date` |
+| `dates.departure_month` | `departure_at` = `YYYY-MM` | 2-3 sample dates | - | - | archive: same month last year |
+| `dates.return_date` | `return_at`, `one_way=false` | `date` of return leg, `from`/`to` swapped | - | - | `end_date` |
+| `travelers.*` | price × passengers (per-person prices) | - | - | - | - |
+| `travelers.residency` | - | - | - | - | - |
+| `transport.modes` | call only if `plane` is in modes | `transport_types` (one call per mode) | - | - | - |
+| `transport.direct_only` | `direct=true` | `transfers=false` | - | - | - |
+| `hotel.*` | - | - | preserved in `TripRequest`; not sent to a provider | - | - |
+| `leisure.interests` | - | - | - | sources by interest (below) | - |
+| `currency` | `currency` (lowercase) | - | `currency` | - | - |
+| `locale` | `locale` (places2) | `lang=ru_RU` | `language` | `ru.wikipedia.org` / `accept-language` | - |
 
 **Leisure sources by interest:** `architecture`, `history`, sights in general → `wikipedia.geosearch` around a resolved stop or transfer coordinate; `museums` → Wikipedia plus the offline OSM POI index; `theatres`, `cinemas`, `parks`, `food`, `kids` → the offline index filtered by type. `festivals`/`concerts` → `events_mock` and explicitly marked synthetic data. The public Nominatim endpoint is reserved for individual geocoding, not catalog creation.
 
@@ -471,16 +471,16 @@ WeatherSummary  { lat, lon, from, to, t_max_avg, t_min_avg, precipitation_mm, se
 
 | # | Step | Output | Effort |
 |---|---|---|---|
-| 1 | Configure fresh Travelpayouts and Yandex Rasp credentials through environment variables | access after independent check | — |
-| 2 | `go run ./cmd/smoke`: call example endpoints and save bounded, redacted responses | historical fixtures in `testdata/<provider>/`; rerun as needed | — |
+| 1 | Configure fresh Travelpayouts and Yandex Rasp credentials through environment variables | access after independent check | - |
+| 2 | `go run ./cmd/smoke`: call example endpoints and save bounded, redacted responses | historical fixtures in `testdata/<provider>/`; rerun as needed | - |
 | 3 | `TripRequest` Go struct with tags; `go generate` → `configs/trip_request.schema.json`; 5 example files | deliverable 1a | 3 h |
 | 4 | Review with Соня (LLM fills it via the schema) and Василина (scenarios, handlers) | agreed contract | 30 min |
-| 5 | Request structs + generated schemas + examples for every endpoint in §6; `configs/providers.json` | deliverable 1b, 1c | 4–5 h |
+| 5 | Request structs + generated schemas + examples for every endpoint in §6; `configs/providers.json` | deliverable 1b, 1c | 4-5 h |
 | 6 | Resolver: places2 + `cities.json` (IATA, coords, tz), Rasp `nearest_settlement`; cached | codes for builders | 3 h |
-| 7 | `BuildTripPlan(trip, resolved, now)` and scenario tests | implemented locally; needs service wiring | — |
+| 7 | `BuildTripPlan(trip, resolved, now)` and scenario tests | implemented locally; needs service wiring | - |
 | 8 | Generic client: auth from registry, query/JSON encoding, timeouts, retries on 429/5xx with backoff, per-provider rate limiter (`golang.org/x/time/rate`), TTL cache, User-Agent | client | 4 h |
 | 9 | Normalizers + tests on the saved `testdata` | normalized results | 4 h |
-| 10 | Write `docs/providers/<provider>.md` from the template (alongside steps 5–9; include the working `curl`s) | deliverable 2 | 3 h |
+| 10 | Write `docs/providers/<provider>.md` from the template (alongside steps 5-9; include the working `curl`s) | deliverable 2 | 3 h |
 | 12 | Leisure: interests → sources (Wikipedia, offline OSM POI index), layover search, `events_mock` | leisure provider | 4 h |
 | 13 | `PROVIDERS_OFFLINE=1` mode that serves `testdata` and cache, so the defense never depends on public APIs | demo safety | 2 h |
 

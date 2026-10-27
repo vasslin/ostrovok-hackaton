@@ -20,8 +20,8 @@
     {
       "thread": {
         "number": "130Х",
-        "title": "Москва — Казань",
-        "short_title": "Москва — Казань",
+        "title": "Москва - Казань",
+        "short_title": "Москва - Казань",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -87,8 +87,8 @@
     {
       "thread": {
         "number": "056М",
-        "title": "Москва — Екатеринбург",
-        "short_title": "Москва — Екатеринбург",
+        "title": "Москва - Екатеринбург",
+        "short_title": "Москва - Екатеринбург",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -154,8 +154,8 @@
     {
       "thread": {
         "number": "112М",
-        "title": "Москва — Круглое Поле",
-        "short_title": "Москва — Круглое Поле",
+        "title": "Москва - Круглое Поле",
+        "short_title": "Москва - Круглое Поле",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -221,8 +221,8 @@
     {
       "thread": {
         "number": "096Н",
-        "title": "Москва — Барнаул",
-        "short_title": "Москва — Барнаул",
+        "title": "Москва - Барнаул",
+        "short_title": "Москва - Барнаул",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -288,8 +288,8 @@
     {
       "thread": {
         "number": "082И",
-        "title": "Москва — Улан-Удэ",
-        "short_title": "Москва — Улан-Удэ",
+        "title": "Москва - Улан-Удэ",
+        "short_title": "Москва - Улан-Удэ",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -355,8 +355,8 @@
     {
       "thread": {
         "number": "026Г",
-        "title": "Москва — Ижевск",
-        "short_title": "Москва — Ижевск",
+        "title": "Москва - Ижевск",
+        "short_title": "Москва - Ижевск",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -422,8 +422,8 @@
     {
       "thread": {
         "number": "128М",
-        "title": "Москва — Казань",
-        "short_title": "Москва — Казань",
+        "title": "Москва - Казань",
+        "short_title": "Москва - Казань",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -489,8 +489,8 @@
     {
       "thread": {
         "number": "002Й",
-        "title": "Москва — Казань",
-        "short_title": "Москва — Казань",
+        "title": "Москва - Казань",
+        "short_title": "Москва - Казань",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -556,8 +556,8 @@
     {
       "thread": {
         "number": "024М",
-        "title": "Москва — Казань",
-        "short_title": "Москва — Казань",
+        "title": "Москва - Казань",
+        "short_title": "Москва - Казань",
         "express_type": null,
         "transport_type": "train",
         "carrier": {
@@ -623,8 +623,8 @@
     {
       "thread": {
         "number": "130Х",
-        "title": "Москва — Казань",
-        "short_title": "Москва — Казань",
+        "title": "Москва - Казань",
+        "short_title": "Москва - Казань",
         "express_type": null,
         "transport_type": "train",
         "carrier": {

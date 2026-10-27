@@ -3,7 +3,7 @@
   "info": {
     "title": "Godnota Travel API",
     "version": "0.1.0",
-    "description": "HTTP-контракт gateway. Сейчас сервисы отвечают пустыми заглушками со статусом 200."
+    "description": "Авторизация и этап 2: подтвержденный конфиг → части маршрута. AI-планирование и склейка маршрутов пока остаются отдельными задачами."
   },
   "servers": [
     {
@@ -13,7 +13,9 @@
   "paths": {
     "/health": {
       "get": {
-        "tags": ["meta"],
+        "tags": [
+          "meta"
+        ],
         "summary": "Проверка готовности gateway",
         "responses": {
           "200": {
@@ -23,238 +25,777 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": { "type": "string", "example": "ok" }
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
                   }
                 }
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/api/sessions": {
       "post": {
-        "tags": ["session"],
+        "tags": [
+          "session"
+        ],
         "summary": "Создать сессию",
         "operationId": "createSession",
         "requestBody": {
           "required": false,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateSessionRequest" },
-              "example": { "user_id": "user-123" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              },
+              "example": {
+                "user_id": "user-123"
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateSessionResponse" } } } }
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
         }
       }
     },
     "/api/sessions/{session_id}": {
       "get": {
-        "tags": ["session"],
+        "tags": [
+          "session"
+        ],
         "summary": "Получить состояние сессии",
         "operationId": "getSession",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/sessions/{session_id}/messages": {
       "post": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Отправить описание поездки",
         "operationId": "planTrip",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/PlanTripRequest" },
-              "example": { "text": "Хочу пять дней у моря в ноябре, недорого, с ребёнком" }
+              "schema": {
+                "$ref": "#/components/schemas/PlanTripRequest"
+              },
+              "example": {
+                "text": "Хочу пять дней у моря в ноябре, недорого, с ребёнком"
+              }
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/sessions/{session_id}/answers": {
       "post": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Передать ответы на уточняющие вопросы",
         "operationId": "submitAnswers",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SubmitAnswersRequest" },
-              "example": { "answers": [{ "question_id": "travel_dates", "text": "10-15 ноября" }] }
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAnswersRequest"
+              },
+              "example": {
+                "answers": [
+                  {
+                    "question_id": "travel_dates",
+                    "text": "10-15 ноября"
+                  }
+                ]
+              }
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/sessions/{session_id}/ideas": {
       "post": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Выбрать идею направления",
         "operationId": "selectIdea",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SelectIdeaRequest" },
-              "example": { "idea_id": "idea-rome", "comment": "Хочу меньше пересадок" }
+              "schema": {
+                "$ref": "#/components/schemas/SelectIdeaRequest"
+              },
+              "example": {
+                "idea_id": "idea-rome",
+                "comment": "Хочу меньше пересадок"
+              }
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/sessions/{session_id}/config": {
       "get": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Получить текущую конфигурацию",
         "operationId": "getConfig",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       },
       "patch": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Изменить поля конфигурации",
         "operationId": "updateConfig",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/UpdateConfigRequest" },
-              "example": { "config": { "version": "1.0", "trip": { "origin": { "city": "Berlin", "country_code": "DE" } } } }
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConfigRequest"
+              },
+              "example": {
+                "config": {
+                  "version": "1.0",
+                  "trip": {
+                    "origin": {
+                      "city": "Berlin",
+                      "country_code": "DE"
+                    }
+                  }
+                }
+              }
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/sessions/{session_id}/confirm": {
       "post": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Подтвердить конфигурацию",
         "operationId": "confirmConfig",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/UpdateConfigRequest" }
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConfigRequest"
+              }
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/sessions/{session_id}/search": {
       "post": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Запустить поиск маршрутов",
         "operationId": "searchRoutes",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          },
+          "409": {
+            "description": "Конфиг не подтвержден"
+          }
+        },
+        "description": "Returns session_id and parts (transport_parts, hotel_parts, errors, limitations). These are stage-2 offers, not assembled/ranked routes. Money amount_minor is a decimal int64 string in protobuf JSON."
       }
     },
     "/api/sessions/{session_id}/routes": {
       "get": {
-        "tags": ["travel"],
+        "tags": [
+          "travel"
+        ],
         "summary": "Получить варианты маршрутов",
         "operationId": "getRoutes",
-        "parameters": [{ "$ref": "#/components/parameters/session_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/session_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          },
+          "409": {
+            "description": "Конфиг не подтвержден"
+          }
+        },
+        "description": "Returns session_id and parts (transport_parts, hotel_parts, errors, limitations). These are stage-2 offers, not assembled/ranked routes. Money amount_minor is a decimal int64 string in protobuf JSON."
       }
     },
     "/api/orders": {
       "post": {
-        "tags": ["order"],
+        "tags": [
+          "order"
+        ],
         "summary": "Создать заказ из выбранного маршрута",
         "operationId": "createOrder",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateOrderRequest" },
-              "example": { "user_id": "user-123", "session_id": "session-1", "route_id": "route-1" }
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderRequest"
+              },
+              "example": {
+                "user_id": "user-123",
+                "session_id": "session-1",
+                "route_id": "route-1"
+              }
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/orders/{order_id}": {
       "get": {
-        "tags": ["order"],
+        "tags": [
+          "order"
+        ],
         "summary": "Получить заказ",
         "operationId": "getOrder",
-        "parameters": [{ "$ref": "#/components/parameters/order_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/order_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/orders/{order_id}/pay": {
       "post": {
-        "tags": ["order"],
+        "tags": [
+          "order"
+        ],
         "summary": "Инициировать оплату",
         "operationId": "payOrder",
-        "parameters": [{ "$ref": "#/components/parameters/order_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/order_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/orders/{order_id}/cancel": {
       "post": {
-        "tags": ["order"],
+        "tags": [
+          "order"
+        ],
         "summary": "Отменить заказ",
         "operationId": "cancelOrder",
-        "parameters": [{ "$ref": "#/components/parameters/order_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/order_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       }
     },
     "/api/users/{user_id}": {
       "get": {
-        "tags": ["user"],
+        "tags": [
+          "user"
+        ],
         "summary": "Получить профиль пользователя",
         "operationId": "getUser",
-        "parameters": [{ "$ref": "#/components/parameters/user_id" }],
-        "responses": { "200": { "description": "OK" } }
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/user_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
       },
       "patch": {
-        "tags": ["user"],
+        "tags": [
+          "user"
+        ],
         "summary": "Обновить язык и валюту",
         "operationId": "updatePreferences",
-        "parameters": [{ "$ref": "#/components/parameters/user_id" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/user_id"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/UpdatePreferencesRequest" },
-              "example": { "language": "ru", "currency": "EUR" }
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePreferencesRequest"
+              },
+              "example": {
+                "language": "ru",
+                "currency": "EUR"
+              }
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нет доступа"
+          },
+          "404": {
+            "description": "Ресурс не найден"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Регистрация",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "user, access_token, token_type, expires_at"
+          },
+          "400": {
+            "description": "Неверные поля"
+          },
+          "401": {
+            "description": "Неверные учетные данные"
+          },
+          "409": {
+            "description": "Аккаунт существует"
+          },
+          "429": {
+            "description": "Лимит попыток входа"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Вход",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "user, access_token, token_type, expires_at"
+          },
+          "400": {
+            "description": "Неверные поля"
+          },
+          "401": {
+            "description": "Неверные учетные данные"
+          },
+          "409": {
+            "description": "Аккаунт существует"
+          },
+          "429": {
+            "description": "Лимит попыток входа"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Текущий пользователь",
+        "responses": {
+          "200": {
+            "description": "Успех"
+          },
+          "401": {
+            "description": "Требуется вход"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Отозвать токен",
+        "responses": {
+          "204": {
+            "description": "Успех"
+          },
+          "401": {
+            "description": "Требуется вход"
+          }
+        }
+      }
+    },
+    "/api/providers/map": {
+      "post": {
+        "tags": [
+          "providers"
+        ],
+        "summary": "Маппинг единого AI-конфига провайдерам",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "config"
+                ],
+                "properties": {
+                  "config": {
+                    "type": "object",
+                    "description": "TripRequest from configs/trip_request.schema.json"
+                  },
+                  "resolved": {
+                    "type": "object",
+                    "description": "Verified backend codes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "configs, missing, limitations"
+          },
+          "400": {
+            "description": "Невалидный конфиг"
+          },
+          "401": {
+            "description": "Требуется вход"
+          }
+        }
       }
     }
   },
   "components": {
     "parameters": {
-      "session_id": { "name": "session_id", "in": "path", "required": true, "schema": { "type": "string" } },
-      "order_id": { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } },
-      "user_id": { "name": "user_id", "in": "path", "required": true, "schema": { "type": "string" } }
+      "session_id": {
+        "name": "session_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "order_id": {
+        "name": "order_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "user_id": {
+        "name": "user_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
     },
     "schemas": {
       "CreateSessionRequest": {
         "type": "object",
-        "properties": { "user_id": { "type": "string" } }
+        "properties": {
+          "user_id": {
+            "type": "string"
+          }
+        }
       },
       "CreateSessionResponse": {
         "type": "object",
-        "properties": { "session_id": { "type": "string" } }
+        "properties": {
+          "session_id": {
+            "type": "string"
+          }
+        }
       },
       "PlanTripRequest": {
         "type": "object",
-        "properties": { "text": { "type": "string" } }
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        }
       },
       "SubmitAnswersRequest": {
         "type": "object",
@@ -264,8 +805,12 @@
             "items": {
               "type": "object",
               "properties": {
-                "question_id": { "type": "string" },
-                "text": { "type": "string" }
+                "question_id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -274,76 +819,167 @@
       "SelectIdeaRequest": {
         "type": "object",
         "properties": {
-          "idea_id": { "type": "string" },
-          "comment": { "type": "string" }
+          "idea_id": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          }
         }
       },
       "UpdateConfigRequest": {
         "type": "object",
         "properties": {
-          "config": { "$ref": "#/components/schemas/TripConfig" }
+          "config": {
+            "$ref": "#/components/schemas/TripConfig"
+          }
         }
       },
       "TripConfig": {
         "type": "object",
         "properties": {
-          "version": { "type": "string" },
+          "version": {
+            "type": "string"
+          },
           "trip": {
             "type": "object",
             "properties": {
-              "origin": { "$ref": "#/components/schemas/Place" },
-              "destinations": { "type": "array", "items": { "$ref": "#/components/schemas/Place" } },
+              "origin": {
+                "$ref": "#/components/schemas/Place"
+              },
+              "destinations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Place"
+                }
+              },
               "date_range": {
                 "type": "object",
                 "properties": {
-                  "start_date": { "type": "string" },
-                  "end_date": { "type": "string" },
-                  "flexible_dates": { "type": "boolean" }
+                  "start_date": {
+                    "type": "string"
+                  },
+                  "end_date": {
+                    "type": "string"
+                  },
+                  "flexible_dates": {
+                    "type": "boolean"
+                  }
                 }
               },
               "travelers": {
                 "type": "object",
                 "properties": {
-                  "adults": { "type": "integer" },
-                  "children": { "type": "integer" },
-                  "children_ages": { "type": "array", "items": { "type": "integer" } }
+                  "adults": {
+                    "type": "integer"
+                  },
+                  "children": {
+                    "type": "integer"
+                  },
+                  "children_ages": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
                 }
               },
               "budget": {
                 "type": "object",
                 "properties": {
-                  "amount": { "type": "number" },
-                  "currency": { "type": "string" },
-                  "scope": { "type": "string" },
-                  "is_hard_limit": { "type": "boolean" }
+                  "amount": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "type": "string"
+                  },
+                  "scope": {
+                    "type": "string"
+                  },
+                  "is_hard_limit": {
+                    "type": "boolean"
+                  }
                 }
               }
             }
+          },
+          "request": {
+            "type": "object",
+            "description": "Canonical TripRequest from configs/trip_request.schema.json. Use request or legacy trip."
+          },
+          "resolved": {
+            "type": "object",
+            "description": "Backend verified IATA / Yandex codes and coordinates, separate from AI-generated config"
           }
         }
       },
       "Place": {
         "type": "object",
         "properties": {
-          "city": { "type": "string" },
-          "country_code": { "type": "string" }
+          "city": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          }
         }
       },
       "CreateOrderRequest": {
         "type": "object",
         "properties": {
-          "user_id": { "type": "string" },
-          "session_id": { "type": "string" },
-          "route_id": { "type": "string" }
+          "user_id": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "route_id": {
+            "type": "string"
+          }
         }
       },
       "UpdatePreferencesRequest": {
         "type": "object",
         "properties": {
-          "language": { "type": "string" },
-          "currency": { "type": "string" }
+          "language": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
+      },
+      "Credentials": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 12,
+            "maxLength": 128
+          }
         }
       }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Opaque token from /api/auth/register or /api/auth/login"
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
 }

@@ -6,7 +6,7 @@
 
 ## Контракты
 
-Исходники лежат в `api/`, сгенерированный Go-код — в `pkg/generated`. Повторная генерация: `sh scripts/gen-proto.sh`.
+Исходники лежат в `api/`, сгенерированный Go-код - в `pkg/generated`. Повторная генерация: `sh scripts/gen-proto.sh`.
 
 | Сервис | RPC | Сообщения |
 |---|---|---|
@@ -23,14 +23,14 @@
 
 ## Структура
 
-Каждый микросервис — отдельный Go-модуль с гексагональной раскладкой:
+Каждый микросервис - отдельный Go-модуль с гексагональной раскладкой:
 
-- `cmd/app` — процесс
-- `internal/controller` — gRPC, всегда `OK` и пустой ответ
-- `internal/usecase` — доменный сервис, логирует запрос и возвращает нулевое значение
-- `internal/entity` — доменные модели
-- `internal/repository` — in-memory заглушка репозитория
-- `internal/adapter` — исходящие gRPC-клиенты там, где сервис кого-то вызывает
+- `cmd/app` - процесс
+- `internal/controller` - gRPC, всегда `OK` и пустой ответ
+- `internal/usecase` - доменный сервис, логирует запрос и возвращает нулевое значение
+- `internal/entity` - доменные модели
+- `internal/repository` - in-memory заглушка репозитория
+- `internal/adapter` - исходящие gRPC-клиенты там, где сервис кого-то вызывает
 
 `travel-service` оркестрирует session, ai, map и route. `route-service` на поиске вызывает provider. Gateway снаружи ходит только в session, travel, user и order.
 

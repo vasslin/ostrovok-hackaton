@@ -6,3 +6,5 @@ bin/
 *.exe
 *.test
 ai-service/server
+data/
+reports/
