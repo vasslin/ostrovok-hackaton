@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "locale": "ru",
+  "currency": "RUB",
+  "origin": {"city": "Петрозаводск", "country_code": "RU"},
+  "destination": {"city": "Кижи", "country_code": "RU"},
+  "dates": {"departure_date": "2027-07-10"},
+  "travelers": {"adults": 2, "children_ages": [12], "residency": "ru"},
+  "transport": {"modes": ["water"], "round_trip": true},
+  "hotel": {"needed": false},
+  "leisure": {"interests": ["architecture", "history", "museums"]},
+  "ai_context": {"trip_purpose": "family", "notes": "Однодневная поездка на «Метеоре», вернуться вечером"},
+  "completeness": {"missing_required": []}
+}

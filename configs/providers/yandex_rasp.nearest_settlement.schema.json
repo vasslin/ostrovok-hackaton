@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/rasp-nearest-settlement",
+  "properties": {
+    "lat": {
+      "type": "number",
+      "maximum": 90,
+      "minimum": -90
+    },
+    "lng": {
+      "type": "number",
+      "maximum": 180,
+      "minimum": -180
+    },
+    "distance": {
+      "type": "integer",
+      "maximum": 50,
+      "minimum": 1,
+      "description": "Search radius in km (our cap)."
+    },
+    "lang": {
+      "type": "string",
+      "enum": [
+        "ru_RU",
+        "uk_UA"
+      ]
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "xml"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "lat",
+    "lng"
+  ],
+  "title": "yandex_rasp.nearest_settlement request parameters"
+}

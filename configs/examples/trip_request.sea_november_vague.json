@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "locale": "ru",
+  "currency": "RUB",
+  "origin": {"city": "Москва", "country_code": "RU"},
+  "destination": {"candidates": ["Хургада", "Анталья", "Дубай"]},
+  "dates": {"departure_month": "2026-11", "nights": 7, "flexible_days": 3},
+  "travelers": {"adults": 2, "children_ages": [6], "residency": "ru"},
+  "transport": {"modes": ["plane"], "round_trip": true, "direct_only": true, "max_duration_hours": 5, "departure_time_from": "07:00", "departure_time_to": "20:00"},
+  "hotel": {"needed": true, "meal": "all_inclusive", "amenities": ["kids_club", "pool", "beach"], "location": ["beach"]},
+  "leisure": {"interests": ["kids", "nature"]},
+  "budget": {"total": 150000, "scope": "total", "is_hard": false},
+  "ai_context": {
+    "trip_purpose": "family",
+    "must_have": ["тёплое море"],
+    "notes": "«хочу куда-нибудь к тёплому морю в ноябре, недорого, с ребёнком, без долгих перелётов»",
+    "assumptions": [
+      {"field": "/travelers/adults", "value": "2", "reason": "«с ребёнком» без уточнений — обычно двое взрослых"},
+      {"field": "/dates/nights", "value": "7", "reason": "типичная длина пляжного отдыха"},
+      {"field": "/budget/total", "value": "150000", "reason": "«недорого» для семьи из трёх человек на неделю"}
+    ]
+  },
+  "completeness": {"missing_required": []}
+}

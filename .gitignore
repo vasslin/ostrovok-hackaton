@@ -1,3 +1,8 @@
+.env
+.env.*
+!.env.example
+.idea/
 bin/
 *.exe
 *.test
+ai-service/server
