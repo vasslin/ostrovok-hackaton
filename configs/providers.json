@@ -22,7 +22,7 @@
     "base_url": "https://api.rasp.yandex-net.ru",
     "auth": {"type": "query", "name": "apikey", "env": "YANDEX_RASP_API_KEY"},
     "rps": 2, "timeout_ms": 8000, "cache_ttl_s": 21600,
-    "attribution": "Данные: Яндекс Расписания (баннер, текст и ссылка из /v3.0/copyright/)",
+    "attribution": "Данные предоставлены сервисом Яндекс.Расписания (активная ссылка http://rasp.yandex.ru/ рядом с данными на каждом экране)",
     "endpoints": {
       "search":             {"method": "GET", "path": "/v3.0/search/",             "params_in": "query"},
       "nearest_settlement": {"method": "GET", "path": "/v3.0/nearest_settlement/", "params_in": "query"},
@@ -30,40 +30,22 @@
       "copyright":          {"method": "GET", "path": "/v3.0/copyright/",          "params_in": "query"}
     }
   },
-  "hotels_mock": {
-    "description": "Our hotel service with the ETG / RateHawk B2B API v3 contract: real hotels, synthetic rates.",
-    "base_url": "http://provider-service:8080/hotels",
-    "auth": {"type": "basic", "env_user": "HOTELS_KEY_ID", "env_pass": "HOTELS_KEY"},
-    "rps": 10, "timeout_ms": 5000, "cache_ttl_s": 0,
-    "endpoints": {
-      "multicomplete":  {"method": "POST", "path": "/api/b2b/v3/search/multicomplete/",               "params_in": "json"},
-      "search_region":  {"method": "POST", "path": "/api/b2b/v3/search/serp/region/",                 "params_in": "json"},
-      "search_geo":     {"method": "POST", "path": "/api/b2b/v3/search/serp/geo/",                    "params_in": "json"},
-      "search_hotels":  {"method": "POST", "path": "/api/b2b/v3/search/serp/hotels/",                 "params_in": "json"},
-      "hotelpage":      {"method": "POST", "path": "/api/b2b/v3/search/hp/",                          "params_in": "json"},
-      "prebook":        {"method": "POST", "path": "/api/b2b/v3/hotel/prebook/",                      "params_in": "json"},
-      "booking_form":   {"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/form/",           "params_in": "json"},
-      "booking_finish": {"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/finish/",         "params_in": "json"},
-      "booking_status": {"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/finish/status/",  "params_in": "json"},
-      "cancel":         {"method": "POST", "path": "/api/b2b/v3/hotel/order/cancel/",                 "params_in": "json"}
-    }
-  },
   "wikipedia": {
-    "description": "Primary leisure source: Wikipedia articles near a point, with description, photo and link. No key.",
+    "description": "Leisure discovery: nearby Wikipedia articles; descriptions and images may be missing. No key.",
     "base_url": "https://ru.wikipedia.org",
     "auth": {"type": "none"},
     "headers": {"User-Agent": "godnota-hackathon/0.1 (https://github.com/ostrovok-hackathon-2026/godnota)"},
-    "rps": 5, "timeout_ms": 8000, "cache_ttl_s": 604800,
-    "attribution": "Википедия (CC BY-SA 4.0)",
+    "rps": 3, "timeout_ms": 8000, "cache_ttl_s": 604800,
+    "attribution": "Wikipedia article: link and CC BY-SA 4.0 attribution; media: check each file's license and author.",
     "endpoints": {
       "geosearch": {"method": "GET", "path": "/w/api.php", "params_in": "query"}
     }
   },
   "nominatim": {
-    "description": "OSM geocoding. Policy: at most 1 request per second, identifying User-Agent, cache results.",
+    "description": "Point geocoding for user searches only. Public server forbids systematic POI-list queries and autocomplete.",
     "base_url": "https://nominatim.openstreetmap.org",
     "auth": {"type": "none"},
-    "headers": {"User-Agent": "godnota-hackathon/0.1"},
+    "headers": {"User-Agent": "godnota-hackathon/0.1 (https://github.com/ostrovok-hackathon-2026/godnota)"},
     "rps": 1, "timeout_ms": 8000, "cache_ttl_s": 2592000,
     "attribution": "© OpenStreetMap contributors",
     "endpoints": {
@@ -72,11 +54,12 @@
     }
   },
   "osrm": {
-    "description": "OSRM demo server: drive time and distance for transfers. Light use only.",
+    "description": "OSRM demo server: drive time and distance for transfers; reasonable non-commercial use only, at most 1 request per second.",
     "base_url": "https://router.project-osrm.org",
     "auth": {"type": "none"},
-    "headers": {"User-Agent": "godnota-hackathon/0.1"},
+    "headers": {"User-Agent": "godnota-hackathon/0.1 (https://github.com/ostrovok-hackathon-2026/godnota)"},
     "rps": 1, "timeout_ms": 8000, "cache_ttl_s": 2592000,
+    "attribution": "Route data: OpenStreetMap contributors (ODbL), routed by OSRM.",
     "endpoints": {
       "route": {"method": "GET", "path": "/route/v1/driving/{coordinates}", "params_in": "query"}
     }
@@ -115,6 +98,7 @@
     "description": "Bank of Russia daily exchange rates (XML, windows-1251).",
     "base_url": "https://www.cbr.ru",
     "auth": {"type": "none"},
+    "headers": {"Accept": "application/xml"},
     "rps": 1, "timeout_ms": 8000, "cache_ttl_s": 43200,
     "endpoints": {
       "daily": {"method": "GET", "path": "/scripts/XML_daily.asp", "params_in": "query"}

@@ -154,7 +154,7 @@ Strategy: **real where it's free and reliable, generated where it isn't, labeled
 
 **Make *any* destination work** (the key to unseen queries): city → geocode → real OSM hotels nearby → generated rates, stable per hotel → flights from distance or real schedules → climate from Open-Meteo. Pre-cache the ~30 likeliest destinations so the demo is fast and doesn't depend on rate-limited public servers.
 
-**Mock booking flow modeled on a real B2B hotel API.** ETG's B2B API v3 (RateHawk / ZenHotels) documents this sequence: search (`/search/serp/region/`, `/geo/` or `/hotels/`; 1–2 cheapest rates per hotel) → hotel page (`/search/hp/`, all rates) → prebook (`/hotel/prebook`, refreshes the price; any change must be shown to the user) → booking form → booking finish → status polling → order info / cancel. Copy that shape into `providers/hotels_mock.py`, including an occasional price change at prebook that the agent has to handle. Pitch line: "our mock follows a real B2B booking flow, so plugging in a real supplier is an adapter, not a rewrite." Don't present it as Ostrovok's own API.
+**Hotels.** No suitable free API with current prices and bookings was found. ETG / RateHawk documents a B2B search and booking flow, but requires a partner agreement and credentials. The provider mock was removed from this repository; keep hotel results unavailable until a real adapter has access and passes sandbox checks. See [hotel API research](providers/hotels.md).
 
 ---
 

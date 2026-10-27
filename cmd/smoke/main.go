@@ -12,10 +12,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,8 +50,8 @@ func main() {
 			continue
 		}
 		p := reg[s.Provider]
-		if s.Provider == "hotels_mock" && *only == "" {
-			fmt.Printf("SKIP %-38s our own service, not running yet\n", s.Name())
+		if s.Provider == "nominatim" && s.Endpoint == "search_amenity" && *only == "" {
+			fmt.Printf("SKIP %-38s public Nominatim does not allow systematic POI collection\n", s.Name())
 			continue
 		}
 		if missing := missingKey(p.Auth); missing != "" {
@@ -70,7 +72,7 @@ func main() {
 			os.Exit(1)
 		}
 		mark := "OK  "
-		if status >= 400 {
+		if status >= 300 {
 			mark = "FAIL"
 			failed++
 		}
@@ -107,12 +109,27 @@ func call(reg providers.Registry, configs string, s providers.Spec) (int, []byte
 	if req.Header.Get("User-Agent") == "" {
 		req.Header.Set("User-Agent", "godnota-hackathon/0.1")
 	}
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) {
+			err = urlErr.Err
+		}
 		return 0, nil, "", err
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
+	if resp.StatusCode >= 300 && resp.StatusCode < 400 {
+		return resp.StatusCode, nil, resp.Header.Get("Content-Type"), fmt.Errorf("provider returned HTTP redirect")
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 2<<20+1))
+	if len(body) > 2<<20 {
+		return resp.StatusCode, nil, resp.Header.Get("Content-Type"), fmt.Errorf("provider response exceeds 2 MiB")
+	}
 	return resp.StatusCode, body, resp.Header.Get("Content-Type"), err
 }
 
@@ -153,6 +170,8 @@ func secretValues(reg providers.Registry) []string {
 func redact(s string, secrets []string) string {
 	for _, v := range secrets {
 		s = strings.ReplaceAll(s, v, "***")
+		s = strings.ReplaceAll(s, url.QueryEscape(v), "***")
+		s = strings.ReplaceAll(s, url.PathEscape(v), "***")
 	}
 	return s
 }

@@ -5,7 +5,7 @@
 1. **Config JSON files**: one unified config that the AI agent fills; one config per provider API (in code: a map keyed by provider name, passed into the HTTP request); required fields and format limits marked.
 2. **Provider API descriptions**: paths, methods, parameters and responses, detailed enough to code the calls.
 
-Every provider below was checked on **2026-10-25** with a real request (results in §1). "To verify" marks the few details I couldn't confirm from official docs.
+External API examples were queried on **2026-10-25**; these are historical probe results, not current availability guarantees. `transport_mock` and `events_mock` are planned internal services and were not queried. Current usage restrictions are linked to official provider documentation below.
 
 ---
 
@@ -14,7 +14,7 @@ Every provider below was checked on **2026-10-25** with a real request (results 
 | # | Deliverable | Files | Done when |
 |---|---|---|---|
 | 1a | Unified trip config (the AI fills it) | `configs/trip_request.schema.json`, `configs/examples/trip_request.*.json` | Соня's ai-service produces it from a chat message and it validates |
-| 1b | Provider registry + one request config per endpoint | `configs/providers.json`, `configs/providers/<provider>.<endpoint>.schema.json`, `configs/examples/<provider>.<endpoint>.json` | each example validates, and a real call with it succeeds |
+| 1b | Provider registry + one request config per endpoint | `configs/providers.json`, `configs/providers/<provider>.<endpoint>.schema.json`, `configs/examples/<provider>.<endpoint>.json` | external examples validate and a live call succeeds where access is available; mock only after implementation |
 | 1c | Required fields and format rules | Go structs with tags → generated `*.schema.json` | `go test` checks every example against its schema and struct |
 | 2 | API descriptions | `docs/providers/<provider>.md` + real sample responses in `testdata/<provider>/` | a teammate can write the client from the doc alone |
 
@@ -35,17 +35,16 @@ Every provider below was checked on **2026-10-25** with a real request (results 
 
 | Config key | Provider | What it gives | Data | Access | Probe result |
 |---|---|---|---|---|---|
-| `hotels_mock` | **our service with the ETG / RateHawk B2B v3 contract** | region search, hotel page, prebook, booking, status, cancel | real hotel names and places (OSM / OpenTripMap) + synthetic rates | internal | to build |
-| — | ETG / RateHawk B2B API | real inventory | — | contract only | docs public, no access |
+| — | ETG / RateHawk B2B API | real inventory and booking | real | partner contract and credentials | documented, not configured |
 
-There is no free hotel API with real prices. We build `hotels_mock` on ETG's documented contract, so swapping in a real supplier later is an adapter, not a rewrite.
+No suitable free hotel-price API was found for this prototype. Hotellook was [disabled](https://support.travelpayouts.com/hc/en-us/articles/29534131568530-FAQ-on-the-closure-of-Hotellook). ETG's real inventory requires a contract and uses HTTPS + HTTP Basic. The previous mock was removed; see [hotel API research](hotels.md). [ETG authorization](https://docs.emergingtravel.com/docs/fundamentals/authorization/).
 
 ### Leisure (museums, cinemas, theatres, events; also during layovers)
 
 | Config key | Provider | What it gives | Data | Access | Probe result |
 |---|---|---|---|---|---|
-| **`wikipedia`** | **Wikipedia API, `generator=geosearch` (primary)** | notable places near a point, with a short description, photo, coordinates and link, in one call | real (CC BY-SA) | none | **200 ✓**: 20 places around the Kazan Kremlin, all with photos |
-| **`nominatim.search_amenity`** | Nominatim structured search (`amenity` + `city`) | places of one type in a city: museums, theatres, cinemas, parks, restaurants | real (OSM) | none | **200 ✓**: 17 museums in Kazan; few cinemas (partial coverage) |
+| **`wikipedia`** | **Wikipedia API, `generator=geosearch`** | nearby articles and coordinates; description/photo when present, each image needs its own license attribution | real | none | **200 ✓**: 20 articles around the Kazan Kremlin in saved response |
+| `nominatim.search_amenity` | Nominatim structured search (`amenity` + `city`) | best text matches only; **not a permitted source for systematic POI collection on the public server** | real (OSM) | none | example 200, excluded from catalog-building flow |
 | `osm_overpass` | OSM Overpass API | any OSM object (hotels, museums, cinemas) | real | none | public server: «at capacity… for automated use run a local instance» ⚠ **offline seeding only** |
 | `events_mock` | our generator | festivals and showtimes for the demo | synthetic | — | to build |
 
@@ -55,10 +54,10 @@ There is no free hotel API with real prices. We build `hotels_mock` on ETG's doc
 
 | Config key | Provider | What it gives | Access | Probe result |
 |---|---|---|---|---|
-| `nominatim` | OSM Nominatim | geocoding: city or address → coordinates | none; ≤1 req/s; User-Agent required | 200 ✓ |
+| `nominatim` | OSM Nominatim | individual user-triggered geocoding: city or address → coordinates | none; ≤1 req/s across app; identifying User-Agent and cache required | 200 ✓ |
 | `open_meteo` | Open-Meteo | forecast, history (ERA5, 1940+), **sea temperature** | none; free non-commercial: <10 000 calls/day, 5 000/h, 600/min; CC BY 4.0 | 200 ✓ |
-| `osrm` | OSRM demo server | drive time and distance for transfers | none; light use only | 200 ✓ (Kazan airport → Kremlin: 29 km, ~54 min) |
-| `cbr` | Bank of Russia daily rates | currency conversion to RUB | none | not probed (standard XML) |
+| `osrm` | OSRM demo server | drive time and distance for transfers | none; reasonable non-commercial use, ≤1 req/s | 200 ✓ (Kazan airport → Kremlin: 29 km, ~54 min) |
+| `cbr` | Bank of Russia daily rates | currency conversion to RUB | none | 200 ✓, saved XML |
 
 ---
 
@@ -70,7 +69,7 @@ user text ─► ai-service ─fills─► TripRequest  (unified config: human v
                                     │   many missing → agent asks in chat; few → user fills a form
                                     ▼
 travel-service ─► provider-service
-                    1. Resolver   city → IATA, Rasp code, coordinates, time zone, hotel region   (cached)
+                    1. Resolver   city → IATA, Rasp code, coordinates, time zone   (cached)
                     2. Builders   TripRequest + resolved codes → map[provider][]Request          (pure Go)
                     3. Client     generic HTTP: auth, encoding, rate limit, retry, cache (providers.json)
                     4. Normalizers  provider JSON → TransportOption / HotelOffer / LeisureItem / Weather
@@ -184,28 +183,12 @@ Two kinds of files.
     "base_url": "https://api.rasp.yandex-net.ru",
     "auth": {"type": "query", "name": "apikey", "env": "YANDEX_RASP_API_KEY"},
     "rps": 2, "timeout_ms": 8000, "cache_ttl_s": 21600,
-    "attribution": "Данные: Яндекс Расписания (баннер, текст и ссылка — /v3.0/copyright/)",
+    "attribution": "Данные предоставлены сервисом Яндекс.Расписания (активная ссылка http://rasp.yandex.ru/ рядом с данными на каждом экране)",
     "endpoints": {
       "search":             {"method": "GET", "path": "/v3.0/search/",             "params_in": "query"},
       "nearest_settlement": {"method": "GET", "path": "/v3.0/nearest_settlement/", "params_in": "query"},
       "thread":             {"method": "GET", "path": "/v3.0/thread/",             "params_in": "query"},
       "copyright":          {"method": "GET", "path": "/v3.0/copyright/",          "params_in": "query"}
-    }
-  },
-  "hotels_mock": {
-    "base_url": "http://provider-service:8080/hotels",
-    "auth": {"type": "basic", "env": "HOTELS_KEY_ID:HOTELS_KEY"},
-    "rps": 10, "timeout_ms": 5000, "cache_ttl_s": 0,
-    "endpoints": {
-      "multicomplete": {"method": "POST", "path": "/api/b2b/v3/search/multicomplete/", "params_in": "json"},
-      "search_region": {"method": "POST", "path": "/api/b2b/v3/search/serp/region/",   "params_in": "json"},
-      "search_geo":    {"method": "POST", "path": "/api/b2b/v3/search/serp/geo/",      "params_in": "json"},
-      "hotelpage":     {"method": "POST", "path": "/api/b2b/v3/search/hp/",            "params_in": "json"},
-      "prebook":       {"method": "POST", "path": "/api/b2b/v3/hotel/prebook/",        "params_in": "json"},
-      "booking_form":  {"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/form/",          "params_in": "json"},
-      "booking_finish":{"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/finish/",        "params_in": "json"},
-      "booking_status":{"method": "POST", "path": "/api/b2b/v3/hotel/order/booking/finish/status/", "params_in": "json"},
-      "cancel":        {"method": "POST", "path": "/api/b2b/v3/hotel/order/cancel/",               "params_in": "json"}
     }
   }
 }
@@ -224,12 +207,6 @@ Two kinds of files.
 {"from": "c213", "to": "c43", "date": "2026-12-12", "transport_types": "train",
  "transfers": false, "limit": 100, "offset": 0, "lang": "ru_RU", "format": "json"}
 
-// configs/examples/hotels_mock.search_geo.json  (near the Kremlin; price_to = 8000 × 2 nights, filters apply to the whole stay)
-{"checkin": "2026-12-12", "checkout": "2026-12-14", "residency": "ru", "language": "ru", "currency": "RUB",
- "latitude": 55.7987, "longitude": 49.1059, "radius": 2000, "hotels_limit": 20,
- "guests": [{"adults": 2, "children": []}],
- "filter": {"star_rating": [3, 4, 5], "meal_type": "breakfast", "price_to": 16000}}
-
 // configs/examples/wikipedia.geosearch.json
 {"action": "query", "generator": "geosearch", "ggscoord": "55.7987|49.1059", "ggsradius": 3000, "ggslimit": 20,
  "prop": "coordinates|pageimages|description|info", "inprop": "url", "piprop": "thumbnail", "pithumbsize": 400,
@@ -240,18 +217,17 @@ Two kinds of files.
 
 ```go
 type Request struct {
-    Provider string // "aviasales"
-    Endpoint string // "prices_for_dates"
-    Params   any    // e.g. AviasalesPricesForDates{...}: a struct with json/url/validate tags
+    Provider string
+    Endpoint string
+    Params   any
 }
 
-// key = provider name; a slice, because one provider may need several calls
-// (outbound + return leg, search → hotel page → prebook)
 type RequestSet map[string][]Request
 
-func BuildRequests(trip TripRequest, codes Resolved) (RequestSet, error)
-func (c *Client) Do(ctx context.Context, r Request, out any) error // reads providers.json: URL, method, auth, encoding
+func BuildTripPlan(input TripRequest, resolved ResolvedTrip, now time.Time) (TripPlan, error)
 ```
+
+`providerkit.BuildTripPlan` is implemented. It returns separate `Discovery` and `Search` maps plus `Missing` and `Limitations`. `Registry.NewHTTPRequest` turns a typed request into an HTTP request. Network code resolution, retries, cache and normalization remain separate work. The concrete example is `go run ./cmd/maptrip -resolved configs/examples/resolved_trip.kazan_weekend.json -now 2026-10-27`.
 
 ---
 
@@ -309,10 +285,10 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
 | Coordinates | decimal degrees, lat −90..90, lon −180..180; **OSRM order is `lon,lat`** | all geo |
 | Hotel guests | ≤9 rooms (1 object = 1 room); adults 1–6 per room; children: ages 0–17, ≤4 per room; ≤10 guests per room | ETG |
 | Hotel stay | `checkin` ≤ today + 730 days; `checkout` ≤ `checkin` + 30 days | ETG |
-| Rate ids | prebook `hash` 1–256 chars, valid 24 h after the hotel page; `search_hash` valid 38 min | ETG |
-| Booking id | `partner_order_id`: UUID, unique per booking attempt | ETG |
+| Rate ids | hotelpage `book_hash` → `/hotel/prebook/` (24 h); SERP `search_hash` → `/serp/prebook/` (prebook recommended within 38 min); paths are not interchangeable | ETG |
+| Booking id | ETG `partner_order_id` is a string up to 256 chars; keep it unique for each booking attempt | ETG |
 | Text limits | ETG `user.comment` 1–256 chars; Rasp `stops` ≤1000; Rasp `thread.uid` ≤100 | |
-| Paging | Rasp `limit` ≤100 (default 100); Nominatim `limit` ≤40 | |
+| Paging | Rasp `limit` ≤100 in our schema; Nominatim `limit` ≤40 in our schema; Aviasales `limit` ≤100 in our schema, API maximum 1000 | |
 | Money | Rasp `price: {whole, cents}` integers; ETG amounts are strings | |
 | Weather range | Open-Meteo forecast ≤16 days ahead; marine forecast 0–8 days; history from 1940 (sea temperature from 2022) | |
 
@@ -336,7 +312,7 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
 ### `aviasales`: Travelpayouts Aviasales Data API
 
 - **Access:** free Travelpayouts partner account → API token in the profile. Send as `X-Access-Token` header (or `token` query param).
-- **Data:** cheapest prices Aviasales users found recently (freshness ~48 h, kept up to 7 days). Not live availability. Use `link` to deep-link to aviasales.ru.
+- **Data:** prices found by Aviasales users in the previous 48 hours, not live availability. The returned `link` is a relative search path; the official example uses `https://www.aviasales.com/`. Parse the final URL safely and never treat cached prices as confirmed bookable prices. [Official method](https://support.travelpayouts.com/hc/en-us/articles/203956163-Aviasales-Data-API).
 - **`GET https://api.travelpayouts.com/aviasales/v3/prices_for_dates`**
   - Params:
     - `origin`*, `destination`*: IATA city or airport
@@ -352,12 +328,12 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
     - `departure_at` / `return_at`: local time with offset, e.g. `2026-12-12T20:35:00+03:00`.
     - `duration_to` / `duration_back`: **minutes** (MOW → KZN: 105).
     - `price`: integer in `currency`; with `return_at` set it is the round-trip price.
-    - `link`: relative path, prefix it with `https://www.aviasales.ru`.
+    - `link`: relative search path; use an allowlisted Aviasales domain when building an outbound link.
   - Errors: 401 without token (verified).
 - **Lookups (no key, verified):**
   - `GET https://autocomplete.travelpayouts.com/places2?term=Казань&locale=ru&types[]=city` (or `types[]=airport`) → `[{code: "KZN", name, country_code, coordinates: {lat, lon}, cases: {vi: "в Казань", ro: "Казани", …}}]`
   - `GET https://api.travelpayouts.com/data/ru/cities.json` (3.5 MB, download once): `code`, `name`, `coordinates`, `time_zone`, `has_flightable_airport`
-- To verify in official docs: the rate limit and the maximum `limit`.
+- Official limit: 600 requests/minute for `prices_for_dates`, maximum `limit` is 1000; our schema's 100 and registry's 5 RPS are conservative application caps. [Travelpayouts API rate limits](https://support.travelpayouts.com/hc/en-us/articles/4402565416594-API-rate-limits).
 
 ### `yandex_rasp`: Yandex Rasp API v3.0
 
@@ -366,7 +342,7 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
   - Send as `apikey` query param or `Authorization` header.
   - **Domain: `api.rasp.yandex-net.ru`.** The old `api.rasp.yandex.net` may not work.
   - The daily limit is shown in the cabinet (check it on day 1).
-  - Attribution is required: banner, text and link (`/v3.0/copyright/`).
+  - Attribution is required next to timetable data on every screen: exact text «Данные предоставлены сервисом Яндекс.Расписания» linked to `http://rasp.yandex.ru/`, at the same font size and color as body text. `/v3.0/copyright/` supplies presentation assets. [Terms, clause 2.3.5](https://yandex.ru/legal/timetable_api/ru/).
 - **`GET /v3.0/search/`**: threads between two points.
   - Params:
     - `from`*, `to`*: Yandex codes (`c213` city, `s9600213` station), or another system with `system=iata|sirena|express|esr`
@@ -396,57 +372,19 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
   - `nearest_settlement` for Kazan coordinates → `c43` (confirmed).
   - `thread` for `002J_0_2` (train 002Й) → 4 stops. **Stop times have a different format: `2026-12-12 20:40:00`, no `T` and no offset.** Parse them in the station's time zone.
   - `copyright` → the attribution text, link and logo to show.
-  - A new key can answer `429 «Ключ не активен»` for a while after it's issued.
+  - Yandex documents immediate key activation; if the API says `429 «Ключ не активен»`, inspect the product/key status in the Developer Cabinet. [Access guide](https://yandex.ru/dev/rasp/doc/ru/concepts/access).
 - **Gotchas:**
   - No month search: for `departure_month`, query 2–3 sample dates.
   - Prices are often missing, so fall back to `transport_mock` for the price but keep the real times.
 
-### `hotels_mock`: our service on the ETG / RateHawk B2B v3 contract
+### Hotels: no configured provider
 
-- **Why:** no free hotel price API exists (Hotellook returns 404; ETG needs a contract). We implement ETG's documented contract ourselves.
-- **Conventions (as in ETG):**
-  - HTTP Basic auth (`KEY_ID:KEY`).
-  - JSON bodies.
-  - Envelope `{data, debug, error, status}`.
-  - Rate-limit headers `X-RateLimit-SecondsNumber`, `-RequestsNumber`, `-Remaining`, `-Reset`.
-- `POST /api/b2b/v3/search/multicomplete/` `{query*, language}` → ≤5 regions + ≤5 hotels (region lookup for the Resolver)
-- `POST /api/b2b/v3/search/serp/region/`
-  - Request:
-    - `checkin`* (≤ today + 730 d), `checkout`* (≤ checkin + 30 d)
-    - `region_id`* (int)
-    - `residency` (alpha-2 lowercase), `language`, `currency`, `hotels_limit`
-    - `guests`: `[{adults* 1–6, children: [ages 0–17, ≤4]}]`, one object per room, ≤9 rooms
-    - `filter`: `{star_rating[], kind[], meal_type, price_from, price_to, has_transfer}`
-    - `upsells`: `{early_checkin: {time}, late_checkout: {time}}`
-  - Response `hotels[]`:
-    - `hid`: int, ≤10 digits
-    - `rates[]`:
-      - `search_hash` (valid 38 min), `daily_prices[]`, `room_name`, `allotment`, `amenities_data[]`
-      - `meal_data`: `{value, has_breakfast, no_child_meal}`
-      - `payment_options.payment_types[]`: `{amount, show_amount, currency_code, show_currency_code, type: now|hotel|deposit, tax_data: {taxes[]}, cancellation_penalties: {free_cancellation_before (UTC), policies: [{start_at, end_at, amount_charge, amount_show}]}}`
-- `POST /api/b2b/v3/search/serp/geo/`: same plus `latitude`, `longitude`, `radius` (define our own max). `POST /api/b2b/v3/search/serp/hotels/`: same plus `hids` (ETG: ≤300).
-- `POST /api/b2b/v3/search/hp/` `{hid*, checkin, checkout, guests, residency, language, currency}` → every rate for one hotel, each with a `book_hash` / `match_hash`
-- `POST /api/b2b/v3/hotel/prebook/` `{hash* (1–256 chars, valid 24 h), price_increase_percent (0–100)}` → same or alternative rate. **Any price change must be shown to the user.**
-- `POST /api/b2b/v3/hotel/order/booking/form/` `{partner_order_id* (UUID), book_hash*, language*, user_ip*}` → `order_id`, payment types
-- `POST /api/b2b/v3/hotel/order/booking/finish/` → starts an async booking. Body:
-  - `user`: `{email*, phone, comment 1–256}`
-  - `partner`: `{partner_order_id*}`
-  - `language`
-  - `rooms`*: `[{guests: [{first_name, last_name, is_child, age}]}]`
-  - `payment_type`*: `{type: now|hotel|deposit, amount, currency_code}`
-- `POST /api/b2b/v3/hotel/order/booking/finish/status/` `{partner_order_id*}` → poll until a final status
-- `POST /api/b2b/v3/hotel/order/cancel/` `{partner_order_id*}`
-- **Mock behavior to build:**
-  - Hotels seeded from real OSM data for ~30 cities.
-  - Prices deterministic (seed = `hid` + dates).
-  - Prebook changes the price 5–10% of the time.
-  - Some dates sold out.
-  - Status goes `processing` → `ok`.
+Hotel preferences remain in the AI-facing `TripRequest`, but this branch has no hotel provider. ETG / RateHawk has a documented B2B API that requires a partner contract and credentials. The earlier internal mock and its unverified request structs were removed. Do not include hotel prices or availability in a generated search plan until a real provider adapter is configured and tested. See [hotel API research](hotels.md).
 
 ### `wikipedia`: primary leisure source (also used for layovers)
 
-- **Access:** no key. Wikimedia asks for an identifying User-Agent (set in `providers.json`). Attribution: «Википедия, CC BY-SA 4.0».
-- **`GET https://ru.wikipedia.org/w/api.php`**: one call returns places with everything a card needs.
+- **Access:** no key. Wikimedia asks for an identifying User-Agent (set in `providers.json`). Text attribution needs an article link and CC BY-SA 4.0 notice; photo licenses vary by file and require individual author/license data. [Commons reuse](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia/licenses). In 2026 compliant unauthenticated API clients have a 200 requests/minute limit; our 3 RPS cap stays below it. [Wikimedia rate limits](https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits).
+- **`GET https://ru.wikipedia.org/w/api.php`**: one call returns nearby articles; some lack description or thumbnail.
   - Params:
     - `action=query`*, `generator=geosearch`*, `format=json`*, `formatversion=2` (pages come as a list)
     - `ggscoord`*: `lat|lon`, e.g. `55.7987|49.1059`
@@ -454,28 +392,28 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
     - `ggslimit`: up to 50 (our cap, so every page keeps its photo)
     - `prop=coordinates|pageimages|description|info`, `inprop=url`, `piprop=thumbnail`, `pithumbsize=400`
   - Response `query.pages[]`: `title`, `description` (e.g. «мечеть в Казани, Россия»), `coordinates[0].lat/lon`, `thumbnail.source`, `fullurl`, `pageid`. A `continue` object means more pages are available.
-  - **Filter:** skip pages without `description`; those are usually areas («Казанская агломерация»), not places.
+  - **Filter:** classify candidate place type and location; missing `description` lowers confidence but should not automatically discard a valid POI.
 - **Verified 2026-10-25:** 20 places within 3 km of the Kazan Kremlin, all with photos, 11 with descriptions (Казанский кремль, Кул-Шариф, Благовещенский собор, Хазинэ…).
 
-### `nominatim.search_amenity`: places of one type (museums, theatres, cinemas)
+### `nominatim.search_amenity`: diagnostic example, excluded from automatic POI collection
 
-- **`GET https://nominatim.openstreetmap.org/search`** with structured params: `amenity`* (place type: `museum`, `theatre`, `cinema`, `zoo`, `park`, `restaurant`…), `city`*, `country`, `format=jsonv2`*, `limit` (≤40), `accept-language=ru`. Same policy as geocoding: ≤1 req/s, User-Agent.
+- **`GET https://nominatim.openstreetmap.org/search`** with structured params: `amenity`* (place type), `city`*, `country`, `format=jsonv2`*, `limit` (our cap 40), `accept-language=ru`. This returns best text matches, not all places of a type. Public Nominatim explicitly forbids systematic POI-list queries and autocomplete; do not run this endpoint for interest-to-city fanout. [Search semantics](https://nominatim.org/release-docs/latest/api/Search/), [usage policy](https://operations.osmfoundation.org/policies/nominatim/).
 - **Filter by `type`**: results can include stops named after a place («Театр…» bus stop).
-- **Verified 2026-10-25:** `amenity=museum` → 17 museums in Kazan; `theatre` → 5; `cinema` → only 2, so coverage is partial. For a full list, seed once from Overpass (step 11).
+- **Verified 2026-10-25:** `amenity=museum` → 17 matches in Kazan; `theatre` → 5; `cinema` → 2. These counts are not complete city totals. Build the demo POI catalog offline from an OSM extract, then query the local index at runtime.
 
 ### Connected services
 
 - **`nominatim`**:
   - `GET https://nominatim.openstreetmap.org/search?q=&format=jsonv2&limit=1&accept-language=ru` (+ `countrycodes`)
   - Returns `lat` and `lon` as strings, plus `display_name`, `type`, `boundingbox`.
-  - Policy: ≤1 req/s, identifying User-Agent, cache results, no bulk use.
+  - Policy: ≤1 req/s across the whole app, identifying User-Agent, cache results, no autocomplete or systematic POI queries.
 - **`open_meteo`** (all verified):
   - Forecast `GET https://api.open-meteo.com/v1/forecast`: `latitude`*, `longitude`*, `daily=temperature_2m_max,temperature_2m_min,precipitation_sum`, `timezone=auto`, ≤16 days.
   - History `GET https://archive-api.open-meteo.com/v1/archive`: `start_date`*, `end_date`*. Use the same dates last year for trips beyond the forecast.
   - Sea `GET https://marine-api.open-meteo.com/v1/marine`: `hourly=sea_surface_temperature`, `start_date` / `end_date` or `forecast_days` 0–8.
 - **`osrm`**:
   - `GET https://router.project-osrm.org/route/v1/driving/{lon},{lat};{lon},{lat}?overview=false` → `routes[0].duration` (s), `distance` (m).
-  - Demo server, so cache everything.
+  - Demo server allows reasonable non-commercial use up to 1 req/s and gives no availability guarantee. Attribute OSM and OSRM. [Demo policy](https://github.com/Project-OSRM/osrm-backend/wiki/Demo-server).
 - **`cbr`**: `GET https://www.cbr.ru/scripts/XML_daily.asp?date_req=DD/MM/YYYY` → XML (windows-1251): `Valute[CharCode, Nominal, Value]`, with a comma as the decimal separator.
 - **`osm_overpass`** (seed script only):
   - `POST https://overpass-api.de/api/interpreter` with `data=[out:json][timeout:25];node["tourism"="hotel"](around:R,lat,lon);out;`
@@ -486,23 +424,23 @@ Alternatives, if the team prefers: hand-write the JSON Schemas and keep the Go s
 
 ## 7. Mapping `TripRequest` → provider parameters
 
-| `TripRequest` | `aviasales` | `yandex_rasp.search` | `hotels_mock.search_*` | `wikipedia` / `nominatim.search_amenity` | `open_meteo` |
+| `TripRequest` | `aviasales` | `yandex_rasp.search` | hotels (not configured) | `wikipedia` / offline OSM POI index | `open_meteo` |
 |---|---|---|---|---|---|
 | `origin.city` | `origin` = IATA (places2) | `from` = `c…` (nearest_settlement on city coords) | — | — | — |
-| `destination.city` | `destination` = IATA | `to` = `c…` | `region_id` (multicomplete) or `latitude`/`longitude` | `ggscoord` = `lat\|lon` of stop or hotel / `city` | `latitude`, `longitude` |
-| `dates.departure_date` | `departure_at` | `date` (outbound) | `checkin` = **arrival** date (overnight trips shift it!) | — | `start_date` |
+| `destination.city` | `destination` = IATA | `to` = `c…` | — | `ggscoord` = `lat\|lon` of stop; local POI index by city/area | `latitude`, `longitude` |
+| `dates.departure_date` | `departure_at` | `date` (outbound) | — | — | `start_date` |
 | `dates.departure_month` | `departure_at` = `YYYY-MM` | 2–3 sample dates | — | — | archive: same month last year |
-| `dates.return_date` | `return_at`, `one_way=false` | `date` of return leg, `from`/`to` swapped | `checkout` | — | `end_date` |
-| `travelers.*` | price × passengers (per-person prices) | — | `guests[]`: split into rooms (≤6 adults, ≤4 children each) | — | — |
-| `travelers.residency` | — | — | `residency` | — | — |
+| `dates.return_date` | `return_at`, `one_way=false` | `date` of return leg, `from`/`to` swapped | — | — | `end_date` |
+| `travelers.*` | price × passengers (per-person prices) | — | — | — | — |
+| `travelers.residency` | — | — | — | — | — |
 | `transport.modes` | call only if `plane` is in modes | `transport_types` (one call per mode) | — | — | — |
 | `transport.direct_only` | `direct=true` | `transfers=false` | — | — | — |
-| `hotel.*` | — | — | `filter.star_rating`, `kind`, `meal_type`, `price_to` (= per night × nights), `upsells` | — | — |
+| `hotel.*` | — | — | preserved in `TripRequest`; not sent to a provider | — | — |
 | `leisure.interests` | — | — | — | sources by interest (below) | — |
 | `currency` | `currency` (lowercase) | — | `currency` | — | — |
 | `locale` | `locale` (places2) | `lang=ru_RU` | `language` | `ru.wikipedia.org` / `accept-language` | — |
 
-**Leisure sources by interest:** `architecture`, `history`, sights in general → `wikipedia.geosearch` around the hotel or stop; `museums` → Wikipedia + `nominatim.search_amenity` (`museum`); `theatres` → `theatre`; `cinemas` → `cinema`; `parks`/`nature` → `park`; `food` → `restaurant`, `cafe`; `kids` → `zoo`, `theme_park`. `festivals`/`concerts` → `events_mock`.
+**Leisure sources by interest:** `architecture`, `history`, sights in general → `wikipedia.geosearch` around a resolved stop or transfer coordinate; `museums` → Wikipedia plus the offline OSM POI index; `theatres`, `cinemas`, `parks`, `food`, `kids` → the offline index filtered by type. `festivals`/`concerts` → `events_mock` and explicitly marked synthetic data. The public Nominatim endpoint is reserved for individual geocoding, not catalog creation.
 
 **Layovers:** when a gap between two transport segments is ≥ `leisure.min_layover_hours`, call `wikipedia.geosearch` around the transfer station. Keep only places reachable and back within the gap: OSRM time × 2 + 1 h buffer.
 
@@ -533,21 +471,20 @@ WeatherSummary  { lat, lon, from, to, t_max_avg, t_min_avg, precipitation_mm, se
 
 | # | Step | Output | Effort |
 |---|---|---|---|
-| 1 | Get keys: Travelpayouts token, Yandex Rasp key (both done). Add env names to `.env.example` | keys work | 1 h |
-| 2 | `scripts/smoke_providers.sh`: one `curl` per endpoint with the Kazan example; save responses | `testdata/<provider>/*.json` | 1–2 h |
+| 1 | Configure fresh Travelpayouts and Yandex Rasp credentials through environment variables | access after independent check | — |
+| 2 | `go run ./cmd/smoke`: call example endpoints and save bounded, redacted responses | historical fixtures in `testdata/<provider>/`; rerun as needed | — |
 | 3 | `TripRequest` Go struct with tags; `go generate` → `configs/trip_request.schema.json`; 5 example files | deliverable 1a | 3 h |
 | 4 | Review with Соня (LLM fills it via the schema) and Василина (scenarios, handlers) | agreed contract | 30 min |
 | 5 | Request structs + generated schemas + examples for every endpoint in §6; `configs/providers.json` | deliverable 1b, 1c | 4–5 h |
-| 6 | Resolver: places2 + `cities.json` (IATA, coords, tz), Rasp `nearest_settlement`, hotels `multicomplete`; cached | codes for builders | 3 h |
-| 7 | `BuildRequests(trip, codes) RequestSet` + golden tests (example trip → expected requests) | builders | 3 h |
+| 6 | Resolver: places2 + `cities.json` (IATA, coords, tz), Rasp `nearest_settlement`; cached | codes for builders | 3 h |
+| 7 | `BuildTripPlan(trip, resolved, now)` and scenario tests | implemented locally; needs service wiring | — |
 | 8 | Generic client: auth from registry, query/JSON encoding, timeouts, retries on 429/5xx with backoff, per-provider rate limiter (`golang.org/x/time/rate`), TTL cache, User-Agent | client | 4 h |
 | 9 | Normalizers + tests on the saved `testdata` | normalized results | 4 h |
 | 10 | Write `docs/providers/<provider>.md` from the template (alongside steps 5–9; include the working `curl`s) | deliverable 2 | 3 h |
-| 11 | `hotels_mock`: seed script (Overpass with backoff or Geofabrik) for ~30 cities, rate generator, ETG-shaped handlers with ETG validation rules | hotel provider | 1–1.5 days |
-| 12 | Leisure: interests → sources (Wikipedia, Nominatim by type), layover search, `events_mock` | leisure provider | 4 h |
+| 12 | Leisure: interests → sources (Wikipedia, offline OSM POI index), layover search, `events_mock` | leisure provider | 4 h |
 | 13 | `PROVIDERS_OFFLINE=1` mode that serves `testdata` and cache, so the defense never depends on public APIs | demo safety | 2 h |
 
-**Order:** 1–2 first (real responses shape everything), then 3–4 (unblocks Соня and Василина), then 5–10, then 11–13. Steps 1–10 are about 3 days for one person; 11–13 add 1.5–2 days.
+The registry, schemas, examples, request builder and local trip mapper are present. Review with AI/frontend owners, code resolution, HTTP execution policy and normalizers remain integration tasks. No hotel source is configured.
 
 ---
 
@@ -558,8 +495,8 @@ WeatherSummary  { lat, lon, from, to, t_max_avg, t_min_avg, precipitation_mm, se
 - **Unknown free limits** (Rasp daily cap) → read them from the cabinets on day 1 and cache aggressively.
 - **Events:** no free events API works (KudaGo blocked, Timepad token-only) → `events_mock`.
 - **Overpass is not for live traffic**: offline seeding only.
-- **Where does `hotels_mock` live?** Recommended: inside provider-service (less infrastructure). A separate service also works.
-- **Attribution** (Яндекс Расписания, Википедия CC BY-SA, OpenStreetMap, Open-Meteo CC BY 4.0) → a footer on the frontend (Даня Казанович).
+- **Hotels:** ETG / RateHawk requires a partner contract. Keep hotel search unavailable until a real adapter is built against the current partner schema.
+- **Attribution:** Yandex requires its exact linked phrase beside timetable data on every screen, not only in a footer; Wikipedia article text needs its link/license notice, each image needs its own author/license, and OSM/Open-Meteo require source attribution. [Yandex conditions](https://yandex.ru/legal/timetable_api/ru/) · [Commons media reuse](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia/licenses).
 - **Overnight trips and time zones:** hotel `checkin` = arrival date, not departure date; always keep offsets.
 
 ---

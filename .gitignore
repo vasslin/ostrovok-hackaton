@@ -1,5 +1,8 @@
-# secrets
 .env
-
-# IDE
+.env.*
+!.env.example
 .idea/
+bin/
+*.exe
+*.test
+ai-service/server

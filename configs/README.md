@@ -9,13 +9,14 @@ Configs for the travel providers. The full plan is in [docs/providers/PLAN.md](.
 | `providers/<provider>.<endpoint>.schema.json` | Schema of the request parameters for one provider endpoint | **generated** |
 | `examples/trip_request.*.json` | 5 filled trip configs (Kazan weekend, vague sea trip, SPb→Moscow train, Kizhi by boat, family with a dog) | hand |
 | `examples/<provider>.<endpoint>.json` | One request config per endpoint, mostly built from the Kazan trip | hand |
+| `examples/resolved_trip.kazan_weekend.json` | Sample provider codes and coordinates for the Kazan demo | hand |
 
 ## Where the rules live
 
 Required fields and format limits are defined **once**, in Go struct tags:
 
 - `internal/trip/trip.go` — `TripRequest`
-- `internal/providers/{tickets,hotels,places}.go` — one struct per endpoint
+- `internal/providers/{tickets,places}.go` — one struct per endpoint
 
 ```go
 Origin string `json:"origin" url:"origin" validate:"required,len=3,alpha,uppercase" jsonschema:"required,pattern=^[A-Z]{3}$"`
@@ -25,7 +26,7 @@ Origin string `json:"origin" url:"origin" validate:"required,len=3,alpha,upperca
 - `jsonschema` — copied into the generated `*.schema.json` (give these to the LLM and the frontend)
 - `url` / `json` — how the field is sent (query string or JSON body); `path:"name"` fills `{name}` in the endpoint path
 
-Rules tags can't express (return after departure, at most 30 nights, not in the past) live in `TripRequest.ValidateAt` and `HotelsSearchBase.Check`.
+Rules tags can't express (return after departure, not in the past) live in `TripRequest.ValidateAt`.
 
 ## Commands
 
@@ -66,4 +67,16 @@ req, err := reg.NewHTTPRequest(ctx, providers.Request{
 // req is a ready *http.Request: validated params, URL, query/body, auth from env vars
 ```
 
-Secrets come from env vars named in `providers.json`: `TRAVELPAYOUTS_TOKEN`, `YANDEX_RASP_API_KEY`, `HOTELS_KEY_ID`, `HOTELS_KEY`.
+Secrets come from env vars named in `providers.json`: `TRAVELPAYOUTS_TOKEN` and `YANDEX_RASP_API_KEY`.
+
+## From the AI config to provider requests
+
+`providerkit.BuildTripPlan` is the importable entry point. It accepts a validated `TripRequest` and resolved city codes and coordinates. It returns two maps keyed by provider: `discovery` for code lookup and `search` for configured provider requests. `missing` lists the facts needed before a request can be built; `limitations` identifies unavailable data sources, including hotels. Hotel preferences remain in `TripRequest`, but no hotel API request is generated because the mock was removed and no live provider credentials are available. The AI supplies human values only; code resolution must check country and city type when names are ambiguous.
+
+```bash
+go run ./cmd/maptrip -trip configs/examples/trip_request.kazan_weekend.json -resolved configs/examples/resolved_trip.kazan_weekend.json -now 2026-10-27
+```
+
+The public Nominatim endpoint is used only for individual city geocoding, never for bulk lists of museums or cinemas. Layover activities require the actual stop coordinates and free interval after route search. The hotel API research and access requirement are in [hotels.md](../docs/providers/hotels.md).
+
+After merging with the multi-module `main` branch, add `.` to `go.work` before importing `github.com/ostrovok-hackathon-2026/godnota/providerkit` from a service. The current `provider-service` protobuf requests and responses are empty stubs, so a service adapter and DTO contract are still required. See [integration notes](../docs/providers/INTEGRATION.md).

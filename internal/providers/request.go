@@ -20,9 +20,9 @@ import (
 // Request is one provider call: which endpoint, and its parameters (one of the
 // structs in Catalog).
 type Request struct {
-	Provider string
-	Endpoint string
-	Params   any
+	Provider string `json:"provider"`
+	Endpoint string `json:"endpoint"`
+	Params   any    `json:"params"`
 }
 
 // RequestSet maps a provider name to its calls for one search. A slice, because
@@ -32,6 +32,19 @@ type RequestSet map[string][]Request
 // Validate runs the struct tags and, if the params have a Check() method, the
 // cross-field rules.
 func Validate(params any) error {
+	v := reflect.ValueOf(params)
+	if !v.IsValid() {
+		return fmt.Errorf("params must be a non-nil struct")
+	}
+	if v.Kind() == reflect.Pointer {
+		if v.IsNil() {
+			return fmt.Errorf("params must be a non-nil struct")
+		}
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return fmt.Errorf("params must be a struct")
+	}
 	if err := trip.Validator().Struct(params); err != nil {
 		return err
 	}
@@ -51,6 +64,18 @@ func (reg Registry) NewHTTPRequest(ctx context.Context, r Request) (*http.Reques
 	ep, ok := p.Endpoints[r.Endpoint]
 	if !ok {
 		return nil, fmt.Errorf("unknown endpoint %s.%s", r.Provider, r.Endpoint)
+	}
+	if err := validateProvider(r.Provider, p); err != nil {
+		return nil, err
+	}
+	spec, ok := Lookup(r.Provider, r.Endpoint)
+	if !ok {
+		return nil, fmt.Errorf("%s.%s is missing from the catalog", r.Provider, r.Endpoint)
+	}
+	want := reflect.TypeOf(spec.New())
+	got := reflect.TypeOf(r.Params)
+	if got != want && got != want.Elem() {
+		return nil, fmt.Errorf("%s.%s: params type %v, want %s", r.Provider, r.Endpoint, got, want.Elem())
 	}
 	if err := Validate(r.Params); err != nil {
 		return nil, fmt.Errorf("%s.%s: %w", r.Provider, r.Endpoint, err)
@@ -144,6 +169,9 @@ func secret(env string) (string, error) {
 
 // fillPath replaces {name} in the path with the field tagged path:"name".
 func fillPath(path string, params any) (string, error) {
+	if err := Validate(params); err != nil {
+		return "", err
+	}
 	v := reflect.Indirect(reflect.ValueOf(params))
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {

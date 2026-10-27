@@ -53,6 +53,23 @@ func (t TripRequest) ValidateAt(now time.Time) error {
 		if dep.After(today.AddDate(0, 0, MaxDaysAhead)) {
 			errs = append(errs, fmt.Errorf("/dates/departure_date: more than %d days ahead", MaxDaysAhead))
 		}
+		if t.Dates.DepartureMonth != "" && t.Dates.DepartureMonth != dep.Format("2006-01") {
+			errs = append(errs, errors.New("/dates/departure_month: disagrees with departure_date"))
+		}
+	}
+	if t.Dates.DepartureMonth != "" {
+		if month, err := time.Parse("2006-01", t.Dates.DepartureMonth); err == nil {
+			lastDay := month.AddDate(0, 1, -1)
+			if lastDay.Before(today) {
+				errs = append(errs, errors.New("/dates/departure_month: is in the past"))
+			}
+			if month.After(today.AddDate(0, 0, MaxDaysAhead)) {
+				errs = append(errs, fmt.Errorf("/dates/departure_month: more than %d days ahead", MaxDaysAhead))
+			}
+		}
+	}
+	if t.Dates.ReturnDate != "" && t.Dates.DepartureDate == "" {
+		errs = append(errs, errors.New("/dates/return_date: requires departure_date"))
 	}
 	if t.Dates.ReturnDate != "" && depErr == nil {
 		if ret, err := time.Parse(time.DateOnly, t.Dates.ReturnDate); err == nil {
@@ -61,6 +78,9 @@ func (t TripRequest) ValidateAt(now time.Time) error {
 			}
 			if ret.Sub(dep) > MaxStayNights*24*time.Hour {
 				errs = append(errs, fmt.Errorf("/dates/return_date: stay is longer than %d nights", MaxStayNights))
+			}
+			if t.Dates.Nights > 0 && int(ret.Sub(dep).Hours()/24) != t.Dates.Nights {
+				errs = append(errs, errors.New("/dates/nights: disagrees with return_date"))
 			}
 		}
 	}

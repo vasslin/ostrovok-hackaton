@@ -1,16 +1,14 @@
-# nominatim — геокодинг и места по типу
+# nominatim — точечный геокодинг
 
-**OpenStreetMap Nominatim.** Две роли:
-1. **Геокодинг:** название города или адреса → координаты (для Resolver, погоды, Википедии).
-2. **Поиск по типу места:** музеи, театры, кинотеатры, парки, рестораны в городе. Дополняет [Википедию](wikipedia.md), где у кинотеатров и ресторанов статей обычно нет.
+**Публичный OpenStreetMap Nominatim** принимает точечные запросы, например название города или адрес → координаты для Resolver, погоды и Википедии. Его структурный `search` умеет искать по `amenity` и городу, но возвращает лучшие совпадения, а не список всех объектов. Использовать его как каталог музеев, театров и кинотеатров нельзя. [Официальная справка Search API](https://nominatim.org/release-docs/latest/api/Search/) и [политика публичного сервера](https://operations.osmfoundation.org/policies/nominatim/).
 
-**Статус:** ✓ обе ручки проверены 2026-10-25, HTTP 200. **Ключ не нужен.**
+**Статус:** оба примера дали HTTP 200 2026-10-25. Это подтверждает формат запроса на тот момент, а не разрешение собирать POI по городам. **Ключ не нужен.**
 
 ## Правила (обязательно)
 
-- **Не чаще 1 запроса в секунду** — в `providers.json` стоит `rps: 1`.
-- **Понятный `User-Agent`** — задан в `providers.json`.
-- **Кэшировать результаты** (у нас на 30 дней); массовые выгрузки запрещены.
+- **Не чаще 1 запроса в секунду суммарно для всего приложения**, включая всех пользователей и экземпляры сервиса. Значение `rps: 1` в `providers.json` нужно обеспечивать общим ограничителем, а не отдельным ограничителем на каждый экземпляр.
+- **Идентифицирующий `User-Agent` с контактной ссылкой** задан в `providers.json`.
+- **Кэшировать результаты** (у нас на 30 дней); запрещены автодополнение и систематические запросы для выгрузки всех POI в зоне. Для каталогов использовать заранее полученный OSM extract или собственный индекс.
 - **Атрибуция:** «© OpenStreetMap contributors».
 
 ## Ручка `search` — геокодинг
@@ -26,7 +24,7 @@
 | `countrycodes` | нет | ISO alpha-2 строчными через запятую | `ru` |
 
 ```bash
-curl -s -A "godnota-hackathon/0.1" -G "https://nominatim.openstreetmap.org/search" \
+curl -s -A "godnota-hackathon/0.1 (https://github.com/ostrovok-hackathon-2026/godnota)" -G "https://nominatim.openstreetmap.org/search" \
   --data-urlencode "q=Казань" --data-urlencode "format=jsonv2" --data-urlencode "limit=1" --data-urlencode "accept-language=ru"
 ```
 
@@ -40,9 +38,9 @@ curl -s -A "godnota-hackathon/0.1" -G "https://nominatim.openstreetmap.org/searc
 
 **`lat` и `lon` приходят строками**, их нужно переводить в числа.
 
-## Ручка `search_amenity` — места по типу
+## Ручка `search_amenity` — пример формата, не источник каталога
 
-Тот же адрес `/search`, но со структурными параметрами вместо `q` (их нельзя смешивать с `q`).
+Тот же адрес `/search`, но со структурными параметрами вместо `q` (их нельзя смешивать с `q`). Пример оставлен для воспроизводимости прототипа; автоматический обход по типам и городам для построения досуга нарушает политику публичного сервера. Подходящий источник для списка мест — локальный OSM extract, полученный вне живого пользовательского запроса.
 
 | Параметр | Обязат. | Формат | Пример |
 |---|---|---|---|
@@ -56,7 +54,7 @@ curl -s -A "godnota-hackathon/0.1" -G "https://nominatim.openstreetmap.org/searc
 Конфиг: `configs/examples/nominatim.search_amenity.json`.
 
 ```bash
-curl -s -A "godnota-hackathon/0.1" -G "https://nominatim.openstreetmap.org/search" \
+curl -s -A "godnota-hackathon/0.1 (https://github.com/ostrovok-hackathon-2026/godnota)" -G "https://nominatim.openstreetmap.org/search" \
   --data-urlencode "amenity=museum" --data-urlencode "city=Казань" --data-urlencode "country=Россия" \
   --data-urlencode "format=jsonv2" --data-urlencode "limit=40" --data-urlencode "accept-language=ru"
 ```
@@ -70,10 +68,10 @@ curl -s -A "godnota-hackathon/0.1" -G "https://nominatim.openstreetmap.org/searc
 ]
 ```
 
-Проверка 2026-10-25 по Казани: `museum` — 17 мест, `theatre` — 5, `cinema` — **всего 2**.
+Проверка 2026-10-25 по Казани: `museum` вернул 17 совпадений, `theatre` — 5, `cinema` — 2. Это **не количество** таких мест в городе.
 
 ## Подводные камни
 
-- **Неполнота.** Кинотеатров находится мало. Для полного списка — разовая выгрузка из Overpass (шаг 11 плана).
+- **Неполнота по определению API.** Даже успешный ответ не даёт полного списка. Для демокаталога нужен офлайн-набор OSM объектов; для актуального большого объёма — свой индекс или сервис с разрешённым POI-поиском.
 - **Мусор в выдаче:** туда попадают остановки с названием места («Театр…», `type: bus_stop`). Оставлять только нужные `type`.
 - **Не больше 40 результатов** на запрос.

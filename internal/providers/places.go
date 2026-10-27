@@ -1,5 +1,12 @@
 package providers
 
+import (
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+)
+
 // WikipediaGeosearch is GET https://ru.wikipedia.org/w/api.php with
 // generator=geosearch: articles near a point, with coordinates, a short
 // description, a photo and a link in one call. Skip pages without a
@@ -16,6 +23,19 @@ type WikipediaGeosearch struct {
 	PIThumbSize   int    `json:"pithumbsize,omitempty" url:"pithumbsize,omitempty" validate:"omitempty,min=50,max=1000" jsonschema:"minimum=50,maximum=1000" jsonschema_description:"Thumbnail width in px."`
 	Format        string `json:"format" url:"format" validate:"required,eq=json" jsonschema:"required,enum=json"`
 	FormatVersion int    `json:"formatversion,omitempty" url:"formatversion,omitempty" validate:"omitempty,oneof=1 2" jsonschema:"enum=1,enum=2,default=2" jsonschema_description:"2 returns pages as a list."`
+}
+
+func (r WikipediaGeosearch) Check() error {
+	parts := strings.Split(r.Coord, "|")
+	if len(parts) != 2 {
+		return fmt.Errorf("ggscoord must be lat|lon")
+	}
+	lat, errLat := strconv.ParseFloat(parts[0], 64)
+	lon, errLon := strconv.ParseFloat(parts[1], 64)
+	if errLat != nil || errLon != nil || !validCoordinates(lat, lon) {
+		return fmt.Errorf("ggscoord is outside valid latitude/longitude range")
+	}
+	return nil
 }
 
 // NominatimSearch is GET /search: geocoding. Nominatim allows at most one
@@ -46,6 +66,29 @@ type NominatimAmenitySearch struct {
 type OSRMRoute struct {
 	Coordinates string `json:"coordinates" url:"-" path:"coordinates" validate:"required,max=200" jsonschema:"required,maxLength=200" jsonschema_description:"lon,lat;lon,lat — longitude first."`
 	Overview    string `json:"overview,omitempty" url:"overview,omitempty" validate:"omitempty,oneof=false simplified full" jsonschema:"enum=false,enum=simplified,enum=full"`
+}
+
+func (r OSRMRoute) Check() error {
+	points := strings.Split(r.Coordinates, ";")
+	if len(points) < 2 || len(points) > 10 {
+		return fmt.Errorf("coordinates must contain 2 to 10 lon,lat points")
+	}
+	for _, point := range points {
+		parts := strings.Split(point, ",")
+		if len(parts) != 2 {
+			return fmt.Errorf("coordinates must contain lon,lat points")
+		}
+		lon, errLon := strconv.ParseFloat(parts[0], 64)
+		lat, errLat := strconv.ParseFloat(parts[1], 64)
+		if errLon != nil || errLat != nil || !validCoordinates(lat, lon) {
+			return fmt.Errorf("coordinates contain invalid latitude/longitude")
+		}
+	}
+	return nil
+}
+
+func validCoordinates(lat, lon float64) bool {
+	return !math.IsNaN(lat) && !math.IsInf(lat, 0) && !math.IsNaN(lon) && !math.IsInf(lon, 0) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180
 }
 
 // OpenMeteoForecast is GET https://api.open-meteo.com/v1/forecast (≤16 days ahead).
@@ -87,5 +130,5 @@ type OpenMeteoMarine struct {
 // CBRDaily is GET https://www.cbr.ru/scripts/XML_daily.asp: daily exchange
 // rates as windows-1251 XML.
 type CBRDaily struct {
-	DateReq string `json:"date_req,omitempty" url:"date_req,omitempty" validate:"omitempty,datetime=02/01/2006" jsonschema:"pattern=^[0-9]{2}/[0-9]{2}/[0-9]{4}$" jsonschema_description:"DD/MM/YYYY; omit for today."`
+	DateReq string `json:"date_req,omitempty" url:"date_req,omitempty" validate:"omitempty,datetime=02/01/2006" jsonschema:"pattern=^[0-9]{2}/[0-9]{2}/[0-9]{4}$" jsonschema_description:"DD/MM/YYYY; omit for the last registered date."`
 }

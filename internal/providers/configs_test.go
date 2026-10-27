@@ -161,49 +161,15 @@ func TestBuiltRequests(t *testing.T) {
 		t.Errorf("wikipedia URL = %s", u)
 	}
 
-	// POST with JSON body
-	u, body := build("hotels_mock", "search_region")
-	if !strings.HasSuffix(u, "/api/b2b/v3/search/serp/region/") || !strings.Contains(body, `"region_id":1001`) {
-		t.Errorf("hotels search: url=%s body=%s", u, body)
-	}
 }
 
 func TestInvalidParamsAreRejected(t *testing.T) {
-	base := providers.HotelsSearchBase{
-		Checkin: "2026-12-12", Checkout: "2026-12-14", Residency: "ru",
-		Guests: []providers.HotelsGuests{{Adults: 2, Children: []providers.ChildAge{}}},
-	}
-	tooLong := base
-	tooLong.Checkout = "2027-01-20"
-	sevenAdults := base
-	sevenAdults.Guests = []providers.HotelsGuests{{Adults: 7}}
-	fiveKids := base
-	fiveKids.Guests = []providers.HotelsGuests{{Adults: 2, Children: []providers.ChildAge{1, 2, 3, 4, 5}}}
-	oldKid := base
-	oldKid.Guests = []providers.HotelsGuests{{Adults: 2, Children: []providers.ChildAge{18}}}
-	upperResidency := base
-	upperResidency.Residency = "RU"
-
 	cases := map[string]any{
-		"lowercase IATA":         &providers.AviasalesPricesForDates{Origin: "mow", Destination: "KZN", Currency: "rub"},
-		"bad departure_at":       &providers.AviasalesPricesForDates{Origin: "MOW", Destination: "KZN", Currency: "rub", DepartureAt: "12.12.2026"},
-		"uppercase currency":     &providers.AviasalesPricesForDates{Origin: "MOW", Destination: "KZN", Currency: "RUB"},
-		"rasp unknown transport": &providers.RaspSearch{From: "c213", To: "c43", TransportTypes: "car"},
-		"rasp limit over 100":    &providers.RaspSearch{From: "c213", To: "c43", Limit: 101},
-		"stay over 30 nights":    &providers.HotelsSearchRegion{HotelsSearchBase: tooLong, RegionID: 1},
-		"7 adults in a room":     &providers.HotelsSearchRegion{HotelsSearchBase: sevenAdults, RegionID: 1},
-		"5 children in a room":   &providers.HotelsSearchRegion{HotelsSearchBase: fiveKids, RegionID: 1},
-		"child aged 18":          &providers.HotelsSearchRegion{HotelsSearchBase: oldKid, RegionID: 1},
-		"uppercase residency":    &providers.HotelsSearchRegion{HotelsSearchBase: upperResidency, RegionID: 1},
-		"empty prebook hash":     &providers.HotelsPrebook{},
-		"order id not a UUID":    &providers.HotelsCancel{PartnerOrderID: "order-1"},
-		"child guest without age": &providers.HotelsBookingFinish{
-			User:        providers.BookingUser{Email: "a@example.com"},
-			Partner:     providers.BookingPartner{PartnerOrderID: "7f3c2a9e-5b1d-4c8e-9a2f-1d3e5b7c9a01"},
-			Language:    "ru",
-			Rooms:       []providers.BookingRoom{{Guests: []providers.BookingGuest{{FirstName: "Маша", LastName: "Иванова", IsChild: true}}}},
-			PaymentType: providers.BookingPayment{Type: "now", Amount: "100", CurrencyCode: "RUB"},
-		},
+		"lowercase IATA":              &providers.AviasalesPricesForDates{Origin: "mow", Destination: "KZN", Currency: "rub"},
+		"bad departure_at":            &providers.AviasalesPricesForDates{Origin: "MOW", Destination: "KZN", Currency: "rub", DepartureAt: "12.12.2026"},
+		"uppercase currency":          &providers.AviasalesPricesForDates{Origin: "MOW", Destination: "KZN", Currency: "RUB"},
+		"rasp unknown transport":      &providers.RaspSearch{From: "c213", To: "c43", TransportTypes: "car"},
+		"rasp limit over 100":         &providers.RaspSearch{From: "c213", To: "c43", Limit: 101},
 		"nominatim limit over 40":     &providers.NominatimSearch{Q: "Казань", Format: "jsonv2", Limit: 41},
 		"marine forecast 9 days":      &providers.OpenMeteoMarine{Latitude: 27, Longitude: 33, ForecastDays: 9},
 		"wikipedia radius > 10 km":    &providers.WikipediaGeosearch{Action: "query", Generator: "geosearch", Coord: "55.7987|49.1059", Radius: 20000, Format: "json"},
@@ -214,5 +180,103 @@ func TestInvalidParamsAreRejected(t *testing.T) {
 		if err := providers.Validate(params); err == nil {
 			t.Errorf("%s: expected a validation error", name)
 		}
+	}
+}
+
+func TestRequestParamsMustMatchEndpoint(t *testing.T) {
+	reg := providers.Registry{
+		"aviasales": {
+			BaseURL: "https://example.com",
+			Auth:    providers.Auth{Type: "none"},
+			RPS:     1, TimeoutMS: 1000,
+			Endpoints: map[string]providers.Endpoint{
+				"prices_for_dates": {Method: "GET", Path: "/prices_for_dates", ParamsIn: "query"},
+			},
+		},
+	}
+	var nilPrices *providers.AviasalesPricesForDates
+	cases := map[string]any{
+		"nil":        nil,
+		"typed nil":  nilPrices,
+		"non-struct": "origin=MOW",
+		"wrong type": &providers.NominatimSearch{Q: "Казань", Format: "jsonv2"},
+	}
+	for name, params := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, err := reg.NewHTTPRequest(context.Background(), providers.Request{Provider: "aviasales", Endpoint: "prices_for_dates", Params: params})
+			if err == nil {
+				t.Fatal("expected a request error")
+			}
+		})
+	}
+	_, err := reg.NewHTTPRequest(context.Background(), providers.Request{
+		Provider: "aviasales",
+		Endpoint: "prices_for_dates",
+		Params: &providers.AviasalesPricesForDates{
+			Origin: "MOW", Destination: "KZN", Currency: "rub",
+		},
+	})
+	if err != nil {
+		t.Fatalf("valid request: %v", err)
+	}
+}
+
+func TestRegistryRejectsInvalidTransportAndEndpoints(t *testing.T) {
+	valid := func() providers.Provider {
+		return providers.Provider{
+			BaseURL: "https://example.com",
+			Auth:    providers.Auth{Type: "none"},
+			RPS:     1, TimeoutMS: 1000,
+			Endpoints: map[string]providers.Endpoint{
+				"search": {Method: "GET", Path: "/search", ParamsIn: "query"},
+			},
+		}
+	}
+	cases := map[string]func(*providers.Provider){
+		"http credentials": func(p *providers.Provider) {
+			p.BaseURL = "http://example.com"
+			p.Auth = providers.Auth{Type: "header", Name: "X-Access-Token", Env: "TEST_TOKEN"}
+		},
+		"url credentials": func(p *providers.Provider) { p.BaseURL = "https://user:pass@example.com" },
+		"url query":       func(p *providers.Provider) { p.BaseURL = "https://example.com?token=foo" },
+		"bad method": func(p *providers.Provider) {
+			p.Endpoints["search"] = providers.Endpoint{Method: "TRACE", Path: "/search", ParamsIn: "query"}
+		},
+		"bad path": func(p *providers.Provider) {
+			p.Endpoints["search"] = providers.Endpoint{Method: "GET", Path: "/../search", ParamsIn: "query"}
+		},
+		"bad auth": func(p *providers.Provider) {
+			p.Auth = providers.Auth{Type: "header", Name: "X Token", Env: "TEST_TOKEN"}
+		},
+	}
+	for name, mutate := range cases {
+		t.Run(name, func(t *testing.T) {
+			p := valid()
+			mutate(&p)
+			data, err := json.Marshal(providers.Registry{"sample": p})
+			if err != nil {
+				t.Fatal(err)
+			}
+			path := filepath.Join(t.TempDir(), "providers.json")
+			if err := os.WriteFile(path, data, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := providers.LoadRegistry(path); err == nil {
+				t.Fatal("expected registry validation error")
+			}
+		})
+	}
+	p := valid()
+	p.BaseURL = "http://example.com"
+	data, err := json.Marshal(providers.Registry{"sample": p})
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "providers.json")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := providers.LoadRegistry(path); err != nil {
+		t.Fatalf("no-auth HTTP mock must be allowed: %v", err)
 	}
 }

@@ -4,13 +4,15 @@
 
 **Статус:** ✓ проверено 2026-10-25, HTTP 200. **Ключ не нужен.**
 
+[Официальное описание XML API Банка России](https://www.cbr.ru/development/SXML/).
+
 ## Ручка `daily`
 
 `GET https://www.cbr.ru/scripts/XML_daily.asp`
 
 | Параметр | Обязат. | Формат | Пример |
 |---|---|---|---|
-| `date_req` | нет | `DD/MM/YYYY`; без него — на сегодня | `25/10/2026` |
+| `date_req` | нет | `DD/MM/YYYY`; без него — на последнюю зарегистрированную дату | `25/10/2026` |
 
 Конфиг: `configs/examples/cbr.daily.json`.
 
