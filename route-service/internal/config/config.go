@@ -9,6 +9,11 @@ type Config struct {
 
 	Clients struct {
 		ProviderAddr string `env:"PROVIDER_GRPC_ADDR" envDefault:"127.0.0.1:50058"`
+		AIAddr       string `env:"AI_GRPC_ADDR" envDefault:"127.0.0.1:50055"`
+	}
+	Join struct {
+		MaxJoins      int `env:"ROUTE_MAX_JOINS" envDefault:"4"`
+		RoutesPerJoin int `env:"ROUTE_ROUTES_PER_JOIN" envDefault:"3"`
 	}
 }
 

@@ -30,7 +30,7 @@ const (
 // RouteService ищет предложения и собирает согласованные маршруты.
 // Сообщения намеренно пустые: поля контракта будут добавлены позже.
 type RouteServiceClient interface {
-	// Stage-2 handoff. Assembly/ranking is owned by the stage-3 implementation.
+	// BuildRoutes assembles joins and asks ai-service to rank up to k*m routes.
 	BuildRoutes(ctx context.Context, in *BuildRoutesRequest, opts ...grpc.CallOption) (*BuildRoutesResponse, error)
 	SearchRoutes(ctx context.Context, in *SearchRoutesRequest, opts ...grpc.CallOption) (*SearchRoutesResponse, error)
 }
@@ -70,7 +70,7 @@ func (c *routeServiceClient) SearchRoutes(ctx context.Context, in *SearchRoutesR
 // RouteService ищет предложения и собирает согласованные маршруты.
 // Сообщения намеренно пустые: поля контракта будут добавлены позже.
 type RouteServiceServer interface {
-	// Stage-2 handoff. Assembly/ranking is owned by the stage-3 implementation.
+	// BuildRoutes assembles joins and asks ai-service to rank up to k*m routes.
 	BuildRoutes(context.Context, *BuildRoutesRequest) (*BuildRoutesResponse, error)
 	SearchRoutes(context.Context, *SearchRoutesRequest) (*SearchRoutesResponse, error)
 }

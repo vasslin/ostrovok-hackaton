@@ -4,6 +4,8 @@ package godnota.ai.v1;
 
 option go_package = "github.com/godnota/pkg/generated/ai/v1;aiv1";
 
+import "google/protobuf/struct.proto";
+
 // AIService инкапсулирует вызовы модели.
 // Сообщения намеренно пустые: поля контракта будут добавлены позже.
 service AIService {
@@ -11,6 +13,12 @@ service AIService {
   rpc UpdateConfig(UpdateConfigRequest) returns (UpdateConfigResponse);
   rpc RefineConfig(RefineConfigRequest) returns (RefineConfigResponse);
   rpc RankRoutes(RankRoutesRequest) returns (RankRoutesResponse);
+}
+
+// TravelAI — внешний контракт модели. Реализация пока заглушка.
+service TravelAI {
+  rpc ExtractConfig(ExtractConfigRequest) returns (ExtractConfigResponse);
+  rpc RankRouteParts(RankRoutePartsRequest) returns (RankRoutePartsResponse);
 }
 
 message GenerateOrUpdateConfigRequest {}
@@ -24,3 +32,14 @@ message RefineConfigResponse {}
 
 message RankRoutesRequest {}
 message RankRoutesResponse {}
+
+message ExtractConfigRequest {}
+message ExtractConfigResponse {}
+
+message RankRoutePartsRequest {
+  string session_id = 1;
+  google.protobuf.Struct config = 2;
+  // Собранные маршруты, не больше k склеек по m маршрутов.
+  repeated google.protobuf.Struct routes = 3;
+}
+message RankRoutePartsResponse {}

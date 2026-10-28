@@ -237,3 +237,145 @@ var AIService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "api/ai/v1/ai.proto",
 }
+
+const (
+	TravelAI_ExtractConfig_FullMethodName  = "/godnota.ai.v1.TravelAI/ExtractConfig"
+	TravelAI_RankRouteParts_FullMethodName = "/godnota.ai.v1.TravelAI/RankRouteParts"
+)
+
+// TravelAIClient is the client API for TravelAI service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// TravelAI — внешний контракт модели. Реализация пока заглушка.
+type TravelAIClient interface {
+	ExtractConfig(ctx context.Context, in *ExtractConfigRequest, opts ...grpc.CallOption) (*ExtractConfigResponse, error)
+	RankRouteParts(ctx context.Context, in *RankRoutePartsRequest, opts ...grpc.CallOption) (*RankRoutePartsResponse, error)
+}
+
+type travelAIClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTravelAIClient(cc grpc.ClientConnInterface) TravelAIClient {
+	return &travelAIClient{cc}
+}
+
+func (c *travelAIClient) ExtractConfig(ctx context.Context, in *ExtractConfigRequest, opts ...grpc.CallOption) (*ExtractConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExtractConfigResponse)
+	err := c.cc.Invoke(ctx, TravelAI_ExtractConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *travelAIClient) RankRouteParts(ctx context.Context, in *RankRoutePartsRequest, opts ...grpc.CallOption) (*RankRoutePartsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RankRoutePartsResponse)
+	err := c.cc.Invoke(ctx, TravelAI_RankRouteParts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TravelAIServer is the server API for TravelAI service.
+// All implementations should embed UnimplementedTravelAIServer
+// for forward compatibility.
+//
+// TravelAI — внешний контракт модели. Реализация пока заглушка.
+type TravelAIServer interface {
+	ExtractConfig(context.Context, *ExtractConfigRequest) (*ExtractConfigResponse, error)
+	RankRouteParts(context.Context, *RankRoutePartsRequest) (*RankRoutePartsResponse, error)
+}
+
+// UnimplementedTravelAIServer should be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedTravelAIServer struct{}
+
+func (UnimplementedTravelAIServer) ExtractConfig(context.Context, *ExtractConfigRequest) (*ExtractConfigResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExtractConfig not implemented")
+}
+func (UnimplementedTravelAIServer) RankRouteParts(context.Context, *RankRoutePartsRequest) (*RankRoutePartsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RankRouteParts not implemented")
+}
+func (UnimplementedTravelAIServer) testEmbeddedByValue() {}
+
+// UnsafeTravelAIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TravelAIServer will
+// result in compilation errors.
+type UnsafeTravelAIServer interface {
+	mustEmbedUnimplementedTravelAIServer()
+}
+
+func RegisterTravelAIServer(s grpc.ServiceRegistrar, srv TravelAIServer) {
+	// If the following call panics, it indicates UnimplementedTravelAIServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&TravelAI_ServiceDesc, srv)
+}
+
+func _TravelAI_ExtractConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExtractConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TravelAIServer).ExtractConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TravelAI_ExtractConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TravelAIServer).ExtractConfig(ctx, req.(*ExtractConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TravelAI_RankRouteParts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RankRoutePartsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TravelAIServer).RankRouteParts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TravelAI_RankRouteParts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TravelAIServer).RankRouteParts(ctx, req.(*RankRoutePartsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// TravelAI_ServiceDesc is the grpc.ServiceDesc for TravelAI service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var TravelAI_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "godnota.ai.v1.TravelAI",
+	HandlerType: (*TravelAIServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ExtractConfig",
+			Handler:    _TravelAI_ExtractConfig_Handler,
+		},
+		{
+			MethodName: "RankRouteParts",
+			Handler:    _TravelAI_RankRouteParts_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api/ai/v1/ai.proto",
+}

@@ -156,7 +156,7 @@ func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoute
 		if c.routes == nil {
 			parts.Limitations = append(parts.Limitations, "route-service: handoff not configured")
 		} else {
-			handoff, cancel := context.WithTimeout(ctx, 750*time.Millisecond)
+			handoff, cancel := context.WithTimeout(ctx, 4*time.Second)
 			_, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
 			cancel()
 			if handoffErr != nil {

@@ -14,5 +14,6 @@ func New(cfg *config.Config) (*grpcapp.App, error) {
 	controller := aictrl.New(aiuc.New(airepo.New()))
 	return grpcapp.New(cfg.GRPC.Port, nil, func(server *grpc.Server) {
 		pb.RegisterAIServiceServer(server, controller)
+		pb.RegisterTravelAIServer(server, aictrl.NewTravelAI())
 	}), nil
 }

@@ -113,8 +113,8 @@ func TestStage2EndToEnd(t *testing.T) {
 			t.Fatal("price/provenance contract broken")
 		}
 		limitations := fmt.Sprint(parts["limitations"])
-		if !strings.Contains(limitations, "Unimplemented") {
-			t.Fatal("stage-3 stub must be reported, not silently succeed")
+		if strings.Contains(limitations, "route-service:") {
+			t.Fatalf("route handoff failed: %s", limitations)
 		}
 		call(t, api, "GET", path+"/routes", token, nil, 200)
 		stranger := call(t, api, "POST", "/api/auth/register", "", credential(), 201)["access_token"].(string)

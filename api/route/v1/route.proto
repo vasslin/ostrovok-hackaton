@@ -9,7 +9,7 @@ import "google/protobuf/struct.proto";
 // RouteService ищет предложения и собирает согласованные маршруты.
 // Сообщения намеренно пустые: поля контракта будут добавлены позже.
 service RouteService {
-  // Stage-2 handoff. Assembly/ranking is owned by the stage-3 implementation.
+  // BuildRoutes assembles joins and asks ai-service to rank up to k*m routes.
   rpc BuildRoutes(BuildRoutesRequest) returns (BuildRoutesResponse);
   rpc SearchRoutes(SearchRoutesRequest) returns (SearchRoutesResponse);
 }
