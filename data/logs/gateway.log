@@ -1,0 +1,11 @@
+time=2026-10-28T23:43:43.437+03:00 level=INFO msg="gateway listening" port=8080
+time=2026-10-28T23:44:03.582+03:00 level=INFO msg="gateway request" method=POST operation=/v1/session/create
+time=2026-10-28T23:44:03.595+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
+time=2026-10-28T23:44:34.655+03:00 level=INFO msg="gateway request" method=GET operation=/v1/travel/capabilities
+time=2026-10-28T23:44:56.050+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/answers
+time=2026-10-28T23:45:41.776+03:00 level=INFO msg="gateway request" method=GET operation=/v1/travel/capabilities
+time=2026-10-28T23:45:53.662+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/answers
+time=2026-10-28T23:46:40.129+03:00 level=INFO msg="gateway request" method=GET operation=/v1/travel/capabilities
+time=2026-10-28T23:46:43.352+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/answers
+time=2026-10-28T23:47:28.037+03:00 level=INFO msg="gateway request" method=GET operation=/v1/travel/capabilities
+time=2026-10-28T23:47:42.811+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan

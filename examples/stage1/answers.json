@@ -1,0 +1,43 @@
+{
+  "text": "",
+  "config": {
+    "version": "1.0",
+    "trip": {
+      "origin": {
+        "city": "Москва"
+      },
+      "destinations": [
+        {
+          "city": "Сочи"
+        }
+      ]
+    }
+  },
+  "questions": [
+    {
+      "id": "trip_dates",
+      "field": "trip.date_range",
+      "text": "На какие даты?",
+      "required": true,
+      "input_type": "text"
+    },
+    {
+      "id": "adults",
+      "field": "trip.travelers.adults",
+      "text": "Сколько взрослых?",
+      "required": true,
+      "input_type": "number"
+    }
+  ],
+  "answers": [
+    {
+      "question_id": "trip_dates",
+      "text": "С 10 по 17 ноября 2026"
+    },
+    {
+      "question_id": "adults",
+      "text": "Двое"
+    }
+  ],
+  "current_date": "2026-10-28"
+}

@@ -1,0 +1,30 @@
+{
+  "config": {
+    "schema_version": "1.0",
+    "locale": "ru",
+    "currency": "RUB",
+    "origin": {
+      "city": "Москва"
+    },
+    "destination": {
+      "city": "Сочи"
+    },
+    "dates": {
+      "departure_date": "2026-11-10",
+      "return_date": "2026-11-17"
+    },
+    "travelers": {
+      "adults": 2
+    },
+    "budget": {
+      "total": 80000,
+      "scope": "total",
+      "is_hard": true
+    },
+    "hotel": {
+      "star_rating_min": 3
+    }
+  },
+  "text": "Бюджет уменьшим до 60000 рублей, с нами собака, отель с бесплатной отменой.",
+  "current_date": "2026-10-28"
+}

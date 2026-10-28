@@ -1,0 +1,100 @@
+{
+  "offers": [
+    {
+      "id": "osm:node:1348003477",
+      "provider": "osm_index",
+      "kind": "museum",
+      "title": "Национальный музей Республики Татарстан",
+      "priceScope": "unknown",
+      "sourceStatus": "offline_snapshot",
+      "sourceUrl": "https://www.openstreetmap.org/node/1348003477",
+      "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+      "latitude": 55.7958566,
+      "longitude": 49.1096731,
+      "observedAt": "2026-10-25",
+      "description": "Opening hours, tickets and availability are not confirmed."
+    },
+    {
+      "id": "osm:way:75658002",
+      "provider": "osm_index",
+      "kind": "theatre",
+      "title": "Татарский театр оперы и балета им. Мусы Джалиля",
+      "priceScope": "unknown",
+      "sourceStatus": "offline_snapshot",
+      "sourceUrl": "https://www.openstreetmap.org/way/75658002",
+      "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+      "latitude": 55.7953624,
+      "longitude": 49.1246675,
+      "observedAt": "2026-10-28T08:03:39Z",
+      "description": "Opening hours, tickets and availability are not confirmed."
+    },
+    {
+      "id": "osm:node:2951266146",
+      "provider": "osm_index",
+      "kind": "museum",
+      "title": "Музей А. М. Горького и Ф. И. Шаляпина",
+      "priceScope": "unknown",
+      "sourceStatus": "offline_snapshot",
+      "sourceUrl": "https://www.openstreetmap.org/node/2951266146",
+      "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+      "latitude": 55.7935621,
+      "longitude": 49.1296637,
+      "observedAt": "2026-10-25",
+      "description": "Opening hours, tickets and availability are not confirmed."
+    },
+    {
+      "id": "osm:node:2494989015",
+      "provider": "osm_index",
+      "kind": "museum",
+      "title": "Литературный музей Г. Тукая",
+      "priceScope": "unknown",
+      "sourceStatus": "offline_snapshot",
+      "sourceUrl": "https://www.openstreetmap.org/node/2494989015",
+      "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+      "latitude": 55.7775358,
+      "longitude": 49.1154559,
+      "observedAt": "2026-10-25",
+      "description": "Opening hours, tickets and availability are not confirmed."
+    },
+    {
+      "id": "osm:way:172548539",
+      "provider": "osm_index",
+      "kind": "museum",
+      "title": "Дом-музей В.И.Ленина",
+      "priceScope": "unknown",
+      "sourceStatus": "offline_snapshot",
+      "sourceUrl": "https://www.openstreetmap.org/way/172548539",
+      "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+      "latitude": 55.7868952,
+      "longitude": 49.1386954,
+      "observedAt": "2026-10-25",
+      "description": "Opening hours, tickets and availability are not confirmed."
+    }
+  ],
+  "issues": [
+    {
+      "provider": "osm_index",
+      "code": "partial_coverage",
+      "message": "partial Kazan sample: 17 museums, one theatre and one cinema; opening hours and completeness not guaranteed"
+    },
+    {
+      "provider": "wikipedia",
+      "code": "upstream_busy",
+      "message": "provider reported an API error"
+    },
+    {
+      "provider": "activity",
+      "code": "results_limited",
+      "message": "Results were limited by max_items_per_stop."
+    }
+  ],
+  "limitations": [
+    "aviasales: цена из кэша, наличие и итоговую цену нужно проверить перед выбором",
+    "yandex_rasp: расписание может не содержать цену и наличие билетов",
+    "поиск отелей выполняется отдельно и требует подтверждённых дат, гражданства гостей и партнёрского доступа",
+    "досуг на пересадке ищется после получения конкретного сегмента, координат остановки и свободного времени",
+    "Wikimedia возвращает достопримечательности; афишу и наличие билетов на события этот запрос не подтверждает",
+    "Provider offers are preliminary: traveler constraints, group totals, connections and final availability must be verified before recommending or booking."
+  ],
+  "discovery": {}
+}

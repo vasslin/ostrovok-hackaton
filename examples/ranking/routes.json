@@ -1,0 +1,98 @@
+{
+  "config": {
+    "version": "1.0",
+    "request": {
+      "schema_version": "1.0",
+      "locale": "ru",
+      "currency": "RUB",
+      "origin": {
+        "city": "Москва"
+      },
+      "destination": {
+        "city": "Сочи"
+      },
+      "dates": {
+        "departure_date": "2026-11-10",
+        "return_date": "2026-11-17"
+      },
+      "travelers": {
+        "adults": 2
+      },
+      "budget": {
+        "total": 80000,
+        "scope": "total",
+        "is_hard": true
+      },
+      "hotel": {
+        "star_rating_min": 3
+      }
+    }
+  },
+  "parts": {
+    "transport_parts": [
+      {
+        "id": "flight-1",
+        "provider": "demo",
+        "source": "synthetic",
+        "fetched_at": "2026-10-28T12:00:00Z",
+        "mode": "plane",
+        "origin": "MOW",
+        "destination": "AER",
+        "origin_city": "Москва",
+        "destination_city": "Сочи",
+        "departure_at": "2026-11-10T08:00:00+03:00",
+        "arrival_at": "2026-11-10T12:00:00+03:00",
+        "return_departure_at": "2026-11-17T16:00:00+03:00",
+        "return_arrival_at": "2026-11-17T20:00:00+03:00",
+        "price": {
+          "amount_minor": "1500000",
+          "currency": "RUB",
+          "scope": "per_person_round_trip"
+        },
+        "transfers": 0,
+        "return_transfers": 0,
+        "warnings": [
+          "Демонстрационные данные, наличие не подтверждено."
+        ]
+      }
+    ],
+    "hotel_parts": [
+      {
+        "id": "hotel-1",
+        "provider": "demo",
+        "source": "synthetic",
+        "fetched_at": "2026-10-28T12:00:00Z",
+        "city": "Сочи",
+        "name": "Демонстрационный отель",
+        "check_in": "2026-11-10",
+        "check_out": "2026-11-17",
+        "stars": 4,
+        "price": {
+          "amount_minor": "3500000",
+          "currency": "RUB",
+          "scope": "stay_all_rooms"
+        },
+        "free_cancellation": true,
+        "warnings": []
+      }
+    ],
+    "errors": [],
+    "limitations": [
+      "Тестовый набор: реальные цены и наличие не запрашивались."
+    ]
+  },
+  "candidates": [
+    {
+      "id": "route-1",
+      "transport_part_ids": [
+        "flight-1"
+      ],
+      "hotel_part_ids": [
+        "hotel-1"
+      ],
+      "connections_verified": false
+    }
+  ],
+  "current_date": "2026-10-28",
+  "limit": 0
+}

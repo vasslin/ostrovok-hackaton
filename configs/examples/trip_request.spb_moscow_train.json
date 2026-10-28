@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "locale": "ru",
+  "currency": "RUB",
+  "origin": {"city": "Санкт-Петербург", "country_code": "RU"},
+  "destination": {"city": "Москва", "country_code": "RU"},
+  "dates": {"departure_date": "2026-11-20", "return_date": "2026-11-22", "nights": 2},
+  "travelers": {"adults": 1, "residency": "ru"},
+  "transport": {"modes": ["train"], "round_trip": true, "direct_only": true, "departure_time_from": "06:00", "departure_time_to": "10:00"},
+  "hotel": {"needed": true, "rooms": 1, "star_rating_min": 3, "meal": "breakfast", "free_cancellation": true, "location": ["near_station"]},
+  "ai_context": {"trip_purpose": "business", "must_have": ["закрывающие документы"]},
+  "completeness": {"missing_required": []}
+}

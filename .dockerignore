@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+!.env.example
+secrets.env.age
+**/server
+**/*.test
+bin
+data
+reports
+integration-tests/out
+.DS_Store
+**/bin
+*.zip
+*.exe
+.idea

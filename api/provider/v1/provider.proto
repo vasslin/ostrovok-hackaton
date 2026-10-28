@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package godnota.provider.v1;
+
+option go_package = "github.com/godnota/pkg/generated/provider/v1;providerv1";
+
+import "google/protobuf/struct.proto";
+import "api/provider/v1/parts.proto";
+
+service ProviderService {
+  rpc GetCapabilities(google.protobuf.Struct) returns (google.protobuf.Struct);
+  rpc SearchParts(SearchPartsRequest) returns (SearchPartsResponse);
+  rpc SearchTransport(SearchTransportRequest) returns (SearchTransportResponse);
+  rpc SearchHotels(SearchHotelsRequest) returns (SearchHotelsResponse);
+  rpc SearchActivities(SearchActivitiesRequest) returns (SearchActivitiesResponse);
+}
+
+message SearchInput {
+  google.protobuf.Struct trip_request = 1;
+  google.protobuf.Struct resolved = 2;
+  string input_format = 3;
+}
+
+message Offer {
+  string id = 1;
+  string provider = 2;
+  string kind = 3;
+  string title = 4;
+  string origin = 5;
+  string destination = 6;
+  string departure = 7;
+  string arrival = 8;
+  optional int64 price_minor = 9;
+  string currency = 10;
+  string price_scope = 11;
+  string source_status = 12;
+  string source_url = 13;
+  string attribution = 14;
+  optional double latitude = 15;
+  optional double longitude = 16;
+  string observed_at = 17;
+  string description = 18;
+}
+
+message ProviderIssue {
+  string provider = 1;
+  string code = 2;
+  string message = 3;
+}
+
+message SearchTransportRequest { SearchInput input = 1; }
+message SearchTransportResponse {
+  repeated Offer offers = 1;
+  repeated ProviderIssue issues = 2;
+  repeated string missing = 3;
+  repeated string limitations = 4;
+  google.protobuf.Struct discovery = 5;
+}
+
+message SearchHotelsRequest { SearchInput input = 1; }
+message SearchHotelsResponse {
+  repeated Offer offers = 1;
+  repeated ProviderIssue issues = 2;
+  repeated string missing = 3;
+  repeated string limitations = 4;
+  google.protobuf.Struct discovery = 5;
+}
+
+message SearchActivitiesRequest { SearchInput input = 1; }
+message SearchActivitiesResponse {
+  repeated Offer offers = 1;
+  repeated ProviderIssue issues = 2;
+  repeated string missing = 3;
+  repeated string limitations = 4;
+  google.protobuf.Struct discovery = 5;
+}

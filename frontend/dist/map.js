@@ -119,7 +119,9 @@ export class RouteMap {
         if (!this.trip || !this.el.clientWidth)
             return;
         const w = this.el.clientWidth, h = this.el.clientHeight;
-        const points = this.trip.stops;
+        const points = this.trip.stops.filter(stop => Number.isFinite(stop.lat) && Number.isFinite(stop.lng));
+        if (!points.length)
+            return;
         const center = { lng: (Math.min(...points.map(s => s.lng)) + Math.max(...points.map(s => s.lng))) / 2, lat: (Math.min(...points.map(s => s.lat)) + Math.max(...points.map(s => s.lat))) / 2 };
         if (this.autoFit) {
             this.offset = { x: 0, y: 0 };
@@ -136,7 +138,8 @@ export class RouteMap {
         const path = coords => coords.map(([lng, lat], i) => { const p = point(lng, lat); return `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(' ') + 'Z';
         const dots = points.map(s => ({ ...s, ...point(s.lng, s.lat) }));
         const unique = dots.filter((s, i) => dots.findIndex(a => a.city === s.city) === i);
-        const lines = this.trip.segments.map((s, i) => { const a = dots.find(d => d.id === s.fromStopId), b = dots.find(d => d.id === s.toStopId); const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} - ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
+        const lines = this.trip.segments.map((s, i) => { const a = dots.find(d => d.id === s.fromStopId), b = dots.find(d => d.id === s.toStopId); if (!a || !b)
+            return ''; const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} - ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
         const mapLand = countries ? countries.map(feature => {
             const polygons = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry.type === 'MultiPolygon' ? feature.geometry.coordinates : [];
             return polygons.map(rings => `<path d="${rings.map(path).join(' ')}" fill="#fafbf7" stroke="#d5dfd8" stroke-width=".8" fill-rule="evenodd"/>`).join('');

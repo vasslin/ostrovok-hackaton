@@ -1,2 +1,1 @@
-
-window.TRAVEL_CONFIG = { mode: 'demo', apiBaseUrl: '/api' };
+window.TRAVEL_CONFIG = { mode: 'api', apiBaseUrl: '/api' };

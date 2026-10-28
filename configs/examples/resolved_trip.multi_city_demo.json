@@ -1,0 +1,9 @@
+{
+  "origin": {"iata": "MOW", "yandex_code": "c213", "latitude": 55.7558, "longitude": 37.6173},
+  "destination": {"iata": "KUF", "yandex_code": "c51", "latitude": 53.1959, "longitude": 50.1002},
+  "stops": [
+    {"iata": "KZN", "yandex_code": "c43", "latitude": 55.7987, "longitude": 49.1059},
+    {"iata": "KUF", "yandex_code": "c51", "latitude": 53.1959, "longitude": 50.1002}
+  ],
+  "hotelbeds_source_market": "RU"
+}

@@ -1,0 +1,13 @@
+{
+  "origin": "Москва",
+  "destination": "Казань",
+  "departure_date": "2026-11-27",
+  "return_date": "2026-11-29",
+  "adults": 2,
+  "children_ages": [],
+  "budget": 40000,
+  "currency": "RUB",
+  "preferences": [
+    "рядом с центром"
+  ]
+}

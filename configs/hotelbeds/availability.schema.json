@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stay", "occupancies", "geolocation", "sourceMarket"],
+  "properties": {
+    "stay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkIn", "checkOut"],
+      "properties": {
+        "checkIn": {"type": "string", "format": "date"},
+        "checkOut": {"type": "string", "format": "date"}
+      }
+    },
+    "occupancies": {
+      "type": "array", "minItems": 1, "maxItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["rooms", "adults", "children"],
+        "properties": {
+          "rooms": {"const": 1},
+          "adults": {"type": "integer", "minimum": 1, "maximum": 9},
+          "children": {"type": "integer", "minimum": 0, "maximum": 8},
+          "paxes": {"type": "array", "items": {
+            "type": "object", "additionalProperties": false, "required": ["type", "age"],
+            "properties": {"type": {"const": "CH"}, "age": {"type": "integer", "minimum": 0, "maximum": 17}}
+          }}
+        }
+      }
+    },
+    "geolocation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["latitude", "longitude", "radius", "unit"],
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        "radius": {"const": 3}, "unit": {"const": "km"}
+      }
+    },
+    "sourceMarket": {"type": "string", "pattern": "^[A-Z]{2}$"}
+  }
+}

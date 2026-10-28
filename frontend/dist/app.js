@@ -1,7 +1,8 @@
+import { reviewRequest } from './planning.js';
 import { view, loadViews } from './templates.js';
 import { icon } from './icons.js';
 import { DEFAULT_CRITERIA, cities, createTrip, money, dateLabel, localTime, guestsLabel } from './model.js';
-import { api, isDemo, readStorage, writeStorage, saveDemoBooking } from './api.js';
+import { api, isDemo, readStorage, writeStorage, saveDemoBooking, UnauthorizedError, getAccessToken, getSessionId } from './api.js';
 import { RouteMap } from './map.js';
 import { setupMobileViewport } from './mobile.js';
 setupMobileViewport();
@@ -19,10 +20,12 @@ if (persisted?.trip && Array.isArray(persisted.trip.stops) && Array.isArray(pers
 }
 const state = {
     page: 'planner', tab: 'overview', trip: initialTrip,
-    messages: persisted?.messages?.length ? persisted.messages : [starterMessage],
+    messages: persisted?.messages?.length ? persisted.messages : [isDemo ? starterMessage : { role: 'assistant', text: 'Куда хотите отправиться? Расскажите о поездке. Перед поиском я покажу параметры для подтверждения.' }],
     profile: { name: 'Путешественник', email: '', phone: '' }, history: [],
     busy: false, bookingBusy: false, mobileView: 'route', drawer: null, modal: null,
-    booking: persisted?.booking || null, error: null, draftText: '', profileBusy: false
+    booking: persisted?.booking || null, error: null, draftText: '', profileBusy: false,
+    loginEmail: '', loginError: '', loginBusy: false, authMode: 'login', pendingSend: null,
+    sessionId: isDemo ? '' : getSessionId(), answerDraft: {}, pendingConfig: null, capabilities: null, reviewOpen: false, reviewDraft: null
 };
 let map, lastFocus, toastTimer, overlayOpen = false, overlayScroll = 0, overlayPage;
 function rememberFocus(element) {
@@ -35,7 +38,7 @@ function restoreFocus() {
     if (!lastFocus) return;
     document.querySelectorAll(lastFocus.selector)[Math.max(0, lastFocus.index)]?.focus({ preventScroll: true });
 }
-const price = amount => money(amount, state.trip?.totals.currency || 'RUB');
+const price = amount => Number.isFinite(amount) ? money(amount, state.trip?.totals.currency || 'RUB') : 'цена неизвестна';
 const button = (text, action, cls = '', attrs = '') => view('button-button', {
     cls: cls,
     action: action,
@@ -45,7 +48,20 @@ const button = (text, action, cls = '', attrs = '') => view('button-button', {
 function notify(text) { $('#toast').textContent = text; $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'), 4000); }
 function persist() { if (isDemo && !writeStorage('session', { trip: state.trip, messages: state.messages.slice(-60), booking: state.booking }))
     notify('Память браузера недоступна: изменения сохранятся только до закрытия страницы.'); }
-function draftTrip() { return state.trip?.status === 'booked' ? { ...state.trip, id: `trip-${crypto.randomUUID()}`, status: 'draft' } : state.trip; }
+function draftTrip() {
+    if (isDemo)
+        return Promise.resolve(state.trip?.status === 'booked' ? { ...state.trip, id: `trip-${crypto.randomUUID()}`, status: 'draft' } : state.trip);
+    const needsNew = !getSessionId() || state.trip?.status === 'booked';
+    const ready = needsNew ? api.createSession() : Promise.resolve(getSessionId());
+    return ready.then(id => {
+        state.sessionId = id;
+        if (state.trip?.status === 'booked')
+            return { ...state.trip, id, status: 'draft' };
+        if (state.trip)
+            return state.trip.id === id ? state.trip : { ...state.trip, id };
+        return { id };
+    });
+}
 function formatRange(trip = state.trip) { return trip ? `${dateLabel(trip.startDate)} - ${dateLabel(trip.endDate)}` : 'Даты поездки'; }
 function render() {
     app.dataset.page = state.page;
@@ -88,7 +104,15 @@ function render() {
     });
     $('.app-shell').inert = nextOverlay;
     if (restoreScroll) window.scrollTo({ top: overlayScroll, behavior: 'instant' });
-    if (planner && state.trip) {
+    const review = document.querySelector('#review-form');
+    if (review && state.reviewDraft) {
+        for (const input of review.elements) {
+            if (!input.name || input.type === 'submit') continue;
+            if (input.type === 'checkbox') input.checked = state.reviewDraft.getAll(input.name).includes(input.value);
+            else if (state.reviewDraft.has(input.name)) input.value = state.reviewDraft.get(input.name);
+        }
+    }
+    if (planner && state.trip && !state.reviewOpen) {
         map = new RouteMap($('#route-map'), { onStop: id => openDrawer('stop', id), onSegment: id => openDrawer('segment', id) });
         map.update(state.trip, state.drawer?.type === 'stop' ? state.drawer.id : null);
     }
@@ -113,9 +137,22 @@ function renderPlanner() {
                 sparkIcon: icon('spark')
             }) : '',
             replace: esc(m.text).replace(/\n/g, '<br>'),
-            conditional2: m.actions?.length ? view('render-planner-message-actions', {
-                mActions: m.actions.map((a, j) => button(esc(a.label), 'chat-action', 'suggestion', `data-message="${i}" data-index="${j}" ${state.busy ? 'disabled' : ''}`)).join('')
-            }) : '',
+            conditional2: [
+                m.questions?.length && i === state.messages.findLastIndex(item => item.role === 'assistant') ? view('render-planner-questions', {
+                    index: i,
+                    disabled: state.busy ? 'disabled' : '',
+                    fields: m.questions.map(question => view('render-planner-question', {
+                        text: esc(question.text),
+                        questionId: esc(question.questionId),
+                        inputType: 'text',
+                        value: esc(state.answerDraft[question.questionId] || ''),
+                        required: question.required ? 'required' : ''
+                    })).join('')
+                }) : '',
+                m.actions?.length ? view('render-planner-message-actions', {
+                    mActions: m.actions.map((a, j) => button(esc(a.label), 'chat-action', 'suggestion', `data-message="${i}" data-index="${j}" ${state.busy ? 'disabled' : ''}`)).join('')
+                }) : ''
+            ].join(''),
             conditional3: m.role === 'assistant' ? (isDemo ? 'Демо-помощник' : 'Помощник') : 'Вы'
         })).join(''),
         conditional3: state.busy ? view('render-planner-thinking', {}) : '',
@@ -133,7 +170,7 @@ function renderPlanner() {
         arrowIcon: icon('arrow'),
         shieldIcon: icon('shield'),
         conditional7: isDemo ? 'Без AI-вызовов. Настоящая модель подключается через backend.' : 'Ваши пожелания помогают собрать подходящую поездку.',
-        conditional8: state.trip ? renderTrip() : view('render-planner-empty-state', {
+        conditional8: !isDemo && state.pendingConfig && state.reviewOpen ? renderReview() : state.trip ? renderTrip() : view('render-planner-empty-state', {
             mapIcon: icon('map'),
             mobileChatButton: button('Открыть чат', 'mobile-chat', 'primary')
         })
@@ -147,7 +184,7 @@ function renderTrip() {
         newTripButton: button(icon('plus') + ' Новая поездка', 'new-trip', 'button-light new-trip', 'aria-label="Начать новую поездку" title="Начать новую поездку"'),
         editCriteriaButton: button(`${icon('calendar')} ${formatRange()}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton2: button(`${icon('user')} ${guestsLabel(c)}`, 'edit-criteria', 'criteria-chip'),
-        editCriteriaButton3: button(`${icon('wallet')} до ${price(c.budgetMinor)}`, 'edit-criteria', 'criteria-chip'),
+        editCriteriaButton3: button(`${icon('wallet')} ${Number.isFinite(c.budgetMinor) ? `до ${price(c.budgetMinor)}` : 'бюджет не задан'}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton4: button('Изменить', 'edit-criteria', 'criteria-edit'),
         conditional: state.tab !== 'overview' ? 'active' : '',
         planeIcon: icon('plane'),
@@ -172,7 +209,44 @@ function renderTrip() {
         infoIcon: icon('info')
     });
 }
-function renderBudgetWarning() { if (!state.trip || state.trip.totals.totalMinor <= state.trip.criteria.budgetMinor)
+function renderReview() {
+    const c = state.pendingConfig || {};
+    const hotels = state.capabilities?.hotels;
+    const unavailable = hotels?.status === 'not_configured';
+    const needed = c.hotel?.needed !== false;
+    const transportText = state.capabilities?.transport ? `Транспорт: Aviasales ${state.capabilities.transport.aviasales ? 'настроен' : 'не настроен'}, Яндекс.Расписания ${state.capabilities.transport.yandex_rasp ? 'настроен' : 'не настроен'}. ` : '';
+ const capabilityText = !state.capabilities ? 'Возможности провайдеров не получены. Повторите проверку перед поиском.' : state.capabilities.mode === 'demo' ? 'Включён demo-режим: транспорт и отели синтетические.' : unavailable ? 'Гостиничный API не настроен. Для проживания нужен партнёрский доступ RateHawk или Hotelbeds; транспортные ключи его не подключают.' : `Гостиничный провайдер: ${hotels?.provider || 'подключён'}. ${['sandbox', 'evaluation'].includes(hotels?.environment) ? 'Тестовая среда, реальное наличие не подтверждено.' : 'Наличие и тариф проверяются при поиске.'}`;
+    return view('render-review', {
+        capabilities: esc(transportText + capabilityText), origin: esc(c.origin?.city || ''), originCountry: esc(c.origin?.country_code || ''),
+        destination: esc(c.destination?.city || ''), destinationCountry: esc(c.destination?.country_code || ''),
+        departure: esc(c.dates?.departure_date || ''), returnDate: esc(c.dates?.return_date || ''), adults: esc(c.travelers?.adults || ''),
+        children: esc((c.travelers?.children_ages || []).join(', ')), residency: esc(c.travelers?.residency || ''), budget: esc(c.budget?.total || ''),
+        currencies: ['RUB', 'USD', 'EUR'].map(value => `<option ${value === (c.currency || 'RUB') ? 'selected' : ''}>${value}</option>`).join(''),
+        hotel: needed ? 'checked' : '', roundTrip: c.transport?.round_trip !== false ? 'checked' : '',
+        modes: [['plane','Самолёт'],['train','Поезд'],['bus','Автобус'],['suburban','Электричка'],['water','Водный'],['helicopter','Вертолёт']].map(([value,label]) => `<label class="review-check"><input type="checkbox" name="modes" value="${value}" ${(c.transport?.modes || ['plane','train']).includes(value) ? 'checked' : ''}>${label}</label>`).join(''),
+        extra: esc(c.stops?.length ? `Остановки: ${c.stops.map(stop => `${stop.city}: ${stop.check_in} — ${stop.check_out}`).join('; ')}. Для изменения остановок напишите в чат.` : c.travelers?.pets?.length ? 'Условия перевозки питомца сохранены. Их стоимость уточняется отдельно.' : 'Пустые поля не заполняются автоматически. Бюджет указан в основной единице валюты.'),
+        warning: needed && unavailable ? 'Отель остаётся в пожеланиях. Чтобы продолжить без него, явно выберите поиск только транспорта.' : '',
+        disabled: state.busy ? 'disabled' : '', searchDisabled: state.busy || !state.capabilities || (needed && unavailable) ? 'disabled' : '',
+        transportOnly: !state.capabilities ? button('Повторить проверку провайдеров', 'refresh-capabilities', 'button-light', 'type="button"') : needed ? `<button type="submit" name="intent" value="transport" class="button button-light" ${state.busy || !state.capabilities ? 'disabled' : ''}>Искать только транспорт</button>` : ''
+    });
+}
+async function acceptDialog(result) {
+    if (!isDemo && result.tripConfig) {
+        state.pendingConfig = result.tripConfig;
+        state.reviewDraft = null;
+        state.reviewOpen = !result.searched;
+        state.trip = result.trip || null;
+        state.booking = null;
+        state.bookingRequestId = null;
+        try { state.capabilities = await api.capabilities(state.sessionId || getSessionId()); }
+        catch { state.capabilities = null; }
+    }
+    if (result.trip) state.trip = result.trip;
+    const actions = [...(result.actions || [])];
+    if (result.searched && result.tripConfig?.hotel?.needed !== false && !(result.trip?.stops || []).some(stop => stop.hotel)) actions.push({ label: 'Продолжить только с транспортом', transportOnly: true });
+    state.messages.push({ role: 'assistant', text: [result.message, ...(result.warnings || [])].filter(Boolean).join('\n'), questions: result.questions || [], actions });
+}
+function renderBudgetWarning() { if (!state.trip || !Number.isFinite(state.trip.criteria.budgetMinor) || !Number.isFinite(state.trip.totals.totalMinor) || state.trip.totals.totalMinor <= state.trip.criteria.budgetMinor || state.trip.warnings.some(warning => warning.startsWith('Сумма неполная')))
     return ''; return view('render-budget-warning-notice', {
     infoIcon: icon('info'),
     price: price(state.trip.totals.totalMinor - state.trip.criteria.budgetMinor),
@@ -186,7 +260,7 @@ function renderItinerary() { const t = state.trip; return view('render-itinerary
             carrier: esc(t.segments[i - 1].ticket.carrier),
             number: esc(t.segments[i - 1].ticket.number),
             duration: duration(t.segments[i - 1].ticket),
-            price: price(t.segments[i - 1].ticket.priceMinor),
+            price: t.segments[i - 1].ticket.roundTripReturn ? 'В тарифе туда-обратно' : price(t.segments[i - 1].ticket.priceMinor),
             chevronIcon: icon('chevron')
         }) : '',
         conditional2: s.hotel ? 'with-hotel' : 'compact-stop',
@@ -212,7 +286,8 @@ function renderItinerary() { const t = state.trip; return view('render-itinerary
     })).join('')
 }); }
 function cPetBadge(h) { return state.trip.criteria.pets && h.petsAllowed ? ' · С питомцем' : ''; }
-function duration(ticket) { const minutes = Math.round((Date.parse(ticket.arrival) - Date.parse(ticket.departure)) / 60000); return `${Math.floor(minutes / 60)} ч${minutes % 60 ? ` ${minutes % 60} мин` : ''}`; }
+function duration(ticket) { const minutes = Math.round((Date.parse(ticket.arrival) - Date.parse(ticket.departure)) / 60000); if (!Number.isFinite(minutes) || minutes < 0)
+    return ''; return `${Math.floor(minutes / 60)} ч${minutes % 60 ? ` ${minutes % 60} мин` : ''}`; }
 function renderTickets() { return view('render-tickets-offer-groups', {
     segments: state.trip.segments.map(s => view('render-tickets-offer-group', {
         sFrom: esc(s.from),
@@ -231,11 +306,11 @@ function ticketOffer(s, o) { const selected = s.ticket.id === o.id; return view(
     planeIcon: icon('plane'),
     oCarrier: esc(o.carrier),
     oNumber: esc(o.number),
-    conditional3: o.baggage ? 'Багаж включён' : 'Только ручная кладь',
+    conditional3: o.baggage === true ? 'Багаж включён' : o.baggage === false ? 'Только ручная кладь' : 'Багаж не указан',
     localTime: localTime(o.departure),
     localTime2: localTime(o.arrival),
     duration: duration(o),
-    price: price(o.priceMinor),
+    price: o.roundTripReturn ? 'В тарифе туда-обратно' : price(o.priceMinor),
     conditional4: selected ? icon('check') : ''
 }); }
 function renderHotels() { return view('render-hotels-hotel-groups', {
@@ -318,7 +393,7 @@ function renderSummary() { const t = state.trip; if (!t)
     price2: price(t.totals.totalMinor),
     guestsLabel2: guestsLabel(t.criteria),
     nights2: t.criteria.nights,
-    bookButton: button(t.status === 'booked' ? `${icon('check')} Заказ оформлен` : 'Забронировать поездку', 'book', 'primary full', `${state.bookingBusy || t.status === 'booked' ? 'disabled' : ''}`),
+    bookButton: button(t.status === 'booked' ? `${icon('check')} Заказ оформлен` : 'Забронировать поездку', 'book', 'primary full', `${state.bookingBusy || t.status === 'booked' || (!isDemo && !t.routeId) ? 'disabled' : ''}`),
     shieldIcon: icon('shield'),
     conditional: state.booking && t.status === 'booked' ? view('render-summary-booking-number', {
         id: esc(state.booking.id)
@@ -495,6 +570,18 @@ function renderModal() {
             confirmNewButton: button('Начать новую', 'confirm-new', 'primary')
         });
     }
+    else if (state.modal === 'login') {
+        const register = state.authMode === 'register';
+        content = view('render-modal-login', {
+            email: esc(state.loginEmail),
+            loginError: esc(state.loginError),
+            disabled: state.loginBusy ? 'disabled' : '',
+            title: register ? 'Создать аккаунт' : 'Нужно войти',
+            hint: register ? 'Пароль не короче 12 символов. После входа можно отправить сообщение.' : 'Войдите, чтобы отправить сообщение. Набранный текст останется в поле чата.',
+            submitLabel: register ? 'Создать аккаунт' : 'Войти',
+            switchLabel: register ? 'Уже есть аккаунт' : 'Создать аккаунт'
+        });
+    }
     return view('render-modal-overlay', {
         conditional: state.modal === 'success' ? 'success-modal' : '',
         closeOverlayButton: button(icon('close'), 'close-overlay', 'modal-close icon-button', 'aria-label="Закрыть окно"'),
@@ -504,6 +591,15 @@ function renderModal() {
 async function send(text, criteria) {
     if (state.busy || (!text.trim() && !criteria))
         return;
+    if (!isDemo && !getAccessToken()) {
+        state.draftText = text;
+        state.pendingSend = { text, criteria: criteria || null };
+        state.error = null;
+        state.loginError = '';
+        state.modal = 'login';
+        render();
+        return;
+    }
     state.error = null;
     state.lastRequest = { text, criteria };
     state.busy = true;
@@ -511,18 +607,55 @@ async function send(text, criteria) {
     state.messages.push({ role: 'user', text });
     render();
     try {
-        const result = await api.sendMessage({ trip: draftTrip(), text, criteria });
+        const result = await api.sendMessage({ trip: await draftTrip(), text, criteria });
         if (result.trip) {
+            if (!isDemo && state.sessionId)
+                result.trip.id = state.sessionId;
             state.trip = result.trip;
             state.booking = null;
             state.bookingRequestId = null;
         }
-        state.messages.push({ role: 'assistant', text: result.message, actions: result.actions || [] });
+        await acceptDialog(result);
         persist();
     }
     catch (e) {
         state.error = e.message;
         state.draftText = text;
+        showLogin(e);
+    }
+    finally {
+        state.busy = false;
+        render();
+    }
+}
+async function chooseIdea(ideaId, label) {
+    if (state.busy)
+        return;
+    if (!getAccessToken()) {
+        state.pendingSend = null;
+        state.modal = 'login';
+        render();
+        return;
+    }
+    state.error = null;
+    state.busy = true;
+    state.messages.push({ role: 'user', text: label });
+    render();
+    try {
+        const trip = await draftTrip();
+        const result = await api.selectIdea(trip.id, ideaId, '');
+        if (result.trip) {
+            if (state.sessionId)
+                result.trip.id = state.sessionId;
+            state.trip = result.trip;
+            state.booking = null;
+            state.bookingRequestId = null;
+        }
+        await acceptDialog(result);
+    }
+    catch (error) {
+        state.error = error.message;
+        showLogin(error);
     }
     finally {
         state.busy = false;
@@ -531,7 +664,7 @@ async function send(text, criteria) {
 }
 async function select(type, itemId, offerId) { if (state.busy)
     return; state.busy = true; render(); try {
-    const result = await api.selectOffer(draftTrip(), type, itemId, offerId);
+    const result = await api.selectOffer(await draftTrip(), type, itemId, offerId);
     state.trip = result.trip;
     state.booking = null;
     state.bookingRequestId = null;
@@ -539,6 +672,7 @@ async function select(type, itemId, offerId) { if (state.busy)
     notify(type === 'hotel' ? 'Отель выбран. Стоимость поездки обновлена.' : 'Билет выбран. Стоимость поездки обновлена.');
 }
 catch (e) {
+    showLogin(e);
     notify(e.message);
 }
 finally {
@@ -550,12 +684,24 @@ async function loadHistory() { try {
     state.history = result.trips || [];
 }
 catch (e) {
+    showLogin(e);
     notify(e.message);
 } }
 async function navigate(page) { state.page = page; state.drawer = null; state.modal = null; state.error = null; if (page === 'history')
-    await loadHistory(); render(); window.scrollTo({ top: 0, behavior: 'instant' }); }
-function closeOverlay() { if (state.bookingBusy)
+    await loadHistory(); if (page === 'planner' && !isDemo && state.trip && getSessionId()) {
+    try {
+        const result = await api.getRoutes(getSessionId());
+        if (result.trip)
+            state.trip = result.trip;
+    }
+    catch (error) {
+        showLogin(error);
+    }
+} render(); window.scrollTo({ top: 0, behavior: 'instant' }); }
+function closeOverlay() { if (state.bookingBusy || state.loginBusy)
     return; state.drawer = null; state.modal = null; render(); restoreFocus(); }
+function showLogin(error) { if (!(error instanceof UnauthorizedError))
+    return; state.loginError = ''; state.modal = 'login'; }
 app.addEventListener('click', async (e) => {
     const target = e.target.closest('[data-action]');
     if (!target || target.disabled)
@@ -569,6 +715,15 @@ app.addEventListener('click', async (e) => {
     }
     if (['planner', 'profile', 'history', 'summary'].includes(action)) {
         await navigate(action);
+        return;
+    }
+    if (action === 'auth-mode') {
+        const email = document.querySelector('#login-form [name="email"]');
+        if (email)
+            state.loginEmail = email.value.trim();
+        state.authMode = state.authMode === 'register' ? 'login' : 'register';
+        state.loginError = '';
+        render();
         return;
     }
     if (action === 'tab') {
@@ -585,14 +740,38 @@ app.addEventListener('click', async (e) => {
     }
     if (action === 'chat-action') {
         const a = state.messages[Number(target.dataset.message)]?.actions?.[Number(target.dataset.index)];
-        if (a)
+        if (!a)
+            return;
+        if (a.transportOnly) {
+ state.reviewOpen = true;
+ state.pendingConfig = { ...state.pendingConfig, hotel: { ...state.pendingConfig?.hotel, needed: false } };
+ render();
+ return;
+ }
+ if (a.ideaId && !isDemo)
+            await chooseIdea(a.ideaId, a.label);
+        else
             await send(a.value);
     }
-    if (action === 'retry' && state.lastRequest) {
+    if (action === 'refresh-capabilities') {
+ try { state.capabilities = await api.capabilities(state.sessionId); } catch (error) { notify(error.message); }
+ render(); return;
+ }
+ if (action === 'retry' && state.reviewOpen) {
+ try {state.capabilities = await api.capabilities(state.sessionId);} catch (error) {notify(error.message);}
+ render(); return;
+ }
+ if (action === 'retry' && state.lastRequest) {
         state.messages.pop();
         await send(state.lastRequest.text, state.lastRequest.criteria);
     }
-    if (action === 'edit-criteria') {
+    if (action === 'edit-criteria' && !isDemo) {
+ state.reviewOpen = true;
+ if (!state.pendingConfig) state.pendingConfig = state.trip?.requestConfig;
+ render();
+ return;
+ }
+ if (action === 'edit-criteria') {
         rememberFocus(target);
         state.modal = 'criteria';
         render();
@@ -603,17 +782,37 @@ app.addEventListener('click', async (e) => {
         render();
     }
     if (action === 'confirm-new') {
-        state.trip = isDemo ? createTrip({ ...DEFAULT_CRITERIA }, {}, `trip-${crypto.randomUUID()}`) : null;
-        state.messages = [starterMessage];
         state.booking = null;
         state.bookingRequestId = null;
-        state.modal = null;
         state.drawer = null;
         state.page = 'planner';
         state.tab = 'overview';
         state.error = null;
-        persist();
+        if (isDemo) {
+            state.trip = createTrip({ ...DEFAULT_CRITERIA }, {}, `trip-${crypto.randomUUID()}`);
+            state.messages = [starterMessage];
+            state.modal = null;
+            persist();
+            render();
+            return;
+        }
+        state.busy = true;
+        state.modal = null;
         render();
+        try {
+            state.sessionId = await api.createSession();
+            state.trip = null;
+ state.pendingConfig = null; state.reviewOpen = false; state.reviewDraft = null;
+            state.messages = [{ role: 'assistant', text: 'Расскажите о новой поездке.' }];
+        }
+        catch (error) {
+            showLogin(error);
+            notify(error.message);
+        }
+        finally {
+            state.busy = false;
+            render();
+        }
     }
     if (action === 'stop')
         openDrawer('stop', target.dataset.id);
@@ -661,6 +860,7 @@ app.addEventListener('click', async (e) => {
         }
         catch (error) {
             state.bookingError = error.message;
+            showLogin(error);
             notify(error.message);
         }
         finally {
@@ -681,13 +881,35 @@ app.addEventListener('click', async (e) => {
             render();
         }
         catch (error) {
+            showLogin(error);
             notify(error.message);
+            render();
         }
     }
 });
 app.addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
+    if (form.id === 'review-form') {
+        if (state.busy) return;
+        const data = new FormData(form);
+        const intent = e.submitter?.value || 'save';
+        state.reviewDraft = data;
+        let config;
+        try { config = reviewRequest(state.pendingConfig, data, intent === 'transport'); }
+        catch (error) { notify(error.message); return; }
+        state.pendingConfig = config;
+ state.reviewDraft = null;
+        state.error = null;
+        state.busy = true;
+        render();
+        try {
+            const result = intent === 'save' ? await api.saveRequest(state.sessionId, config) : await api.confirmSearch(state.sessionId, config);
+            await acceptDialog(result);
+        } catch (error) { state.error = error.message; showLogin(error); }
+        finally { state.busy = false; render(); }
+        return;
+    }
     if (form.id === 'chat-form') {
         const text = new FormData(form).get('message').trim();
         await send(text);
@@ -696,7 +918,101 @@ app.addEventListener('submit', async (e) => {
         const data = new FormData(form), ages = String(data.get('childrenAges')).trim();
         const criteria = { origin: data.get('origin'), destination: data.get('destination'), startDate: data.get('startDate'), nights: Number(data.get('nights')), adults: Number(data.get('adults')), childrenAges: ages ? ages.split(',').map(a => Number(a.trim())) : [], budgetMinor: Math.round(Number(data.get('budget')) * 100), pets: data.get('pets') === 'on' };
         state.modal = null;
-        await send('Обновить параметры поездки', criteria);
+        if (isDemo) {
+            await send('Обновить параметры поездки', criteria);
+            return;
+        }
+        state.error = null;
+        state.busy = true;
+        state.messages.push({ role: 'user', text: 'Обновил параметры поездки' });
+        render();
+        try {
+            const trip = await draftTrip();
+            const result = await api.updateConfig(trip.id, criteria);
+            if (result.trip && state.sessionId)
+                result.trip.id = state.sessionId;
+            if (result.trip)
+                state.trip = result.trip;
+            await acceptDialog(result);
+        }
+        catch (error) {
+            state.error = error.message;
+            showLogin(error);
+        }
+        finally {
+            state.busy = false;
+            render();
+        }
+    }
+    if (form.id === 'answers-form') {
+        if (state.busy)
+            return;
+        const message = state.messages[Number(form.dataset.message)];
+        if (!message?.questions?.length)
+            return;
+        const data = new FormData(form);
+        const answers = message.questions.map(question => ({ question_id: question.questionId, text: String(data.get(question.questionId) || '').trim() }));
+        if (answers.some((answer, index) => message.questions[index].required && !answer.text)) {
+            notify('Заполните обязательные поля.');
+            return;
+        }
+        state.error = null;
+        state.busy = true;
+        state.messages.push({ role: 'user', text: answers.map(answer => answer.text).join(', ') });
+        render();
+        try {
+            const trip = await draftTrip();
+            const result = await api.submitAnswers(trip.id, answers);
+            if (result.trip && state.sessionId)
+                result.trip.id = state.sessionId;
+            if (result.trip)
+                state.trip = result.trip;
+            await acceptDialog(result);
+        }
+        catch (error) {
+            state.error = error.message;
+            showLogin(error);
+        }
+        finally {
+            state.busy = false;
+            render();
+        }
+    }
+    if (form.id === 'login-form') {
+        if (state.loginBusy)
+            return;
+        const data = new FormData(form);
+        state.loginEmail = String(data.get('email')).trim();
+        const password = String(data.get('password'));
+        if (password.length < 12) {
+            state.loginError = 'Пароль не короче 12 символов.';
+            render();
+            return;
+        }
+        state.loginError = '';
+        state.loginBusy = true;
+        render();
+        try {
+            const submit = state.authMode === 'register' ? api.register : api.login;
+            await submit({ email: state.loginEmail, password });
+            state.modal = null;
+            const pending = state.pendingSend;
+            state.pendingSend = null;
+            state.loginBusy = false;
+            if (pending) {
+                await send(pending.text, pending.criteria);
+                return;
+            }
+            notify(state.authMode === 'register' ? 'Аккаунт создан.' : 'Вы вошли.');
+        }
+        catch (error) {
+            state.loginError = error.message;
+        }
+        finally {
+            state.loginBusy = false;
+            if (!state.busy)
+                render();
+        }
     }
     if (form.id === 'profile-form') {
         if (state.profileBusy)
@@ -715,6 +1031,7 @@ app.addEventListener('submit', async (e) => {
             notify('Изменения сохранены.');
         }
         catch (error) {
+            showLogin(error);
             notify(error.message);
         }
         finally {
@@ -723,8 +1040,13 @@ app.addEventListener('submit', async (e) => {
         }
     }
 });
-app.addEventListener('input', e => { if (e.target.id === 'chat-input')
-    state.draftText = e.target.value; });
+app.addEventListener('input', e => {
+    if (e.target.id === 'chat-input')
+        state.draftText = e.target.value;
+    if (e.target.closest('#review-form')) state.reviewDraft = new FormData(e.target.closest('form'));
+    if (e.target.closest('#answers-form'))
+        state.answerDraft = { ...state.answerDraft, [e.target.name]: e.target.value };
+});
 app.addEventListener('keydown', e => { if (e.target.id === 'chat-input' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
     e.preventDefault();
     e.target.form.requestSubmit();
@@ -747,9 +1069,22 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && (state.mod
 window.addEventListener('hashchange', () => { if (location.hash === '#planner')
     navigate('planner'); });
 loadViews().then(() => {
+    if (!isDemo && !getAccessToken())
+        state.modal = 'login';
     render();
-    api.getProfile().then(result => {
-        state.profile = result.profile;
-        render();
-    }).catch(error => notify(error.message));
+    if (!isDemo && getAccessToken() && getSessionId()) {
+ api.restoreSession(getSessionId()).then(async result => {
+ state.messages = result.messages.length ? result.messages : state.messages;
+ state.answerDraft = result.answerDraft || {};
+ await acceptDialog({ ...result, message: 'Восстановлены сохранённые параметры поездки.' });
+ try { const routes = await api.getRoutes(getSessionId()); if (routes.trip) { state.trip = routes.trip; state.reviewOpen = false; } } catch {}
+ render();
+ }).catch(error => { showLogin(error); notify(error.message); });
+ }
+ if (isDemo || getAccessToken()) {
+        api.getProfile().then(result => {
+            state.profile = result.profile;
+            render();
+        }).catch(error => { showLogin(error); notify(error.message); render(); });
+    }
 }).catch(error => notify(error.message));

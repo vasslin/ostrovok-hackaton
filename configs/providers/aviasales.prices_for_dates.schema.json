@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/aviasales-prices-for-dates",
+  "properties": {
+    "origin": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "IATA code of the origin city or airport, e.g. MOW."
+    },
+    "destination": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "IATA code of the destination city or airport, e.g. KZN."
+    },
+    "departure_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+      "description": "YYYY-MM-DD or YYYY-MM."
+    },
+    "return_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+      "description": "YYYY-MM-DD or YYYY-MM; omit for one-way."
+    },
+    "one_way": {
+      "type": "boolean",
+      "description": "true returns one ticket per date group."
+    },
+    "direct": {
+      "type": "boolean",
+      "description": "Non-stop flights only."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[a-z]{3}$",
+      "default": "rub"
+    },
+    "sorting": {
+      "type": "string",
+      "enum": [
+        "price",
+        "route"
+      ],
+      "default": "price"
+    },
+    "unique": {
+      "type": "boolean"
+    },
+    "limit": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 1,
+      "description": "Our cap; the official maximum is not confirmed.",
+      "default": 30
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "origin",
+    "destination",
+    "currency"
+  ],
+  "title": "aviasales.prices_for_dates request parameters"
+}

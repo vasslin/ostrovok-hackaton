@@ -383,6 +383,23 @@
 </form>
 </template>
 
+<template id="render-modal-login">
+<span class="eyebrow">ВХОД</span>
+<h2 id="modal-title">
+  {{title}}
+</h2>
+<p class="muted">
+  {{hint}}
+</p>
+<form id="login-form">
+  <label>Почта<input type="email" name="email" value="{{email}}" required autocomplete="username"></label>
+  <label>Пароль<input type="password" name="password" required minlength="12" autocomplete="current-password"></label>
+  <p id="login-error" role="alert">{{loginError}}</p>
+  <button class="primary full" type="submit" {{disabled}}>{{submitLabel}}</button>
+  <button class="text-button" type="button" data-action="auth-mode" {{disabled}}>{{switchLabel}}</button>
+</form>
+</template>
+
 <template id="render-modal-eyebrow-2">
 <span class="eyebrow">С ЧИСТОГО ЛИСТА</span>
 <h2 id="modal-title">
@@ -492,6 +509,17 @@
 <div class="message-actions">
   {{mActions}}
 </div>
+</template>
+
+<template id="render-planner-questions">
+<form class="message-actions" id="answers-form" data-message="{{index}}">
+  {{fields}}
+  <button class="primary" type="submit" {{disabled}}>Ответить</button>
+</form>
+</template>
+
+<template id="render-planner-question">
+<label>{{text}}<input type="{{inputType}}" name="{{questionId}}" value="{{value}}" {{required}} maxlength="500"></label>
 </template>
 
 <template id="render-planner-message-avatar">
@@ -689,7 +717,7 @@
               Развлечения из маршрута · входные билеты не включены
             </p>
           </div>
-          <strong>Бесплатно</strong>
+          <strong>Цена уточняется</strong>
         </div>
       </div>
       {{renderedBudgetWarning}}{{tWarnings}}
@@ -813,7 +841,7 @@
 {{renderedBudgetWarning}}{{tWarnings}}
 <div class="trip-total">
   <div>
-    <span class="small-muted">Вся поездка на {{expression}} чел.</span><strong>{{price}}</strong><span class="total-detail">Перелёты, проживание и трансферы</span>
+    <span class="small-muted">Вся поездка на {{expression}} чел.</span><strong>{{price}}</strong><span class="total-detail">Стоимость выбранных услуг; дополнительные расходы уточняются</span>
   </div>
   <div class="total-actions">
     {{showCostButton}}{{summaryButton}}
@@ -826,4 +854,33 @@
 
 <template id="ticket-offer-ticket-offer">
 <button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>-</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
+</template>
+
+<template id="render-review">
+<section class="config-review" aria-label="Параметры поездки">
+  <p class="notice" role="status">{{capabilities}}</p>
+  <form id="review-form" class="review-grid">
+    <label>Откуда<input name="origin" value="{{origin}}" required maxlength="100"></label>
+    <label>Страна отправления (код, например RU)<input name="originCountry" value="{{originCountry}}" pattern="[A-Za-z]{2}" maxlength="2"></label>
+    <label>Куда<input name="destination" value="{{destination}}" required maxlength="100"></label>
+    <label>Страна назначения (код, например FR)<input name="destinationCountry" value="{{destinationCountry}}" pattern="[A-Za-z]{2}" maxlength="2"></label>
+    <label>Дата отправления<input type="date" name="departure" value="{{departure}}" required></label>
+    <label>Дата возвращения<input type="date" name="return" value="{{returnDate}}"></label>
+    <label>Взрослые<input type="number" name="adults" min="1" max="9" value="{{adults}}" required></label>
+    <label>Возраст детей через запятую<input name="children" value="{{children}}" placeholder="Например, 7, 12"></label>
+    <label>Гражданство гостей (код, например ru)<input name="residency" value="{{residency}}" pattern="[A-Za-z]{2}" maxlength="2"></label>
+    <label>Бюджет на всех гостей<input type="number" name="budget" min="1" step="1" value="{{budget}}" placeholder="Не задан"></label>
+    <label>Валюта<select name="currency">{{currencies}}</select></label>
+    <label class="review-check"><input type="checkbox" name="hotel" {{hotel}}>Нужен отель</label>
+    <label class="review-check"><input type="checkbox" name="roundTrip" {{roundTrip}}>Туда и обратно</label>
+    <fieldset class="review-wide"><legend>Транспорт</legend>{{modes}}</fieldset>
+    <p class="review-wide">{{extra}}</p>
+    <p class="review-wide" role="alert">{{warning}}</p>
+    <div class="review-wide review-actions">
+      <button type="submit" name="intent" value="save" class="button button-light" {{disabled}}>Сохранить изменения</button>
+      <button type="submit" name="intent" value="search" class="button primary" {{searchDisabled}}>Подтвердить и искать</button>
+      {{transportOnly}}
+    </div>
+  </form>
+</section>
 </template>

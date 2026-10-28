@@ -2,6 +2,7 @@ const { test, expect } = require('playwright/test');
 
 test.beforeEach(async ({ page }) => {
   await page.route(/fonts\.google/, route => route.abort());
+  await page.route('**/config.js', route => route.fulfill({ contentType: 'application/javascript', body: "window.TRAVEL_CONFIG = { mode: 'demo', apiBaseUrl: '/api' };" }));
   await page.goto('/');
   await expect(page.locator('.trip-total')).toBeVisible();
 });
@@ -144,7 +145,11 @@ test('two-finger map zoom leaves the reset control usable', async ({ page, conte
 });
 
 test('standalone demo works with the mobile module bundled offline', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
   await page.goto('/standalone.html');
+  await expect.poll(async () => (await page.locator('.trip-total').count()) > 0 || errors.length > 0).toBe(true);
+  expect(errors).toEqual([]);
   await expect(page.locator('.trip-total')).toBeVisible();
   await noHorizontalOverflow(page);
   if (await mobile(page)) {

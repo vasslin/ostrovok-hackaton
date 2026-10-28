@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/nominatim-search",
+  "properties": {
+    "q": {
+      "type": "string",
+      "maxLength": 255,
+      "minLength": 1
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "jsonv2",
+        "geojson"
+      ]
+    },
+    "limit": {
+      "type": "integer",
+      "maximum": 40,
+      "minimum": 1
+    },
+    "accept-language": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "countrycodes": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Comma-separated ISO alpha-2 codes, lowercase."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "q",
+    "format"
+  ],
+  "title": "nominatim.search request parameters"
+}

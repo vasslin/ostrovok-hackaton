@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/open-meteo-archive",
+  "properties": {
+    "latitude": {
+      "type": "number",
+      "maximum": 90,
+      "minimum": -90
+    },
+    "longitude": {
+      "type": "number",
+      "maximum": 180,
+      "minimum": -180
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "daily": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "hourly": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "timezone": {
+      "type": "string",
+      "maxLength": 64,
+      "default": "auto"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "latitude",
+    "longitude",
+    "start_date",
+    "end_date"
+  ],
+  "title": "open_meteo_archive.archive request parameters"
+}
