@@ -30,7 +30,7 @@ const (
 // RouteService ищет предложения и собирает согласованные маршруты.
 // Сообщения намеренно пустые: поля контракта будут добавлены позже.
 type RouteServiceClient interface {
-	// BuildRoutes assembles joins and asks ai-service to rank up to k*m routes.
+	// BuildRoutes assembles joins, ranks routes inside each join, then ranks the combined list.
 	BuildRoutes(ctx context.Context, in *BuildRoutesRequest, opts ...grpc.CallOption) (*BuildRoutesResponse, error)
 	SearchRoutes(ctx context.Context, in *SearchRoutesRequest, opts ...grpc.CallOption) (*SearchRoutesResponse, error)
 }
@@ -70,7 +70,7 @@ func (c *routeServiceClient) SearchRoutes(ctx context.Context, in *SearchRoutesR
 // RouteService ищет предложения и собирает согласованные маршруты.
 // Сообщения намеренно пустые: поля контракта будут добавлены позже.
 type RouteServiceServer interface {
-	// BuildRoutes assembles joins and asks ai-service to rank up to k*m routes.
+	// BuildRoutes assembles joins, ranks routes inside each join, then ranks the combined list.
 	BuildRoutes(context.Context, *BuildRoutesRequest) (*BuildRoutesResponse, error)
 	SearchRoutes(context.Context, *SearchRoutesRequest) (*SearchRoutesResponse, error)
 }

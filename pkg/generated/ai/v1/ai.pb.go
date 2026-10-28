@@ -382,6 +382,120 @@ func (*ExtractConfigResponse) Descriptor() ([]byte, []int) {
 	return file_api_ai_v1_ai_proto_rawDescGZIP(), []int{9}
 }
 
+type RankJoinRoutesRequest struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	SessionId string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Config    *structpb.Struct       `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
+	JoinId    string                 `protobuf:"bytes,3,opt,name=join_id,json=joinId,proto3" json:"join_id,omitempty"`
+	// Совместимые сочетания слотов одной склейки.
+	Routes        []*structpb.Struct `protobuf:"bytes,4,rep,name=routes,proto3" json:"routes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RankJoinRoutesRequest) Reset() {
+	*x = RankJoinRoutesRequest{}
+	mi := &file_api_ai_v1_ai_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RankJoinRoutesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RankJoinRoutesRequest) ProtoMessage() {}
+
+func (x *RankJoinRoutesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_ai_v1_ai_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RankJoinRoutesRequest.ProtoReflect.Descriptor instead.
+func (*RankJoinRoutesRequest) Descriptor() ([]byte, []int) {
+	return file_api_ai_v1_ai_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *RankJoinRoutesRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *RankJoinRoutesRequest) GetConfig() *structpb.Struct {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+func (x *RankJoinRoutesRequest) GetJoinId() string {
+	if x != nil {
+		return x.JoinId
+	}
+	return ""
+}
+
+func (x *RankJoinRoutesRequest) GetRoutes() []*structpb.Struct {
+	if x != nil {
+		return x.Routes
+	}
+	return nil
+}
+
+type RankJoinRoutesResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Порядок внутри склейки. Пустой ответ оставляет порядок запроса.
+	Routes        []*structpb.Struct `protobuf:"bytes,1,rep,name=routes,proto3" json:"routes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RankJoinRoutesResponse) Reset() {
+	*x = RankJoinRoutesResponse{}
+	mi := &file_api_ai_v1_ai_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RankJoinRoutesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RankJoinRoutesResponse) ProtoMessage() {}
+
+func (x *RankJoinRoutesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_ai_v1_ai_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RankJoinRoutesResponse.ProtoReflect.Descriptor instead.
+func (*RankJoinRoutesResponse) Descriptor() ([]byte, []int) {
+	return file_api_ai_v1_ai_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RankJoinRoutesResponse) GetRoutes() []*structpb.Struct {
+	if x != nil {
+		return x.Routes
+	}
+	return nil
+}
+
 type RankRoutePartsRequest struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	SessionId string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
@@ -394,7 +508,7 @@ type RankRoutePartsRequest struct {
 
 func (x *RankRoutePartsRequest) Reset() {
 	*x = RankRoutePartsRequest{}
-	mi := &file_api_ai_v1_ai_proto_msgTypes[10]
+	mi := &file_api_ai_v1_ai_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -406,7 +520,7 @@ func (x *RankRoutePartsRequest) String() string {
 func (*RankRoutePartsRequest) ProtoMessage() {}
 
 func (x *RankRoutePartsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_ai_v1_ai_proto_msgTypes[10]
+	mi := &file_api_ai_v1_ai_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -419,7 +533,7 @@ func (x *RankRoutePartsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RankRoutePartsRequest.ProtoReflect.Descriptor instead.
 func (*RankRoutePartsRequest) Descriptor() ([]byte, []int) {
-	return file_api_ai_v1_ai_proto_rawDescGZIP(), []int{10}
+	return file_api_ai_v1_ai_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *RankRoutePartsRequest) GetSessionId() string {
@@ -444,14 +558,16 @@ func (x *RankRoutePartsRequest) GetRoutes() []*structpb.Struct {
 }
 
 type RankRoutePartsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Порядок финального ранжирования. Пустой ответ оставляет порядок запроса.
+	Routes        []*structpb.Struct `protobuf:"bytes,1,rep,name=routes,proto3" json:"routes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RankRoutePartsResponse) Reset() {
 	*x = RankRoutePartsResponse{}
-	mi := &file_api_ai_v1_ai_proto_msgTypes[11]
+	mi := &file_api_ai_v1_ai_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -463,7 +579,7 @@ func (x *RankRoutePartsResponse) String() string {
 func (*RankRoutePartsResponse) ProtoMessage() {}
 
 func (x *RankRoutePartsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_ai_v1_ai_proto_msgTypes[11]
+	mi := &file_api_ai_v1_ai_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -476,7 +592,14 @@ func (x *RankRoutePartsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RankRoutePartsResponse.ProtoReflect.Descriptor instead.
 func (*RankRoutePartsResponse) Descriptor() ([]byte, []int) {
-	return file_api_ai_v1_ai_proto_rawDescGZIP(), []int{11}
+	return file_api_ai_v1_ai_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RankRoutePartsResponse) GetRoutes() []*structpb.Struct {
+	if x != nil {
+		return x.Routes
+	}
+	return nil
 }
 
 var File_api_ai_v1_ai_proto protoreflect.FileDescriptor
@@ -493,21 +616,31 @@ const file_api_ai_v1_ai_proto_rawDesc = "" +
 	"\x11RankRoutesRequest\"\x14\n" +
 	"\x12RankRoutesResponse\"\x16\n" +
 	"\x14ExtractConfigRequest\"\x17\n" +
-	"\x15ExtractConfigResponse\"\x98\x01\n" +
+	"\x15ExtractConfigResponse\"\xb1\x01\n" +
+	"\x15RankJoinRoutesRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12/\n" +
+	"\x06config\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x06config\x12\x17\n" +
+	"\ajoin_id\x18\x03 \x01(\tR\x06joinId\x12/\n" +
+	"\x06routes\x18\x04 \x03(\v2\x17.google.protobuf.StructR\x06routes\"I\n" +
+	"\x16RankJoinRoutesResponse\x12/\n" +
+	"\x06routes\x18\x01 \x03(\v2\x17.google.protobuf.StructR\x06routes\"\x98\x01\n" +
 	"\x15RankRoutePartsRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12/\n" +
 	"\x06config\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x06config\x12/\n" +
-	"\x06routes\x18\x03 \x03(\v2\x17.google.protobuf.StructR\x06routes\"\x18\n" +
-	"\x16RankRoutePartsResponse2\x87\x03\n" +
+	"\x06routes\x18\x03 \x03(\v2\x17.google.protobuf.StructR\x06routes\"I\n" +
+	"\x16RankRoutePartsResponse\x12/\n" +
+	"\x06routes\x18\x01 \x03(\v2\x17.google.protobuf.StructR\x06routes2\x87\x03\n" +
 	"\tAIService\x12u\n" +
 	"\x16GenerateOrUpdateConfig\x12,.godnota.ai.v1.GenerateOrUpdateConfigRequest\x1a-.godnota.ai.v1.GenerateOrUpdateConfigResponse\x12W\n" +
 	"\fUpdateConfig\x12\".godnota.ai.v1.UpdateConfigRequest\x1a#.godnota.ai.v1.UpdateConfigResponse\x12W\n" +
 	"\fRefineConfig\x12\".godnota.ai.v1.RefineConfigRequest\x1a#.godnota.ai.v1.RefineConfigResponse\x12Q\n" +
 	"\n" +
-	"RankRoutes\x12 .godnota.ai.v1.RankRoutesRequest\x1a!.godnota.ai.v1.RankRoutesResponse2\xc5\x01\n" +
+	"RankRoutes\x12 .godnota.ai.v1.RankRoutesRequest\x1a!.godnota.ai.v1.RankRoutesResponse2\xa4\x02\n" +
 	"\bTravelAI\x12Z\n" +
 	"\rExtractConfig\x12#.godnota.ai.v1.ExtractConfigRequest\x1a$.godnota.ai.v1.ExtractConfigResponse\x12]\n" +
+	"\x0eRankJoinRoutes\x12$.godnota.ai.v1.RankJoinRoutesRequest\x1a%.godnota.ai.v1.RankJoinRoutesResponse\x12]\n" +
 	"\x0eRankRouteParts\x12$.godnota.ai.v1.RankRoutePartsRequest\x1a%.godnota.ai.v1.RankRoutePartsResponseB-Z+github.com/godnota/pkg/generated/ai/v1;aiv1b\x06proto3"
 
 var (
@@ -522,7 +655,7 @@ func file_api_ai_v1_ai_proto_rawDescGZIP() []byte {
 	return file_api_ai_v1_ai_proto_rawDescData
 }
 
-var file_api_ai_v1_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_api_ai_v1_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_api_ai_v1_ai_proto_goTypes = []any{
 	(*GenerateOrUpdateConfigRequest)(nil),  // 0: godnota.ai.v1.GenerateOrUpdateConfigRequest
 	(*GenerateOrUpdateConfigResponse)(nil), // 1: godnota.ai.v1.GenerateOrUpdateConfigResponse
@@ -534,30 +667,38 @@ var file_api_ai_v1_ai_proto_goTypes = []any{
 	(*RankRoutesResponse)(nil),             // 7: godnota.ai.v1.RankRoutesResponse
 	(*ExtractConfigRequest)(nil),           // 8: godnota.ai.v1.ExtractConfigRequest
 	(*ExtractConfigResponse)(nil),          // 9: godnota.ai.v1.ExtractConfigResponse
-	(*RankRoutePartsRequest)(nil),          // 10: godnota.ai.v1.RankRoutePartsRequest
-	(*RankRoutePartsResponse)(nil),         // 11: godnota.ai.v1.RankRoutePartsResponse
-	(*structpb.Struct)(nil),                // 12: google.protobuf.Struct
+	(*RankJoinRoutesRequest)(nil),          // 10: godnota.ai.v1.RankJoinRoutesRequest
+	(*RankJoinRoutesResponse)(nil),         // 11: godnota.ai.v1.RankJoinRoutesResponse
+	(*RankRoutePartsRequest)(nil),          // 12: godnota.ai.v1.RankRoutePartsRequest
+	(*RankRoutePartsResponse)(nil),         // 13: godnota.ai.v1.RankRoutePartsResponse
+	(*structpb.Struct)(nil),                // 14: google.protobuf.Struct
 }
 var file_api_ai_v1_ai_proto_depIdxs = []int32{
-	12, // 0: godnota.ai.v1.RankRoutePartsRequest.config:type_name -> google.protobuf.Struct
-	12, // 1: godnota.ai.v1.RankRoutePartsRequest.routes:type_name -> google.protobuf.Struct
-	0,  // 2: godnota.ai.v1.AIService.GenerateOrUpdateConfig:input_type -> godnota.ai.v1.GenerateOrUpdateConfigRequest
-	2,  // 3: godnota.ai.v1.AIService.UpdateConfig:input_type -> godnota.ai.v1.UpdateConfigRequest
-	4,  // 4: godnota.ai.v1.AIService.RefineConfig:input_type -> godnota.ai.v1.RefineConfigRequest
-	6,  // 5: godnota.ai.v1.AIService.RankRoutes:input_type -> godnota.ai.v1.RankRoutesRequest
-	8,  // 6: godnota.ai.v1.TravelAI.ExtractConfig:input_type -> godnota.ai.v1.ExtractConfigRequest
-	10, // 7: godnota.ai.v1.TravelAI.RankRouteParts:input_type -> godnota.ai.v1.RankRoutePartsRequest
-	1,  // 8: godnota.ai.v1.AIService.GenerateOrUpdateConfig:output_type -> godnota.ai.v1.GenerateOrUpdateConfigResponse
-	3,  // 9: godnota.ai.v1.AIService.UpdateConfig:output_type -> godnota.ai.v1.UpdateConfigResponse
-	5,  // 10: godnota.ai.v1.AIService.RefineConfig:output_type -> godnota.ai.v1.RefineConfigResponse
-	7,  // 11: godnota.ai.v1.AIService.RankRoutes:output_type -> godnota.ai.v1.RankRoutesResponse
-	9,  // 12: godnota.ai.v1.TravelAI.ExtractConfig:output_type -> godnota.ai.v1.ExtractConfigResponse
-	11, // 13: godnota.ai.v1.TravelAI.RankRouteParts:output_type -> godnota.ai.v1.RankRoutePartsResponse
-	8,  // [8:14] is the sub-list for method output_type
-	2,  // [2:8] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	14, // 0: godnota.ai.v1.RankJoinRoutesRequest.config:type_name -> google.protobuf.Struct
+	14, // 1: godnota.ai.v1.RankJoinRoutesRequest.routes:type_name -> google.protobuf.Struct
+	14, // 2: godnota.ai.v1.RankJoinRoutesResponse.routes:type_name -> google.protobuf.Struct
+	14, // 3: godnota.ai.v1.RankRoutePartsRequest.config:type_name -> google.protobuf.Struct
+	14, // 4: godnota.ai.v1.RankRoutePartsRequest.routes:type_name -> google.protobuf.Struct
+	14, // 5: godnota.ai.v1.RankRoutePartsResponse.routes:type_name -> google.protobuf.Struct
+	0,  // 6: godnota.ai.v1.AIService.GenerateOrUpdateConfig:input_type -> godnota.ai.v1.GenerateOrUpdateConfigRequest
+	2,  // 7: godnota.ai.v1.AIService.UpdateConfig:input_type -> godnota.ai.v1.UpdateConfigRequest
+	4,  // 8: godnota.ai.v1.AIService.RefineConfig:input_type -> godnota.ai.v1.RefineConfigRequest
+	6,  // 9: godnota.ai.v1.AIService.RankRoutes:input_type -> godnota.ai.v1.RankRoutesRequest
+	8,  // 10: godnota.ai.v1.TravelAI.ExtractConfig:input_type -> godnota.ai.v1.ExtractConfigRequest
+	10, // 11: godnota.ai.v1.TravelAI.RankJoinRoutes:input_type -> godnota.ai.v1.RankJoinRoutesRequest
+	12, // 12: godnota.ai.v1.TravelAI.RankRouteParts:input_type -> godnota.ai.v1.RankRoutePartsRequest
+	1,  // 13: godnota.ai.v1.AIService.GenerateOrUpdateConfig:output_type -> godnota.ai.v1.GenerateOrUpdateConfigResponse
+	3,  // 14: godnota.ai.v1.AIService.UpdateConfig:output_type -> godnota.ai.v1.UpdateConfigResponse
+	5,  // 15: godnota.ai.v1.AIService.RefineConfig:output_type -> godnota.ai.v1.RefineConfigResponse
+	7,  // 16: godnota.ai.v1.AIService.RankRoutes:output_type -> godnota.ai.v1.RankRoutesResponse
+	9,  // 17: godnota.ai.v1.TravelAI.ExtractConfig:output_type -> godnota.ai.v1.ExtractConfigResponse
+	11, // 18: godnota.ai.v1.TravelAI.RankJoinRoutes:output_type -> godnota.ai.v1.RankJoinRoutesResponse
+	13, // 19: godnota.ai.v1.TravelAI.RankRouteParts:output_type -> godnota.ai.v1.RankRoutePartsResponse
+	13, // [13:20] is the sub-list for method output_type
+	6,  // [6:13] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_api_ai_v1_ai_proto_init() }
@@ -571,7 +712,7 @@ func file_api_ai_v1_ai_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_ai_v1_ai_proto_rawDesc), len(file_api_ai_v1_ai_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

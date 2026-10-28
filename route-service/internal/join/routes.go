@@ -47,15 +47,24 @@ type Block struct {
 	Warnings    []string
 }
 
-// Materialize keeps at most m valid routes for each join.
-// The cap is local. Final order is decided by ai-service.
+// Expand returns every valid route of one join, cheapest complete price first.
+// The walk stops at maxExpanded routes. The per-join cap is applied after ranking.
+func Expand(item Join) []Route {
+	return expand(item, maxExpanded)
+}
+
+// Materialize keeps at most m valid routes for each join, in the local price order.
 func Materialize(joins []Join, m int) ([]Route, error) {
 	if m < 1 {
 		return nil, fmt.Errorf("m must be positive")
 	}
 	var routes []Route
 	for _, item := range joins {
-		routes = append(routes, expand(item, m)...)
+		expanded := Expand(item)
+		if len(expanded) > m {
+			expanded = expanded[:m]
+		}
+		routes = append(routes, expanded...)
 	}
 	return routes, nil
 }

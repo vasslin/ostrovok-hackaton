@@ -55,7 +55,14 @@ func (TravelAI) ExtractConfig(context.Context, *pb.ExtractConfigRequest) (*pb.Ex
 	return &pb.ExtractConfigResponse{}, nil
 }
 
+// RankJoinRoutes is the per-join ranking stub. It does not score or reorder routes.
+func (TravelAI) RankJoinRoutes(_ context.Context, req *pb.RankJoinRoutesRequest) (*pb.RankJoinRoutesResponse, error) {
+	slog.Info("ai-service: rank join routes", "session_id", req.GetSessionId(), "join_id", req.GetJoinId(), "routes", len(req.GetRoutes()))
+	return &pb.RankJoinRoutesResponse{Routes: req.GetRoutes()}, nil
+}
+
+// RankRouteParts is the final-ranking stub. It does not score or reorder routes.
 func (TravelAI) RankRouteParts(_ context.Context, req *pb.RankRoutePartsRequest) (*pb.RankRoutePartsResponse, error) {
-	slog.Info("ai-service: rank route parts", "session_id", req.GetSessionId(), "routes", len(req.GetRoutes()))
-	return &pb.RankRoutePartsResponse{}, nil
+	slog.Info("ai-service: final route ranking", "session_id", req.GetSessionId(), "routes", len(req.GetRoutes()))
+	return &pb.RankRoutePartsResponse{Routes: req.GetRoutes()}, nil
 }

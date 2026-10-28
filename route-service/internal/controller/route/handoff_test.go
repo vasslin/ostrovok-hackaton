@@ -2,6 +2,7 @@ package route
 
 import (
 	"context"
+	"slices"
 	"testing"
 
 	aiv1 "github.com/godnota/pkg/generated/ai/v1"
@@ -17,7 +18,15 @@ import (
 
 type travelAIStub struct {
 	aiv1.UnimplementedTravelAIServer
-	fn func(context.Context, *aiv1.RankRoutePartsRequest) (*aiv1.RankRoutePartsResponse, error)
+	join func(context.Context, *aiv1.RankJoinRoutesRequest) (*aiv1.RankJoinRoutesResponse, error)
+	fn   func(context.Context, *aiv1.RankRoutePartsRequest) (*aiv1.RankRoutePartsResponse, error)
+}
+
+func (s travelAIStub) RankJoinRoutes(ctx context.Context, req *aiv1.RankJoinRoutesRequest) (*aiv1.RankJoinRoutesResponse, error) {
+	if s.join == nil {
+		return &aiv1.RankJoinRoutesResponse{}, nil
+	}
+	return s.join(ctx, req)
 }
 
 func (s travelAIStub) RankRouteParts(ctx context.Context, req *aiv1.RankRoutePartsRequest) (*aiv1.RankRoutePartsResponse, error) {
@@ -36,7 +45,7 @@ func TestBuildRoutesSendsRoutesToTravelAI(t *testing.T) {
 		}})
 	})
 	conn := testkit.Conn(t, func(server *grpc.Server) {
-		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 2))
+		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 2, 5))
 	})
 	client := pb.NewRouteServiceClient(conn)
 	ctx := context.Background()
@@ -63,6 +72,100 @@ func TestBuildRoutesSendsRoutesToTravelAI(t *testing.T) {
 	}
 }
 
+func TestBuildRoutesTrimsAfterRanking(t *testing.T) {
+	var seen int
+	aiConn := testkit.Conn(t, func(server *grpc.Server) {
+		aiv1.RegisterTravelAIServer(server, travelAIStub{fn: func(_ context.Context, req *aiv1.RankRoutePartsRequest) (*aiv1.RankRoutePartsResponse, error) {
+			seen = len(req.GetRoutes())
+			routes := append([]*structpb.Struct{}, req.GetRoutes()...)
+			slices.Reverse(routes)
+			return &aiv1.RankRoutePartsResponse{Routes: routes}, nil
+		}})
+	})
+	conn := testkit.Conn(t, func(server *grpc.Server) {
+		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 2, 1))
+	})
+	config, _ := structpb.NewStruct(map[string]any{"origin": map[string]any{"city": "Москва"}})
+	response, err := pb.NewRouteServiceClient(conn).BuildRoutes(context.Background(), &pb.BuildRoutesRequest{SessionId: "s", Config: config, Parts: sampleParts()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if seen != 2 || len(response.GetCandidates()) != 1 || amount(response.GetCandidates()[0]) != 9200 {
+		t.Fatalf("ranked list was trimmed before the AI order: seen=%d candidates=%v", seen, response.GetCandidates())
+	}
+}
+
+func TestBuildRoutesRanksInsideEachJoin(t *testing.T) {
+	var joinCalls int
+	var finalSeen int
+	aiConn := testkit.Conn(t, func(server *grpc.Server) {
+		aiv1.RegisterTravelAIServer(server, travelAIStub{
+			join: func(_ context.Context, req *aiv1.RankJoinRoutesRequest) (*aiv1.RankJoinRoutesResponse, error) {
+				joinCalls++
+				if req.GetSessionId() != "s" || req.GetJoinId() == "" || len(req.GetRoutes()) != 2 {
+					t.Fatalf("join rank request: %v", req)
+				}
+				routes := append([]*structpb.Struct{}, req.GetRoutes()...)
+				slices.Reverse(routes)
+				return &aiv1.RankJoinRoutesResponse{Routes: routes}, nil
+			},
+			fn: func(_ context.Context, req *aiv1.RankRoutePartsRequest) (*aiv1.RankRoutePartsResponse, error) {
+				finalSeen = len(req.GetRoutes())
+				return &aiv1.RankRoutePartsResponse{}, nil
+			},
+		})
+	})
+	conn := testkit.Conn(t, func(server *grpc.Server) {
+		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 1, 5))
+	})
+	config, _ := structpb.NewStruct(map[string]any{"origin": map[string]any{"city": "Москва"}})
+	response, err := pb.NewRouteServiceClient(conn).BuildRoutes(context.Background(), &pb.BuildRoutesRequest{SessionId: "s", Config: config, Parts: twoJoinParts()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if joinCalls != 2 || finalSeen != 2 || len(response.GetCandidates()) != 2 {
+		t.Fatalf("joins=%d final=%d candidates=%d", joinCalls, finalSeen, len(response.GetCandidates()))
+	}
+	if amount(response.GetCandidates()[0]) != 9200 || amount(response.GetCandidates()[1]) != 9200 {
+		t.Fatalf("per-join top was not kept: %v", response.GetCandidates())
+	}
+}
+
+func TestBuildRoutesTrimsFinalOrder(t *testing.T) {
+	var sent []*structpb.Struct
+	aiConn := testkit.Conn(t, func(server *grpc.Server) {
+		aiv1.RegisterTravelAIServer(server, travelAIStub{
+			join: func(_ context.Context, req *aiv1.RankJoinRoutesRequest) (*aiv1.RankJoinRoutesResponse, error) {
+				routes := append([]*structpb.Struct{}, req.GetRoutes()...)
+				slices.Reverse(routes)
+				return &aiv1.RankJoinRoutesResponse{Routes: routes}, nil
+			},
+			fn: func(_ context.Context, req *aiv1.RankRoutePartsRequest) (*aiv1.RankRoutePartsResponse, error) {
+				sent = append([]*structpb.Struct{}, req.GetRoutes()...)
+				routes := append([]*structpb.Struct{}, req.GetRoutes()...)
+				slices.Reverse(routes)
+				return &aiv1.RankRoutePartsResponse{Routes: routes}, nil
+			},
+		})
+	})
+	conn := testkit.Conn(t, func(server *grpc.Server) {
+		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 1, 1))
+	})
+	config, _ := structpb.NewStruct(map[string]any{"origin": map[string]any{"city": "Москва"}})
+	response, err := pb.NewRouteServiceClient(conn).BuildRoutes(context.Background(), &pb.BuildRoutesRequest{SessionId: "s", Config: config, Parts: twoJoinParts()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sent) != 2 || len(response.GetCandidates()) != 1 {
+		t.Fatalf("final saw %d, candidates %d", len(sent), len(response.GetCandidates()))
+	}
+	kept := response.GetCandidates()[0]
+	first := sent[len(sent)-1]
+	if amount(kept) != amount(first) || joinID(kept) != joinID(first) {
+		t.Fatalf("threshold kept %s/%v, final order starts with %s/%v", joinID(kept), amount(kept), joinID(first), amount(first))
+	}
+}
+
 func TestBuildRoutesRequiresRankerWhenRoutesExist(t *testing.T) {
 	conn := testkit.Conn(t, func(server *grpc.Server) {
 		pb.RegisterRouteServiceServer(server, New(nil))
@@ -82,11 +185,34 @@ func TestBuildRoutesPropagatesAIError(t *testing.T) {
 		}})
 	})
 	conn := testkit.Conn(t, func(server *grpc.Server) {
-		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 2))
+		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 2, 5))
 	})
 	config, _ := structpb.NewStruct(map[string]any{"origin": map[string]any{"city": "Москва"}})
 	_, err := pb.NewRouteServiceClient(conn).BuildRoutes(context.Background(), &pb.BuildRoutesRequest{SessionId: "s", Config: config, Parts: sampleParts()})
 	if status.Code(err) != codes.Unavailable {
+		t.Fatal(err)
+	}
+}
+
+func TestBuildRoutesPropagatesJoinRankingError(t *testing.T) {
+	var finalCalled bool
+	aiConn := testkit.Conn(t, func(server *grpc.Server) {
+		aiv1.RegisterTravelAIServer(server, travelAIStub{
+			join: func(context.Context, *aiv1.RankJoinRoutesRequest) (*aiv1.RankJoinRoutesResponse, error) {
+				return nil, status.Error(codes.Unavailable, "model down")
+			},
+			fn: func(context.Context, *aiv1.RankRoutePartsRequest) (*aiv1.RankRoutePartsResponse, error) {
+				finalCalled = true
+				return &aiv1.RankRoutePartsResponse{}, nil
+			},
+		})
+	})
+	conn := testkit.Conn(t, func(server *grpc.Server) {
+		pb.RegisterRouteServiceServer(server, New(nil).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), 4, 2, 5))
+	})
+	config, _ := structpb.NewStruct(map[string]any{"origin": map[string]any{"city": "Москва"}})
+	_, err := pb.NewRouteServiceClient(conn).BuildRoutes(context.Background(), &pb.BuildRoutesRequest{SessionId: "s", Config: config, Parts: sampleParts()})
+	if status.Code(err) != codes.Unavailable || finalCalled {
 		t.Fatal(err)
 	}
 }
@@ -102,6 +228,21 @@ func sampleParts() *providerv1.SearchPartsResponse {
 			{Id: "costly", City: "Казань", CheckIn: "2026-12-12", CheckOut: "2026-12-14", Price: &providerv1.Money{AmountMinor: 9000, Currency: "RUB"}},
 		},
 	}
+}
+
+func twoJoinParts() *providerv1.SearchPartsResponse {
+	parts := sampleParts()
+	parts.TransportParts = append(parts.TransportParts, &providerv1.TransportPart{
+		Id: "out-early", OriginCity: "Москва", DestinationCity: "Казань", DepartureAt: "2026-12-10T08:00:00Z", ArrivalAt: "2026-12-10T10:00:00Z", Price: &providerv1.Money{AmountMinor: 100, Currency: "RUB"},
+	})
+	for _, hotel := range parts.HotelParts {
+		hotel.CheckIn = "2026-12-10"
+	}
+	return parts
+}
+
+func joinID(route *structpb.Struct) string {
+	return route.GetFields()["join_id"].GetStringValue()
 }
 
 func amount(route *structpb.Struct) float64 {

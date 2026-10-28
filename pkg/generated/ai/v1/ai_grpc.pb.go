@@ -240,6 +240,7 @@ var AIService_ServiceDesc = grpc.ServiceDesc{
 
 const (
 	TravelAI_ExtractConfig_FullMethodName  = "/godnota.ai.v1.TravelAI/ExtractConfig"
+	TravelAI_RankJoinRoutes_FullMethodName = "/godnota.ai.v1.TravelAI/RankJoinRoutes"
 	TravelAI_RankRouteParts_FullMethodName = "/godnota.ai.v1.TravelAI/RankRouteParts"
 )
 
@@ -250,6 +251,9 @@ const (
 // TravelAI — внешний контракт модели. Реализация пока заглушка.
 type TravelAIClient interface {
 	ExtractConfig(ctx context.Context, in *ExtractConfigRequest, opts ...grpc.CallOption) (*ExtractConfigResponse, error)
+	// Ранжирование готовых маршрутов одной склейки. Реализация — заглушка.
+	RankJoinRoutes(ctx context.Context, in *RankJoinRoutesRequest, opts ...grpc.CallOption) (*RankJoinRoutesResponse, error)
+	// Финальное ранжирование всех собранных маршрутов. Реализация — заглушка.
 	RankRouteParts(ctx context.Context, in *RankRoutePartsRequest, opts ...grpc.CallOption) (*RankRoutePartsResponse, error)
 }
 
@@ -265,6 +269,16 @@ func (c *travelAIClient) ExtractConfig(ctx context.Context, in *ExtractConfigReq
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExtractConfigResponse)
 	err := c.cc.Invoke(ctx, TravelAI_ExtractConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *travelAIClient) RankJoinRoutes(ctx context.Context, in *RankJoinRoutesRequest, opts ...grpc.CallOption) (*RankJoinRoutesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RankJoinRoutesResponse)
+	err := c.cc.Invoke(ctx, TravelAI_RankJoinRoutes_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -288,6 +302,9 @@ func (c *travelAIClient) RankRouteParts(ctx context.Context, in *RankRoutePartsR
 // TravelAI — внешний контракт модели. Реализация пока заглушка.
 type TravelAIServer interface {
 	ExtractConfig(context.Context, *ExtractConfigRequest) (*ExtractConfigResponse, error)
+	// Ранжирование готовых маршрутов одной склейки. Реализация — заглушка.
+	RankJoinRoutes(context.Context, *RankJoinRoutesRequest) (*RankJoinRoutesResponse, error)
+	// Финальное ранжирование всех собранных маршрутов. Реализация — заглушка.
 	RankRouteParts(context.Context, *RankRoutePartsRequest) (*RankRoutePartsResponse, error)
 }
 
@@ -300,6 +317,9 @@ type UnimplementedTravelAIServer struct{}
 
 func (UnimplementedTravelAIServer) ExtractConfig(context.Context, *ExtractConfigRequest) (*ExtractConfigResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExtractConfig not implemented")
+}
+func (UnimplementedTravelAIServer) RankJoinRoutes(context.Context, *RankJoinRoutesRequest) (*RankJoinRoutesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RankJoinRoutes not implemented")
 }
 func (UnimplementedTravelAIServer) RankRouteParts(context.Context, *RankRoutePartsRequest) (*RankRoutePartsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RankRouteParts not implemented")
@@ -342,6 +362,24 @@ func _TravelAI_ExtractConfig_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TravelAI_RankJoinRoutes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RankJoinRoutesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TravelAIServer).RankJoinRoutes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TravelAI_RankJoinRoutes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TravelAIServer).RankJoinRoutes(ctx, req.(*RankJoinRoutesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TravelAI_RankRouteParts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RankRoutePartsRequest)
 	if err := dec(in); err != nil {
@@ -370,6 +408,10 @@ var TravelAI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExtractConfig",
 			Handler:    _TravelAI_ExtractConfig_Handler,
+		},
+		{
+			MethodName: "RankJoinRoutes",
+			Handler:    _TravelAI_RankJoinRoutes_Handler,
 		},
 		{
 			MethodName: "RankRouteParts",

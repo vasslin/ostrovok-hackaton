@@ -14,6 +14,7 @@ type Config struct {
 	Join struct {
 		MaxJoins      int `env:"ROUTE_MAX_JOINS" envDefault:"4"`
 		RoutesPerJoin int `env:"ROUTE_ROUTES_PER_JOIN" envDefault:"3"`
+		Threshold     int `env:"ROUTE_THRESHOLD" envDefault:"5"`
 	}
 }
 

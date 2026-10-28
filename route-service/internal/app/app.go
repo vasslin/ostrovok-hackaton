@@ -29,7 +29,7 @@ func New(cfg *config.Config) (*grpcapp.App, error) {
 	}
 
 	service := routeuc.New(routerepo.New(), providergrpc.New(providerv1.NewProviderServiceClient(providerConn)))
-	controller := routectrl.New(service).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), cfg.Join.MaxJoins, cfg.Join.RoutesPerJoin)
+	controller := routectrl.New(service).WithRanker(aigrpc.New(aiv1.NewTravelAIClient(aiConn)), cfg.Join.MaxJoins, cfg.Join.RoutesPerJoin, cfg.Join.Threshold)
 	return grpcapp.New(cfg.GRPC.Port, func() {
 		_ = providerConn.Close()
 		_ = aiConn.Close()

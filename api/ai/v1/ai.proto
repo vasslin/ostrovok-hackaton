@@ -18,6 +18,9 @@ service AIService {
 // TravelAI — внешний контракт модели. Реализация пока заглушка.
 service TravelAI {
   rpc ExtractConfig(ExtractConfigRequest) returns (ExtractConfigResponse);
+  // Ранжирование готовых маршрутов одной склейки. Реализация — заглушка.
+  rpc RankJoinRoutes(RankJoinRoutesRequest) returns (RankJoinRoutesResponse);
+  // Финальное ранжирование всех собранных маршрутов. Реализация — заглушка.
   rpc RankRouteParts(RankRoutePartsRequest) returns (RankRoutePartsResponse);
 }
 
@@ -36,10 +39,25 @@ message RankRoutesResponse {}
 message ExtractConfigRequest {}
 message ExtractConfigResponse {}
 
+message RankJoinRoutesRequest {
+  string session_id = 1;
+  google.protobuf.Struct config = 2;
+  string join_id = 3;
+  // Совместимые сочетания слотов одной склейки.
+  repeated google.protobuf.Struct routes = 4;
+}
+message RankJoinRoutesResponse {
+  // Порядок внутри склейки. Пустой ответ оставляет порядок запроса.
+  repeated google.protobuf.Struct routes = 1;
+}
+
 message RankRoutePartsRequest {
   string session_id = 1;
   google.protobuf.Struct config = 2;
-  // Собранные маршруты, не больше k склеек по m маршрутов.
+  // Топ маршрутов каждой склейки.
   repeated google.protobuf.Struct routes = 3;
 }
-message RankRoutePartsResponse {}
+message RankRoutePartsResponse {
+  // Порядок финального ранжирования. Пустой ответ оставляет порядок запроса.
+  repeated google.protobuf.Struct routes = 1;
+}

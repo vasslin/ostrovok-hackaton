@@ -15,29 +15,34 @@ type routeService interface {
 	SearchRoutes(context.Context) ([]entity.Variant, error)
 }
 
-// Ranker sends the assembled routes to TravelAI.RankRouteParts.
+// Ranker asks TravelAI to order routes inside one join, then across all joins.
 type Ranker interface {
+	RankJoinRoutes(context.Context, string, *structpb.Struct, string, []*structpb.Struct) ([]*structpb.Struct, error)
 	RankRouteParts(context.Context, string, *structpb.Struct, []*structpb.Struct) ([]*structpb.Struct, error)
 }
 
 type Controller struct {
-	service routeService
-	rank    Ranker
-	k       int
-	m       int
+	service       routeService
+	rank          Ranker
+	maxJoins      int
+	routesPerJoin int
+	threshold     int
 }
 
 func New(service routeService) *Controller {
-	return &Controller{service: service, k: 4, m: 3}
+	return &Controller{service: service, maxJoins: 4, routesPerJoin: 3, threshold: 5}
 }
 
-func (c *Controller) WithRanker(rank Ranker, k, m int) *Controller {
+func (c *Controller) WithRanker(rank Ranker, maxJoins, routesPerJoin, threshold int) *Controller {
 	c.rank = rank
-	if k > 0 {
-		c.k = k
+	if maxJoins > 0 {
+		c.maxJoins = maxJoins
 	}
-	if m > 0 {
-		c.m = m
+	if routesPerJoin > 0 {
+		c.routesPerJoin = routesPerJoin
+	}
+	if threshold > 0 {
+		c.threshold = threshold
 	}
 	return c
 }
@@ -51,14 +56,56 @@ func (c *Controller) BuildRoutes(ctx context.Context, req *pb.BuildRoutesRequest
 	if req.GetSessionId() == "" || req.GetConfig() == nil || req.GetParts() == nil {
 		return nil, status.Error(codes.InvalidArgument, "session_id, config and parts required")
 	}
-	joins, err := join.Assemble(req.GetParts(), originCity(req.GetConfig()), c.k)
+	joins, err := join.Assemble(req.GetParts(), originCity(req.GetConfig()), c.maxJoins)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	routes, err := join.Materialize(joins, c.m)
+	payload, err := c.rankJoins(ctx, req.GetSessionId(), req.GetConfig(), joins)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, err
 	}
+	if len(payload) == 0 {
+		return &pb.BuildRoutesResponse{}, nil
+	}
+	ranked, err := c.rank.RankRouteParts(ctx, req.GetSessionId(), req.GetConfig(), payload)
+	if err != nil {
+		return nil, err
+	}
+	if len(ranked) > c.threshold {
+		ranked = ranked[:c.threshold]
+	}
+	return &pb.BuildRoutesResponse{Candidates: ranked}, nil
+}
+
+func (c *Controller) rankJoins(ctx context.Context, sessionID string, config *structpb.Struct, joins []join.Join) ([]*structpb.Struct, error) {
+	var payload []*structpb.Struct
+	for _, item := range joins {
+		if err := ctx.Err(); err != nil {
+			return nil, status.FromContextError(err).Err()
+		}
+		documents, err := routeDocuments(join.Expand(item))
+		if err != nil {
+			return nil, err
+		}
+		if len(documents) == 0 {
+			continue
+		}
+		if c.rank == nil {
+			return nil, status.Error(codes.FailedPrecondition, "ai-service is not configured")
+		}
+		ranked, err := c.rank.RankJoinRoutes(ctx, sessionID, config, item.ID, documents)
+		if err != nil {
+			return nil, err
+		}
+		if len(ranked) > c.routesPerJoin {
+			ranked = ranked[:c.routesPerJoin]
+		}
+		payload = append(payload, ranked...)
+	}
+	return payload, nil
+}
+
+func routeDocuments(routes []join.Route) ([]*structpb.Struct, error) {
 	payload := make([]*structpb.Struct, 0, len(routes))
 	for _, route := range routes {
 		document, err := route.Proto()
@@ -67,17 +114,7 @@ func (c *Controller) BuildRoutes(ctx context.Context, req *pb.BuildRoutesRequest
 		}
 		payload = append(payload, document)
 	}
-	if len(payload) == 0 {
-		return &pb.BuildRoutesResponse{}, nil
-	}
-	if c.rank == nil {
-		return nil, status.Error(codes.FailedPrecondition, "ai-service is not configured")
-	}
-	ranked, err := c.rank.RankRouteParts(ctx, req.GetSessionId(), req.GetConfig(), payload)
-	if err != nil {
-		return nil, err
-	}
-	return &pb.BuildRoutesResponse{Candidates: ranked}, nil
+	return payload, nil
 }
 
 func originCity(config *structpb.Struct) string {
