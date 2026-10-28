@@ -28,27 +28,17 @@ SERVICE_API_KEY, если задан, travel-service передаёт тольк
 docker compose -f docker-compose.yml -f docker-compose.session.yml up --build -d
 ```
 
-Порты на хосте: AI HTTP 8080 и gRPC 9090, travel gRPC `127.0.0.1:50051`, session gRPC `127.0.0.1:50052`. PostgreSQL доступен только внутри Docker-сети; данные сохраняются в volume `session-data`. Пароль development-БД можно изменить через SESSION_DB_PASSWORD до первого создания БД. Для доступа к существующему volume нужен его прежний пароль.
+Порты полного Compose на хосте: UI 5173, gateway HTTP 8080, AI HTTP 8090. Внутренние gRPC: travel-service:50051, session-service:50052, ai-service:50055; наружу они не публикуются. PostgreSQL доступен только внутри Docker-сети; данные сохраняются в volume `session-data`. Пароль development-БД можно изменить через SESSION_DB_PASSWORD до первого создания БД. Для доступа к существующему volume нужен его прежний пароль.
 
-Этот дополнительный Compose поднимает цепочку этапа 1. Провайдеры, route-service и map-service в него не входят; для поиска надо подключить соответствующие сервисы общего проекта через PROVIDER_GRPC_ADDR, ROUTE_GRPC_ADDR, MAP_GRPC_ADDR. Базовый Compose с одним AI-сервисом также продолжает работать.
+Базовый docker-compose.yml теперь поднимает весь проект. docker-compose.session.yml сохранён как пустое совместимое дополнение для прежней команды запуска. Для обычного запуска достаточно docker compose up --build -d --wait.
 
-Пример с установленным grpcurl, из корня репозитория:
-
-```sh
-grpcurl -plaintext -import-path . -proto api/session/v1/session.proto \
-  -d '{"user_id":"demo-user"}' localhost:50052 godnota.session.v1.SessionService/CreateSession
-
-grpcurl -plaintext -max-time 400 -import-path . -proto api/travel/v1/travel.proto \
-  -d '{"user_id":"demo-user","session_id":"CHAT_ID_ИЗ_ПЕРВОГО_ОТВЕТА","text":"Хочу из Москвы в Сочи"}' \
-  localhost:50051 godnota.travel.v1.TravelService/PlanTrip
-```
-
-Проверка реальной цепочки с PostgreSQL и Qwen:
+Проверка реальной цепочки с PostgreSQL и Qwen через публичный gateway:
 
 ```sh
-cd travel-service
-TRAVEL_INTEGRATION_ADDR=localhost:50051 SESSION_INTEGRATION_ADDR=localhost:50052 go test -race ./...
+make test-ai API_URL=http://localhost:5173
 ```
+
+Для прямого gRPC-теста при нативном запуске с известными локальными портами можно использовать TRAVEL_INTEGRATION_ADDR и SESSION_INTEGRATION_ADDR; в Docker эти порты намеренно остаются внутренними.
 
 Без TRAVEL_INTEGRATION_ADDR live-тест пропускается; unit-тесты проверяют загрузку перед AI, сохранение после ответа, восстановление вопросов/идей после создания нового контроллера, отсутствие дублирования истории, изоляцию владельца и проброс ошибок.
 

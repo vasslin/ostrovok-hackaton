@@ -7,9 +7,11 @@ option go_package = "github.com/godnota/pkg/generated/travel/v1;travelv1";
 import "api/common/v1/trip.proto";
 import "api/provider/v1/parts.proto";
 import "api/ai/v1/ai.proto";
+import "google/protobuf/struct.proto";
 
 // TravelService оркестрирует сценарий: конфиг, уточнения, поиск и выдача маршрутов.
 service TravelService {
+  rpc GetCapabilities(GetConfigRequest) returns (google.protobuf.Struct);
   rpc PlanTrip(PlanTripRequest) returns (PlanTripResponse);
   rpc SubmitAnswers(SubmitAnswersRequest) returns (SubmitAnswersResponse);
   rpc SelectIdea(SelectIdeaRequest) returns (SelectIdeaResponse);
@@ -113,6 +115,7 @@ message SearchRoutesRequest {
 message SearchRoutesResponse {
   string session_id = 1;
   godnota.provider.v1.SearchPartsResponse parts = 2;
+  repeated google.protobuf.Struct candidates = 3;
 }
 
 message GetRoutesRequest {
@@ -123,4 +126,5 @@ message GetRoutesRequest {
 message GetRoutesResponse {
   string session_id = 1;
   godnota.provider.v1.SearchPartsResponse parts = 2;
+  repeated google.protobuf.Struct candidates = 3;
 }

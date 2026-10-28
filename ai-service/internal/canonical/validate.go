@@ -12,7 +12,6 @@ import (
 )
 
 const MaxStayNights = 30
-
 const MaxDaysAhead = 365
 
 var (
@@ -33,7 +32,6 @@ func Validator() *validator.Validate {
 	})
 	return validate
 }
-
 func (t TripRequest) ValidateAt(now time.Time) error {
 	var errs []error
 	if err := Validator().Struct(t); err != nil {
@@ -82,7 +80,6 @@ func (t TripRequest) ValidateAt(now time.Time) error {
 	}
 	return errors.Join(errs...)
 }
-
 func (t TripRequest) MissingRequired() []string {
 	var verrs validator.ValidationErrors
 	if !errors.As(Validator().Struct(t), &verrs) {
@@ -96,9 +93,8 @@ func (t TripRequest) MissingRequired() []string {
 	}
 	return missing
 }
-
 func jsonPath(namespace string) string {
-	parts := strings.Split(namespace, ".")[1:]
+	parts := strings.Split(namespace, ".")[1:] // drop the root type name
 	path := ""
 	for _, p := range parts {
 		name, index, hasIndex := strings.Cut(p, "[")

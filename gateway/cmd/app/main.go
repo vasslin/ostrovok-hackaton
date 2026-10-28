@@ -43,7 +43,7 @@ func main() {
 
 	const headerTimeout = 5 * time.Second
 	const readTimeout = 10 * time.Second
-	const writeTimeout = 15 * time.Second
+	writeTimeout := httpapi.OperationTimeout("/v1/travel/plan") + 10*time.Second
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.HTTP.Port,

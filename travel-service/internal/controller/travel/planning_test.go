@@ -37,12 +37,13 @@ func (f *sessionsFake) SaveContext(_ context.Context, r *sessionv1.SaveContextRe
 
 type providerFake struct {
 	providerv1.ProviderServiceClient
-	calls int
+	calls    int
+	resolved *structpb.Struct
 }
 
 func (f *providerFake) SearchParts(context.Context, *providerv1.SearchPartsRequest, ...grpc.CallOption) (*providerv1.SearchPartsResponse, error) {
 	f.calls++
-	return &providerv1.SearchPartsResponse{HotelParts: []*providerv1.HotelPart{{Id: "h", Source: "synthetic"}}}, nil
+	return &providerv1.SearchPartsResponse{Resolved: f.resolved, HotelParts: []*providerv1.HotelPart{{Id: "h", Source: "synthetic"}}}, nil
 }
 func TestConfirmationAndInvalidation(t *testing.T) {
 	raw, e := os.ReadFile("../../../../configs/examples/trip_request.kazan_weekend.json")

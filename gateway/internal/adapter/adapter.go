@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/godnota/gateway/internal/httpapi"
 	mapv1 "github.com/godnota/pkg/generated/map/v1"
@@ -22,7 +21,6 @@ import (
 
 const (
 	invalidRequest = "invalid request"
-	requestTimeout = 5 * time.Second
 	maxStreams     = 100
 )
 
@@ -97,7 +95,7 @@ func (b *backend) Call(ctx context.Context, path string, raw json.RawMessage) (j
 	}
 	defer b.release()
 
-	ctx, cancel := context.WithTimeout(ctx, requestTimeout)
+	ctx, cancel := context.WithTimeout(ctx, httpapi.OperationTimeout(path))
 	defer cancel()
 
 	switch path {
@@ -108,6 +106,8 @@ func (b *backend) Call(ctx context.Context, path string, raw json.RawMessage) (j
 	case "/v1/session/get":
 		return unary(ctx, raw, &sessionv1.GetSessionRequest{}, b.session.GetSession)
 
+	case "/v1/travel/capabilities":
+		return unary(ctx, raw, &travelv1.GetConfigRequest{}, b.travel.GetCapabilities)
 	case "/v1/travel/plan":
 		return unary(ctx, raw, &travelv1.PlanTripRequest{}, b.travel.PlanTrip)
 	case "/v1/travel/answers":

@@ -5,22 +5,25 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 )
 
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TravelService_PlanTrip_FullMethodName      = "/godnota.travel.v1.TravelService/PlanTrip"
-	TravelService_SubmitAnswers_FullMethodName = "/godnota.travel.v1.TravelService/SubmitAnswers"
-	TravelService_SelectIdea_FullMethodName    = "/godnota.travel.v1.TravelService/SelectIdea"
-	TravelService_GetConfig_FullMethodName     = "/godnota.travel.v1.TravelService/GetConfig"
-	TravelService_UpdateConfig_FullMethodName  = "/godnota.travel.v1.TravelService/UpdateConfig"
-	TravelService_ConfirmConfig_FullMethodName = "/godnota.travel.v1.TravelService/ConfirmConfig"
-	TravelService_SearchRoutes_FullMethodName  = "/godnota.travel.v1.TravelService/SearchRoutes"
-	TravelService_GetRoutes_FullMethodName     = "/godnota.travel.v1.TravelService/GetRoutes"
+	TravelService_GetCapabilities_FullMethodName = "/godnota.travel.v1.TravelService/GetCapabilities"
+	TravelService_PlanTrip_FullMethodName        = "/godnota.travel.v1.TravelService/PlanTrip"
+	TravelService_SubmitAnswers_FullMethodName   = "/godnota.travel.v1.TravelService/SubmitAnswers"
+	TravelService_SelectIdea_FullMethodName      = "/godnota.travel.v1.TravelService/SelectIdea"
+	TravelService_GetConfig_FullMethodName       = "/godnota.travel.v1.TravelService/GetConfig"
+	TravelService_UpdateConfig_FullMethodName    = "/godnota.travel.v1.TravelService/UpdateConfig"
+	TravelService_ConfirmConfig_FullMethodName   = "/godnota.travel.v1.TravelService/ConfirmConfig"
+	TravelService_SearchRoutes_FullMethodName    = "/godnota.travel.v1.TravelService/SearchRoutes"
+	TravelService_GetRoutes_FullMethodName       = "/godnota.travel.v1.TravelService/GetRoutes"
 )
 
 type TravelServiceClient interface {
+	GetCapabilities(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*structpb.Struct, error)
 	PlanTrip(ctx context.Context, in *PlanTripRequest, opts ...grpc.CallOption) (*PlanTripResponse, error)
 	SubmitAnswers(ctx context.Context, in *SubmitAnswersRequest, opts ...grpc.CallOption) (*SubmitAnswersResponse, error)
 	SelectIdea(ctx context.Context, in *SelectIdeaRequest, opts ...grpc.CallOption) (*SelectIdeaResponse, error)
@@ -37,6 +40,16 @@ type travelServiceClient struct {
 
 func NewTravelServiceClient(cc grpc.ClientConnInterface) TravelServiceClient {
 	return &travelServiceClient{cc}
+}
+
+func (c *travelServiceClient) GetCapabilities(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*structpb.Struct, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(structpb.Struct)
+	err := c.cc.Invoke(ctx, TravelService_GetCapabilities_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *travelServiceClient) PlanTrip(ctx context.Context, in *PlanTripRequest, opts ...grpc.CallOption) (*PlanTripResponse, error) {
@@ -120,6 +133,7 @@ func (c *travelServiceClient) GetRoutes(ctx context.Context, in *GetRoutesReques
 }
 
 type TravelServiceServer interface {
+	GetCapabilities(context.Context, *GetConfigRequest) (*structpb.Struct, error)
 	PlanTrip(context.Context, *PlanTripRequest) (*PlanTripResponse, error)
 	SubmitAnswers(context.Context, *SubmitAnswersRequest) (*SubmitAnswersResponse, error)
 	SelectIdea(context.Context, *SelectIdeaRequest) (*SelectIdeaResponse, error)
@@ -129,8 +143,12 @@ type TravelServiceServer interface {
 	SearchRoutes(context.Context, *SearchRoutesRequest) (*SearchRoutesResponse, error)
 	GetRoutes(context.Context, *GetRoutesRequest) (*GetRoutesResponse, error)
 }
+
 type UnimplementedTravelServiceServer struct{}
 
+func (UnimplementedTravelServiceServer) GetCapabilities(context.Context, *GetConfigRequest) (*structpb.Struct, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCapabilities not implemented")
+}
 func (UnimplementedTravelServiceServer) PlanTrip(context.Context, *PlanTripRequest) (*PlanTripResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PlanTrip not implemented")
 }
@@ -162,10 +180,29 @@ type UnsafeTravelServiceServer interface {
 }
 
 func RegisterTravelServiceServer(s grpc.ServiceRegistrar, srv TravelServiceServer) {
+
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&TravelService_ServiceDesc, srv)
+}
+
+func _TravelService_GetCapabilities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TravelServiceServer).GetCapabilities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TravelService_GetCapabilities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TravelServiceServer).GetCapabilities(ctx, req.(*GetConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _TravelService_PlanTrip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -316,6 +353,10 @@ var TravelService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "godnota.travel.v1.TravelService",
 	HandlerType: (*TravelServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetCapabilities",
+			Handler:    _TravelService_GetCapabilities_Handler,
+		},
 		{
 			MethodName: "PlanTrip",
 			Handler:    _TravelService_PlanTrip_Handler,

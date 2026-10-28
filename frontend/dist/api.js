@@ -1,3 +1,4 @@
+import { providerIssue } from './planning.js';
 import { DEFAULT_CRITERIA, createTrip, parseMessage, selectedIds, cheaperSelection, money, cities } from './model.js';
 const config = window.TRAVEL_CONFIG || { mode: 'demo', apiBaseUrl: '/api' };
 export const isDemo = config.mode !== 'api';
@@ -81,7 +82,8 @@ function toSnake(value) {
 }
 async function request(path, { method = 'GET', body, requestId, anonymous = false } = {}) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const aiRequest = /\/(messages|answers|ideas)$/.test(path);
+    const timeout = setTimeout(() => controller.abort(), aiRequest ? (Number(config.aiRequestTimeoutMs) || 390000) : 40000);
     const token = anonymous ? '' : getAccessToken();
     try {
         const response = await fetch(`${config.apiBaseUrl.replace(/\/$/, '')}${path}`, {
@@ -102,8 +104,14 @@ async function request(path, { method = 'GET', body, requestId, anonymous = fals
             clearAccessToken();
             throw new UnauthorizedError(message);
         }
-        if (!response.ok)
-            throw new Error(json.message || `Сервис временно недоступен (${response.status}). Повторите запрос.`);
+        if (!response.ok) {
+            const rawMessage = json.message || '';
+ const validation = response.status === 400 && /\/(config|confirm)$/.test(path);
+ const friendly = validation ? 'Проверьте города, страны, будущие даты, состав гостей и бюджет. Дата возвращения должна быть позже отправления, поездка — не более 30 ночей.' : /confirm trip config/.test(rawMessage) ? 'Сначала подтвердите параметры поездки.' : rawMessage;
+ const error = new Error(friendly || `Сервис временно недоступен (${response.status}). Повторите запрос.`);
+            error.status = response.status;
+            throw error;
+        }
         return json;
     }
     catch (error) {
@@ -124,14 +132,18 @@ function sessionPath(sessionId) {
 }
 function dialogText(raw) {
     const summary = String(raw.summary || '').trim();
-    if (summary)
-        return summary;
+    if (summary) {
+        let memory = false;
+        try { memory = Array.isArray(JSON.parse(summary)?.notes); } catch {}
+        if (!memory) return summary;
+    }
     const questions = (raw.questions || []).map(question => question.text).filter(Boolean);
     if (questions.length)
         return questions.join('\n');
     const ideas = (raw.advice || []).map(idea => [idea.title || idea.city, idea.reason || idea.description].filter(Boolean).join(' — ')).filter(Boolean);
     if (ideas.length)
         return ideas.join('\n');
+    if (raw.ready_for_search) return 'Проверьте параметры поездки и подтвердите поиск.';
     const notes = [...(raw.warnings || []), ...(raw.missing_fields || [])].filter(Boolean);
     if (notes.length)
         return notes.join('\n');
@@ -150,7 +162,7 @@ function chatFromDialog(raw) {
         value: idea.id,
         ideaId: idea.id
     }));
-    return { message: dialogText(raw), questions, actions, readyForSearch: Boolean(raw.ready_for_search) };
+    return { message: dialogText(raw), questions, actions, readyForSearch: Boolean(raw.ready_for_search), tripConfig: raw.config?.request || null, warnings: raw.warnings || [] };
 }
 function frontendTrip(trip, sessionId) {
     if (!trip || !Array.isArray(trip.stops) || !Array.isArray(trip.segments))
@@ -186,7 +198,7 @@ function transportLegs(part) {
     const to = part.destination_city || part.destination;
     if (!from || !to || !part.departure_at || !part.arrival_at)
         return [];
-    const outbound = { id: part.id, from, to, departure: part.departure_at, arrival: part.arrival_at, price: asMinor(part.price), currency: part.price?.currency || 'RUB', source: part.source || '', provider: part.provider || '', mode: part.mode || '', transfers: part.transfers || 0, roundTripReturn: false };
+    const outbound = { id: part.id, from, to, departure: part.departure_at, arrival: part.arrival_at, price: asMinor(part.price), currency: part.price?.currency || 'RUB', source: part.source || '', provider: part.provider || '', mode: part.mode || '', scope: part.price?.scope || '', transfers: part.transfers || 0, roundTripReturn: false };
     if (!part.return_departure_at || !part.return_arrival_at)
         return [outbound];
     return [outbound, { ...outbound, id: `${part.id}-return`, from: to, to: from, departure: part.return_departure_at, arrival: part.return_arrival_at, price: null, transfers: part.return_transfers || 0, roundTripReturn: true }];
@@ -226,7 +238,7 @@ function finishTrip(stops, segments, sessionId, synthetic, currency) {
 function ticketFromLeg(leg) {
     return {
         id: leg.id, carrier: leg.provider || 'Перевозчик', number: leg.transfers ? `${modeLabel(leg.mode)} · пересадок ${leg.transfers}` : modeLabel(leg.mode),
-        type: leg.mode === 'plane' ? 'flight' : (leg.mode || 'flight'), departure: leg.departure, arrival: leg.arrival, priceMinor: leg.price,
+        type: leg.mode === 'plane' ? 'flight' : (leg.mode || 'flight'), departure: leg.departure, arrival: leg.arrival, priceMinor: leg.price, priceScope: leg.scope,
         baggage: null, refundable: null, petsAllowed: false, demo: leg.source === 'synthetic', source: leg.source, roundTripReturn: leg.roundTripReturn
     };
 }
@@ -270,29 +282,76 @@ function assembleParts(parts, sessionId) {
     }
     return finishTrip(stops, segments, sessionId, [...legs, ...hotels].some(item => item.source === 'synthetic'), legs.find(leg => leg.currency)?.currency || 'RUB');
 }
-function tripFromSearch(search, sessionId) {
-    const ready = frontendTrip(search.trip, sessionId);
-    if (ready)
-        return ready;
-    if (!search.parts)
-        return null;
-    return assembleParts(search.parts, sessionId);
+function tripFromSearch(search, sessionId, requestConfig = null, selectedRoute = '') {
+    const candidates = (search.candidates || []).map(toSnake);
+    const chosen = candidates.find(item => item.id === selectedRoute) || candidates[0];
+    const parts = chosen ? { transport_parts: chosen.transport || [], hotel_parts: chosen.hotels || (chosen.hotel ? [chosen.hotel] : []) } : search.parts;
+    const trip = frontendTrip(search.trip, sessionId) || (parts ? assembleParts(parts, sessionId) : null);
+    if (!trip) return null;
+    if (chosen) {
+        trip.routeId = chosen.id;
+        trip.routeCandidates = candidates;
+        trip.requestConfig = requestConfig;
+        trip.warnings = [...(trip.warnings || []), ...(chosen.warnings || [])];
+        const variants = candidates.map(candidate => assembleParts({ transport_parts: candidate.transport || [], hotel_parts: candidate.hotels || (candidate.hotel ? [candidate.hotel] : []) }, sessionId)).filter(Boolean);
+        for (const stop of trip.stops) {
+            const options = variants.flatMap(variant => variant.stops.filter(other => sameCity(other.city, stop.city)).flatMap(other => other.hotelOptions));
+            stop.hotelOptions = [...new Map(options.map(option => [option.id, option])).values()];
+        }
+        for (const segment of trip.segments) {
+            const options = variants.flatMap(variant => variant.segments.filter(other => sameCity(other.from, segment.from) && sameCity(other.to, segment.to)).flatMap(other => other.options));
+            segment.options = [...new Map(options.map(option => [option.id, option])).values()];
+        }
+    }
+    if (requestConfig?.travelers && parts) {
+        const adults = requestConfig.travelers.adults;
+        const children = requestConfig.travelers.children_ages || [];
+        trip.criteria = { ...trip.criteria, adults, childrenAges: children, pets: Boolean(requestConfig.travelers.pets?.length), budgetMinor: requestConfig.budget?.scope && requestConfig.budget.scope !== 'total' ? null : (requestConfig.budget?.total ? requestConfig.budget.total * 100 : null) };
+        const tickets = new Set(trip.segments.flatMap(segment => [segment.ticket, ...(segment.options || [])]));
+        for (const ticket of tickets) {
+            if (ticket.roundTripReturn) continue;
+            if (children.length || !['per_person_one_way', 'per_person_round_trip'].includes(ticket.priceScope)) ticket.priceMinor = null;
+            else if (ticket.priceMinor != null) ticket.priceMinor *= adults;
+        }
+        trip.totals.transportMinor = trip.segments.reduce((sum, segment) => sum + (segment.ticket.roundTripReturn ? 0 : (segment.ticket.priceMinor || 0)), 0);
+        trip.totals.totalMinor = trip.segments.some(segment => !segment.ticket.roundTripReturn && segment.ticket.priceMinor == null) || trip.stops.some(stop => stop.hotel && stop.hotel.priceMinor == null) ? null : trip.totals.transportMinor + trip.totals.hotelsMinor;
+        if (children.length) trip.warnings.push('Сумма неполная: детские тарифы не подтверждены.');
+    }
+    if (chosen?.price_status === 'unknown') {
+        trip.totals.totalMinor = null;
+        trip.warnings.push('Сумма неполная: итоговая цена маршрута не подтверждена поставщиком.');
+    }
+    return trip;
 }
+
 function searchNotes(search) {
     const parts = search.parts || {};
-    return [...(parts.limitations || []), ...(parts.errors || []).map(error => error.message || error.code || '').filter(Boolean)];
+    const limitations = (parts.limitations || []).map(note => {
+        if (/Nominatim|route-service|^\//.test(note)) return '';
+        if (/hotel|отел/.test(note)) return 'Проживание подбирается отдельно при наличии гостиничного провайдера, дат и гражданства гостей.';
+        return /[а-яё]/i.test(note) ? note : 'Условия, окончательная цена и наличие предложений требуют проверки у поставщика.';
+    }).filter(Boolean);
+    return [...new Set([...limitations, ...(parts.errors || []).map(providerIssue).filter(Boolean)])];
 }
-async function searchReady(sessionId, dialog) {
-    if (!dialog.readyForSearch)
-        return { ...dialog, trip: null };
-    await request(`${sessionPath(sessionId)}/confirm`, { method: 'POST', body: {} });
-    const search = await request(`${sessionPath(sessionId)}/search`, { method: 'POST', body: {} });
-    const trip = tripFromSearch(search, sessionId);
+function pendingDialog(raw) {
+    return { ...chatFromDialog(raw), trip: null };
+}
+function searchResult(search, sessionId, config) {
+    const trip = tripFromSearch(search, sessionId, config);
     const notes = searchNotes(search);
-    if (trip)
-        trip.warnings = [...notes, ...(trip.warnings || [])];
-    const message = [dialog.message, notes.join('\n')].filter(Boolean).join('\n');
-    return { ...dialog, trip, message };
+    const hotelRequested = config?.hotel?.needed !== false;
+    const missingHotel = hotelRequested && !(search.parts?.hotel_parts || []).length;
+    if (missingHotel && (search.parts?.transport_parts || []).length) notes.unshift('Транспорт найден отдельно. Проживание не подобрано, общая цена поездки не подтверждена.');
+    if (trip) {
+        trip.warnings = [...new Set([...notes, ...(trip.warnings || []).filter(note => /[а-яё]/i.test(note) && !/^\//.test(note))])];
+        trip.requestConfig = config;
+        trip.providerIssues = search.parts?.errors || [];
+        trip.totals.transferMinor = null;
+        trip.totals.activitiesMinor = null;
+        if (missingHotel) { trip.totals.hotelsMinor = null; trip.totals.totalMinor = null; }
+        trip.partial = missingHotel || !trip.routeId;
+    }
+    return { trip, message: notes.join('\n') || (trip ? 'Результаты поиска готовы.' : 'Подходящих вариантов не найдено. Измените даты или требования.'), actions: [], questions: [], tripConfig: config, searched: true, providerIssues: search.parts?.errors || [] };
 }
 function addDays(iso, nights) {
     const [year, month, day] = String(iso).split('-').map(Number);
@@ -312,7 +371,7 @@ function applyCriteria(request, criteria) {
     else
         delete next.travelers.pets;
     if (criteria.budgetMinor > 0)
-        next.budget = { ...(request?.budget || {}), total: criteria.budgetMinor, scope: request?.budget?.scope || 'total' };
+        next.budget = { ...(request?.budget || {}), total: criteria.budgetMinor / 100, scope: request?.budget?.scope || 'total' };
     if (!next.transport)
         next.transport = { modes: ['plane', 'train'], round_trip: true };
     if (!next.hotel)
@@ -337,7 +396,7 @@ export const api = {
         if (!isDemo) {
             const sessionId = trip?.id || getSessionId();
             const raw = await request(`${sessionPath(sessionId)}/messages`, { method: 'POST', body: { text } });
-            return searchReady(sessionId, chatFromDialog(raw));
+            return pendingDialog(raw);
         }
         await pause();
         const current = trip?.criteria || DEFAULT_CRITERIA;
@@ -370,42 +429,67 @@ export const api = {
     },
     async submitAnswers(sessionId, answers) {
         const raw = await request(`${sessionPath(sessionId)}/answers`, { method: 'POST', body: { answers } });
-        return searchReady(sessionId, chatFromDialog(raw));
+        return pendingDialog(raw);
     },
     async selectIdea(sessionId, ideaId, comment = '') {
         const raw = await request(`${sessionPath(sessionId)}/ideas`, { method: 'POST', body: { idea_id: ideaId, comment } });
-        return searchReady(sessionId, chatFromDialog(raw));
+        return pendingDialog(raw);
+    },
+    async capabilities(sessionId) {
+        return request(`${sessionPath(sessionId)}/capabilities`);
+    },
+    async restoreSession(sessionId) {
+        const session = await request(sessionPath(sessionId));
+        let dialog = {};
+        const messages = [];
+ const answerDraft = {};
+        for (const message of session.messages || []) {
+            if (message.role === 'user') {
+ let text = message.text;
+ try {const answers = JSON.parse(text); if (Array.isArray(answers) && answers.every(answer => answer.question_id && typeof answer.text === 'string')) { for (const answer of answers) answerDraft[answer.question_id] = answer.text; text = answers.map(answer => answer.text).join(', '); }} catch {}
+ messages.push({ role: 'user', text }); continue;
+ }
+            try {
+                const turn = JSON.parse(message.text);
+                if (turn.response && (turn.kind === 'planning_turn' || turn.state === 'config_updated')) {
+                    const item = chatFromDialog(turn.response);
+                    messages.push({ role: 'assistant', text: item.message, questions: item.questions, actions: item.actions });
+                    dialog = item;
+                }
+            } catch {}
+        }
+        const current = await request(`${sessionPath(sessionId)}/config`);
+        return { ...dialog, tripConfig: current.config?.request || null, messages, answerDraft, trip: null };
     },
     async getRoutes(sessionId) {
         const search = await request(`${sessionPath(sessionId)}/routes`);
-        const notes = searchNotes(search);
-        const trip = tripFromSearch(search, sessionId);
-        if (trip)
-            trip.warnings = [...notes, ...(trip.warnings || [])];
-        return { trip, message: notes.join('\n'), actions: [], questions: [] };
+        const stored = await request(`${sessionPath(sessionId)}/config`);
+        return searchResult(search, sessionId, stored?.config?.request);
+    },
+    async saveRequest(sessionId, tripRequest) {
+        const saved = await request(`${sessionPath(sessionId)}/config`, { method: 'PATCH', body: { config: { version: '1.0', request: tripRequest } } });
+        return { trip: null, tripConfig: saved.config?.request || tripRequest, readyForSearch: true, message: 'Параметры сохранены. Проверьте их и подтвердите поиск.', questions: [], actions: [] };
+    },
+    async confirmSearch(sessionId, tripRequest) {
+        const capabilities = await api.capabilities(sessionId);
+        if (tripRequest?.hotel?.needed !== false && capabilities.hotels?.status !== 'available') throw new Error('Поиск отелей не подключён. Выберите «Искать только транспорт» или подключите гостиничного провайдера.');
+        await api.saveRequest(sessionId, tripRequest);
+        await request(`${sessionPath(sessionId)}/confirm`, { method: 'POST', body: {} });
+        const search = await request(`${sessionPath(sessionId)}/search`, { method: 'POST', body: {} });
+        return searchResult(search, sessionId, tripRequest);
     },
     async updateConfig(sessionId, criteria) {
         const current = await request(`${sessionPath(sessionId)}/config`);
-        const config = current.config && typeof current.config === 'object' ? { ...current.config } : { version: '1.0' };
-        config.version = config.version || '1.0';
-        config.request = applyCriteria(config.request, criteria);
-        await request(`${sessionPath(sessionId)}/config`, { method: 'PATCH', body: { config } });
-        await request(`${sessionPath(sessionId)}/confirm`, { method: 'POST', body: {} });
-        const search = await request(`${sessionPath(sessionId)}/search`, { method: 'POST', body: {} });
-        const notes = searchNotes(search);
-        const trip = tripFromSearch(search, sessionId);
-        if (trip)
-            trip.warnings = [...notes, ...(trip.warnings || [])];
-        return {
-            trip,
-            message: notes.length ? notes.join('\n') : 'Параметры сохранены. Ищу варианты.',
-            actions: [],
-            questions: []
-        };
+        return api.saveRequest(sessionId, applyCriteria(current.config?.request, criteria));
     },
     async selectOffer(trip, type, itemId, offerId) {
-        if (!isDemo)
-            return request(`/trips/${encodeURIComponent(trip.id)}/selection`, { method: 'PATCH', body: { type, itemId, offerId, revision: trip.revision } });
+        if (!isDemo) {
+            const candidates = trip.routeCandidates || [];
+            const chosen = candidates.find(candidate => type === 'hotel' ? (candidate.hotels || (candidate.hotel ? [candidate.hotel] : [])).some(hotel => hotel.id === offerId) : (candidate.transport || []).some(part => part.id === offerId || `${part.id}-return` === offerId));
+            if (!chosen) throw new Error('Этот вариант не входит в подтверждённые маршруты. Обновите поиск.');
+            const next = tripFromSearch({ candidates }, trip.id, trip.requestConfig, chosen.id);
+            return { trip: next };
+        }
         await pause();
         const item = type === 'hotel' ? trip.stops.find(s => s.id === itemId) : trip.segments.find(s => s.id === itemId);
         const offers = type === 'hotel' ? item?.hotelOptions : item?.options;
@@ -416,8 +500,15 @@ export const api = {
         return { trip: next };
     },
     async book(trip, requestId) {
-        if (!isDemo)
-            return request(`/trips/${encodeURIComponent(trip.id)}/bookings`, { method: 'POST', body: { revision: trip.revision, demo: true }, requestId });
+        if (!isDemo) {
+            if (!trip.routeId) throw new Error('Сначала выберите маршрут из актуальной выдачи.');
+            const order = await request('/orders', { method: 'POST', body: { session_id: trip.id, route_id: trip.routeId }, requestId });
+            const result = { booking: { id: order.order_id, status: order.status, demo: order.mode === 'demo', createdAt: new Date().toISOString() }, trip: { ...trip, status: 'booked' } };
+            const key = `api-history:${getUserId()}`;
+            const history = readStorage(key, []);
+            if (!history.some(item => item.booking.id === result.booking.id)) writeStorage(key, [result, ...history]);
+            return result;
+        }
         await pause();
         return { booking: { id: `DEMO-${requestId.replace(/-/g, '').slice(0, 8).toUpperCase()}`, status: 'confirmed_demo', createdAt: new Date().toISOString(), demo: true }, trip: { ...trip, status: 'booked' } };
     },
@@ -437,13 +528,28 @@ export const api = {
         return { profile };
     },
     async getHistory() {
-        if (!isDemo)
-            return request('/me/trips');
+        if (!isDemo) {
+            const saved = readStorage(`api-history:${getUserId()}`, []);
+            const verified = await Promise.all(saved.map(async item => {
+                try {
+                    const order = await request(`/orders/${encodeURIComponent(item.booking.id)}`);
+                    return { ...item, booking: { ...item.booking, status: order.status } };
+                } catch (error) {
+                    if (error.status === 404) return null;
+                    throw error;
+                }
+            }));
+            return { trips: verified.filter(Boolean) };
+        }
         return { trips: readStorage('history', []) };
     },
     async getTrip(id) {
-        if (!isDemo)
-            return request(`/trips/${encodeURIComponent(id)}`);
+        if (!isDemo) {
+            const history = await this.getHistory();
+            const saved = history.trips.find(item => item.trip.id === id);
+            if (!saved) throw new Error('Заказ больше не доступен в текущем backend.');
+            return { trip: saved.trip };
+        }
         const trip = readStorage('history', []).find(item => item.trip.id === id)?.trip;
         if (!trip)
             throw new Error('Не удалось найти эту поездку.');

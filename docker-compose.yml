@@ -1,23 +1,218 @@
 services:
-  ai-service:
-    platform: linux/amd64
-    build: ./ai-service
-    env_file: .env
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
     environment:
-      APP_PORT: ${APP_PORT:-8080}
-      GRPC_PORT: ${GRPC_PORT:-9090}
+      HTTP_PORT: "8080"
+      LLM_TIMEOUT: ${LLM_TIMEOUT:-180s}
+      TRAVEL_GRPC_ADDR: travel-service:50051
+      SESSION_GRPC_ADDR: session-service:50052
+      USER_GRPC_ADDR: user-service:50053
+      ORDER_GRPC_ADDR: order-service:50054
+      MAP_GRPC_ADDR: map-service:50056
+      AUTH_DATA_FILE: /app/data/auth.json
+    volumes:
+      - auth-data:/app/data
+    ports:
+      - "8080:8080"
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      travel-service:
+        condition: service_healthy
+      session-service:
+        condition: service_healthy
+      map-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  travel-service:
+    env_file:
+      - path: .env
+        required: false
+    build:
+      context: .
+      dockerfile: travel-service/Dockerfile
+    environment:
+      GRPC_PORT: "50051"
+      SESSION_GRPC_ADDR: session-service:50052
+      AI_GRPC_ADDR: ai-service:50055
+      MAP_GRPC_ADDR: map-service:50056
+      ROUTE_GRPC_ADDR: route-service:50057
+      PROVIDER_GRPC_ADDR: provider-service:50058
+    depends_on:
+      session-service:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
+      map-service:
+        condition: service_healthy
+      route-service:
+        condition: service_healthy
+      provider-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "50051"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  session-db:
+    image: postgres:16.6-alpine
+    environment:
+      POSTGRES_USER: session
+      POSTGRES_PASSWORD: ${SESSION_DB_PASSWORD:-local-session}
+      POSTGRES_DB: session
+    volumes:
+      - session-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U session -d session"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  session-service:
+    build:
+      context: .
+      dockerfile: session-service/Dockerfile
+    environment:
+      GRPC_PORT: "50052"
+      SESSION_REPOSITORY: postgres
+      SESSION_POSTGRES_DSN: postgres://session:${SESSION_DB_PASSWORD:-local-session}@session-db:5432/session?sslmode=disable
+      SESSION_PREVIOUS_CHATS_LIMIT: "4"
+    depends_on:
+      session-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "50052"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    environment:
+      GRPC_PORT: "50053"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "50053"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    environment:
+      GRPC_PORT: "50054"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "50054"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  ai-service:
+    build: ./ai-service
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      APP_PORT: "8090"
+      GRPC_PORT: "50055"
       LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434/v1}
       LLM_MODEL: ${LLM_MODEL:-travel-qwen:4b}
       LLM_TIMEOUT: ${LLM_TIMEOUT:-180s}
     ports:
-      - "8080:8080"
-      - "9090:9090"
+      - "127.0.0.1:8090:8090"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     stop_grace_period: 200s
     healthcheck:
       test: ["CMD", "/server", "healthcheck"]
-      interval: 15s
+      interval: 5s
       timeout: 3s
-      retries: 3
+      retries: 12
+
+  map-service:
+    build:
+      context: .
+      dockerfile: map-service/Dockerfile
+    environment:
+      GRPC_PORT: "50056"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "50056"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  route-service:
+    build:
+      context: .
+      dockerfile: route-service/Dockerfile
+    environment:
+      GRPC_PORT: "50057"
+      PROVIDER_GRPC_ADDR: provider-service:50058
+    depends_on:
+      provider-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "50057"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  provider-service:
+    build:
+      context: .
+      dockerfile: provider-service/Dockerfile
+    environment:
+      GRPC_HOST: "0.0.0.0"
+      GRPC_PORT: "50058"
+      PROVIDER_MODE: ${PROVIDER_MODE:-demo}
+    env_file:
+      - path: .env
+        required: false
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "50058"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  session-data:
+  auth-data:

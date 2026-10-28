@@ -19,6 +19,7 @@ import (
 )
 
 type agentTurn struct {
+	State     string               `json:"state,omitempty"`
 	Kind      string               `json:"kind"`
 	Response  json.RawMessage      `json:"response"`
 	Questions []*commonv1.Question `json:"questions"`
@@ -100,7 +101,14 @@ func (c *PlanningController) record(ctx context.Context, userID, id, userText st
 	if planning {
 		kind = "planning_turn"
 	}
-	stored, err := json.Marshal(agentTurn{Kind: kind, Response: data, Questions: questions, Ideas: ideas})
+	state := ""
+	switch response.(type) {
+	case *pb.UpdateConfigResponse:
+		state = "config_updated"
+	case *pb.ConfirmConfigResponse:
+		state = "confirmed"
+	}
+	stored, err := json.Marshal(agentTurn{State: state, Kind: kind, Response: data, Questions: questions, Ideas: ideas})
 	if err != nil {
 		return status.Error(codes.Internal, "context encoding failed")
 	}
@@ -137,7 +145,7 @@ func (c *PlanningController) recommend(ctx context.Context, loaded *sessionv1.Ge
 		}
 		previous = append(previous, &aiv1.PreviousSession{Context: &aiv1.ConversationContext{Summary: tail(chat.GetSummary(), 3000)}})
 	}
-	ideas, err := c.ai.GenerateRecommendations(c.agentContext(ctx), &aiv1.GenerateRecommendationsRequest{Text: text, Config: result.Config, Context: conversation(loaded), LastSessions: previous, CurrentDate: time.Now().UTC().Format(time.DateOnly)})
+	ideas, err := c.ai.GenerateRecommendations(c.agentContext(ctx), &aiv1.GenerateRecommendationsRequest{Text: text, Config: modelConfig(result.Config), Context: conversation(loaded), LastSessions: previous, CurrentDate: time.Now().UTC().Format(time.DateOnly)})
 	if err != nil {
 		return err
 	}
@@ -160,7 +168,7 @@ func (c *PlanningController) PlanTrip(ctx context.Context, r *pb.PlanTripRequest
 	if c.ai == nil {
 		return nil, status.Error(codes.Unavailable, "AI client not configured")
 	}
-	got, err := c.ai.GenerateOrUpdateConfig(c.agentContext(ctx), &aiv1.GenerateOrUpdateConfigRequest{SessionId: r.GetSessionId(), Text: r.GetText(), Config: loaded.GetCfg(), Context: conversation(loaded), CurrentDate: time.Now().UTC().Format(time.DateOnly)})
+	got, err := c.ai.GenerateOrUpdateConfig(c.agentContext(ctx), &aiv1.GenerateOrUpdateConfigRequest{SessionId: r.GetSessionId(), Text: r.GetText(), Config: modelConfig(loaded.GetCfg()), Context: conversation(loaded), CurrentDate: time.Now().UTC().Format(time.DateOnly)})
 	if err != nil {
 		return nil, err
 	}
@@ -171,6 +179,8 @@ func (c *PlanningController) PlanTrip(ctx context.Context, r *pb.PlanTripRequest
 	if err = c.recommend(ctx, loaded, &result, r.GetText()); err != nil {
 		return nil, err
 	}
+	limitClarifications(loaded, &result)
+	result.Config = retainResolved(loaded.GetCfg(), result.Config)
 	out := &pb.PlanTripResponse{SessionId: r.GetSessionId(), Intent: result.Status, Config: result.Config, Questions: result.Questions, ReadyForSearch: result.Status == "generate", Advice: result.Advice, Summary: result.Summary, MissingFields: result.MissingFields, Warnings: result.Warnings}
 	if err = c.finishAgent(ctx, loaded, result, r.GetText(), out); err != nil {
 		return nil, err
@@ -191,7 +201,7 @@ func (c *PlanningController) SubmitAnswers(ctx context.Context, r *pb.SubmitAnsw
 	if len(r.GetAnswers()) == 0 || len(turn.Questions) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "answers require saved questions")
 	}
-	got, err := c.ai.UpdateConfig(c.agentContext(ctx), &aiv1.UpdateConfigRequest{SessionId: r.GetSessionId(), Config: loaded.GetCfg(), Context: conversation(loaded), Questions: turn.Questions, Answers: r.GetAnswers(), CurrentDate: time.Now().UTC().Format(time.DateOnly)})
+	got, err := c.ai.UpdateConfig(c.agentContext(ctx), &aiv1.UpdateConfigRequest{SessionId: r.GetSessionId(), Config: modelConfig(loaded.GetCfg()), Context: conversation(loaded), Questions: turn.Questions, Answers: r.GetAnswers(), CurrentDate: time.Now().UTC().Format(time.DateOnly)})
 	if err != nil {
 		return nil, err
 	}
@@ -204,6 +214,8 @@ func (c *PlanningController) SubmitAnswers(ctx context.Context, r *pb.SubmitAnsw
 	if err = c.recommend(ctx, loaded, &result, text); err != nil {
 		return nil, err
 	}
+	limitClarifications(loaded, &result)
+	result.Config = retainResolved(loaded.GetCfg(), result.Config)
 	out := &pb.SubmitAnswersResponse{SessionId: r.GetSessionId(), Config: result.Config, Questions: result.Questions, ReadyForSearch: result.Status == "generate", Advice: result.Advice, Summary: result.Summary, MissingFields: result.MissingFields, Warnings: result.Warnings}
 	if err = c.finishAgent(ctx, loaded, result, text, out); err != nil {
 		return nil, err
@@ -230,7 +242,7 @@ func (c *PlanningController) SelectIdea(ctx context.Context, r *pb.SelectIdeaReq
 	if selected == nil {
 		return nil, status.Error(codes.InvalidArgument, "idea_id must match a saved idea")
 	}
-	got, err := c.ai.RefineConfig(c.agentContext(ctx), &aiv1.RefineConfigRequest{SessionId: r.GetSessionId(), Text: r.GetComment(), SelectedIdea: selected, Config: loaded.GetCfg(), Context: conversation(loaded), CurrentDate: time.Now().UTC().Format(time.DateOnly)})
+	got, err := c.ai.RefineConfig(c.agentContext(ctx), &aiv1.RefineConfigRequest{SessionId: r.GetSessionId(), Text: r.GetComment(), SelectedIdea: selected, Config: modelConfig(loaded.GetCfg()), Context: conversation(loaded), CurrentDate: time.Now().UTC().Format(time.DateOnly)})
 	if err != nil {
 		return nil, err
 	}
@@ -238,6 +250,8 @@ func (c *PlanningController) SelectIdea(ctx context.Context, r *pb.SelectIdeaReq
 		return nil, status.Error(codes.DataLoss, "AI returned no response")
 	}
 	result := agentResult{Status: got.GetStatus(), Config: got.GetConfig(), Questions: got.GetQuestions(), Advice: got.GetAdvice(), Summary: got.GetSummary(), MissingFields: got.GetMissingFields(), Warnings: got.GetWarnings()}
+	limitClarifications(loaded, &result)
+	result.Config = retainResolved(loaded.GetCfg(), result.Config)
 	out := &pb.SelectIdeaResponse{SessionId: r.GetSessionId(), Config: result.Config, Questions: result.Questions, Advice: result.Advice, Summary: result.Summary, MissingFields: result.MissingFields, Warnings: result.Warnings, ReadyForSearch: result.Status == "generate"}
 	if err = c.finishAgent(ctx, loaded, result, "Выбрана идея "+r.GetIdeaId()+". "+r.GetComment(), out); err != nil {
 		return nil, err
