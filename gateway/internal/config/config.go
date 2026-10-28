@@ -3,7 +3,8 @@ package config
 import "github.com/caarlos0/env/v10"
 
 type Config struct {
-	HTTP struct {
+	AuthDataFile string `env:"AUTH_DATA_FILE" envDefault:"data/auth.json"`
+	HTTP         struct {
 		Port string `env:"HTTP_PORT" envDefault:"8080"`
 	}
 
@@ -12,6 +13,7 @@ type Config struct {
 		SessionAddr string `env:"SESSION_GRPC_ADDR" envDefault:"127.0.0.1:50052"`
 		UserAddr    string `env:"USER_GRPC_ADDR" envDefault:"127.0.0.1:50053"`
 		OrderAddr   string `env:"ORDER_GRPC_ADDR" envDefault:"127.0.0.1:50054"`
+		MapAddr     string `env:"MAP_GRPC_ADDR" envDefault:"127.0.0.1:50056"`
 	}
 }
 

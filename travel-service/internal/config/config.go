@@ -8,10 +8,11 @@ type Config struct {
 	}
 
 	Clients struct {
-		SessionAddr string `env:"SESSION_GRPC_ADDR" envDefault:"127.0.0.1:50052"`
-		AIAddr      string `env:"AI_GRPC_ADDR" envDefault:"127.0.0.1:50055"`
-		MapAddr     string `env:"MAP_GRPC_ADDR" envDefault:"127.0.0.1:50056"`
-		RouteAddr   string `env:"ROUTE_GRPC_ADDR" envDefault:"127.0.0.1:50057"`
+		SessionAddr  string `env:"SESSION_GRPC_ADDR" envDefault:"127.0.0.1:50052"`
+		AIAddr       string `env:"AI_GRPC_ADDR" envDefault:"127.0.0.1:50055"`
+		MapAddr      string `env:"MAP_GRPC_ADDR" envDefault:"127.0.0.1:50056"`
+		RouteAddr    string `env:"ROUTE_GRPC_ADDR" envDefault:"127.0.0.1:50057"`
+		ProviderAddr string `env:"PROVIDER_GRPC_ADDR" envDefault:"127.0.0.1:50058"`
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/godnota/gateway/docs"
+	"github.com/godnota/gateway/internal/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -45,6 +46,7 @@ type route struct {
 }
 
 var routes = []route{
+	{pattern: "POST /api/providers/map", operation: "/v1/map/config"},
 	{pattern: "POST /api/sessions", operation: "/v1/session/create"},
 	{pattern: "GET /api/sessions/{session_id}", operation: "/v1/session/get", pathFields: []string{"session_id"}},
 	{pattern: "POST /api/sessions/{session_id}/messages", operation: "/v1/travel/plan", pathFields: []string{"session_id"}},
@@ -64,7 +66,12 @@ var routes = []route{
 }
 
 func Handler(backend Backend) http.Handler {
+	return HandlerWithAuth(backend, nil)
+}
+
+func HandlerWithAuth(backend Backend, store *auth.Store) http.Handler {
 	mux := http.NewServeMux()
+	registerAuth(mux, store)
 	docs.Register(mux)
 	mux.HandleFunc("GET /health", health)
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -74,14 +81,24 @@ func Handler(backend Backend) http.Handler {
 		mux.HandleFunc(spec.pattern, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("Cache-Control", "no-store")
+			user, err := authenticate(store, r)
+			if err != nil {
+				writeError(w, err)
+				return
+			}
 			raw, err := requestDTO(w, r, spec)
 			if err != nil {
 				writeError(w, err)
 				return
 			}
-			slog.Info("gateway request", "method", r.Method, "path", r.URL.Path, "operation", spec.operation, "body", string(raw))
+			slog.Info("gateway request", "method", r.Method, "operation", spec.operation)
 			ctx, cancel := context.WithTimeout(r.Context(), backendTimeout)
 			defer cancel()
+			raw, err = authorize(ctx, backend, user, spec, raw)
+			if err != nil {
+				writeError(w, err)
+				return
+			}
 			response, err := backend.Call(ctx, spec.operation, raw)
 			if err != nil {
 				writeError(w, err)
@@ -162,6 +179,11 @@ func requestDTO(w http.ResponseWriter, r *http.Request, spec route) (json.RawMes
 		}
 		fields[key], _ = json.Marshal(r.PathValue(key))
 	}
+	for _, alias := range []string{"userId", "sessionId", "orderId"} {
+		if _, exists := fields[alias]; exists {
+			return invalid("use snake_case identifiers")
+		}
+	}
 	return json.Marshal(fields)
 }
 
@@ -199,6 +221,9 @@ func writeError(w http.ResponseWriter, err error) {
 	}[public.Code]
 	if httpStatus == 0 {
 		httpStatus = http.StatusInternalServerError
+	}
+	if httpStatus == http.StatusUnauthorized {
+		w.Header().Set("WWW-Authenticate", "Bearer")
 	}
 	w.WriteHeader(httpStatus)
 	_ = json.NewEncoder(w).Encode(public)

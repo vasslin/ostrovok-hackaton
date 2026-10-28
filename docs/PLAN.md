@@ -72,7 +72,7 @@ model: text answer, stop_reason = "end_turn"      ← the UI already shows the c
 The core loop, in pseudo-code (the same shape in any language or SDK):
 
 ```text
-messages = [system prompt, user message, today's date + compact trip state]
+messages = [analysis context, user message, today's date + compact trip state]
 loop:
     reply = llm.chat(messages, functions=TOOLS)
     append reply to messages
@@ -93,7 +93,7 @@ loop:
 - **One request at a time** on the free package. Queue LLM calls in the ai-service; evals run sequentially.
 - **One function call per reply**, in OpenAI's older format: `functions` in the request, `function_call` in the reply, and the result goes back as a `role: "function"` message. So make tools chunky: one call should do a lot of work in code.
 - If you use LiteLLM: model `gigachat/GigaChat-2-Max`, credentials in `GIGACHAT_CREDENTIALS`, pass `ssl_verify=False` (or install the certificate). Version 1.106.4 fails on `tools` without the `mcp` package: `pip install mcp`.
-- Keep the system prompt and the function list identical between calls, and put today's date and the trip state in the newest message.
+- Keep the analysis context and the function list identical between calls, and put today's date and the trip state in the newest message.
 - Keep every LLM call in one module, so switching models later touches nothing else.
 
 **Framework?** Not needed. LangGraph, Google ADK or CrewAI add concepts and latency. One agent with about 12 good tools plus deterministic Python is faster to build, easier to debug and more reliable. Multi-agent setups look good on slides but break more often on unseen queries.
@@ -129,23 +129,23 @@ Strategy: **real where it's free and reliable, generated where it isn't, labeled
 |---|---|---|---|---|
 | City → coordinates, country | Nominatim (OpenStreetMap) | real | no | 1 request/s, needs a User-Agent; cache |
 | Hotels: names, locations, stars, tags | OSM Overpass (`tourism=hotel`, `stars=*`) | real | no | public servers are rate-limited, so pre-fetch and cache |
-| Prices, availability, rooms, meal plans, cancellation rules, check-in times, kid and pet policies | our generator, seeded by hotel id (city price level × stars × season × noise) | synthetic | — | stable across calls; badge «демо-цены» |
+| Prices, availability, rooms, meal plans, cancellation rules, check-in times, kid and pet policies | our generator, seeded by hotel id (city price level × stars × season × noise) | synthetic | - | stable across calls; badge «демо-цены» |
 | Reviews of Russian hotels | Yandex Geo Reviews Dataset 2023 (~500k reviews of Russian businesses, hotels included) | real | no | check the license |
-| Reviews elsewhere | LLM-generated per guest type, consistent with the hotel's attributes | synthetic | — | generate once, store |
+| Reviews elsewhere | LLM-generated per guest type, consistent with the hotel's attributes | synthetic | - | generate once, store |
 | Air temperature and rain for a month | Open-Meteo Historical Weather (ERA5, 1940 to now) | real | no | average the same month over recent years |
 | Forecast for trips within ~2 weeks | Open-Meteo Forecast | real | no | |
 | **Sea temperature** | Open-Meteo Marine API, `sea_surface_temperature` | real | no | history from 2022 → «море в ноябре: X °C» from real data |
 | Flight and train schedules from and within Russia | Yandex Rasp API v3 (Яндекс Расписания) | real | free key | use the `api.rasp.yandex-net.ru` domain; attribution required |
-| Flight prices (Russian market) | Travelpayouts / Aviasales Data API (cheapest prices users found in the last 2–7 days) | real, cached | free partner token | check the access rules; otherwise generate |
-| Flight duration and price fallback | great-circle distance between airports → duration and price model | synthetic | — | |
+| Flight prices (Russian market) | Travelpayouts / Aviasales Data API (cheapest prices users found in the last 2-7 days) | real, cached | free partner token | check the access rules; otherwise generate |
+| Flight duration and price fallback | great-circle distance between airports → duration and price model | synthetic | - | |
 | Airports, IATA codes | OurAirports CSV | real | no | public domain |
 | Transfer drive time and distance | OSRM (OSM routing) | real | no | the demo server is rate-limited; cache |
-| Transfer prices | per-km tariff by city | synthetic | — | |
+| Transfer prices | per-km tariff by city | synthetic | - | |
 | Visa rules for a Russian passport | passport-index-dataset (GitHub), or a hand-made table for ~40 destinations | real / curated | no | check it's up to date |
 | Holidays (crowds, price peaks) | Nager.Date API | real | no | |
 | Exchange rates | Central Bank of Russia daily XML | real | no | |
 | Destination text and photos | Wikivoyage / Wikipedia, Wikimedia Commons | real | no | CC BY-SA attribution |
-| **Destination catalog** ("where to go") | hand-curated 50–80 places popular with travelers from Russia, tagged: sea, ski, city, nature, kids, visa, direct flights | curated | — | the inspiration stage depends on it |
+| **Destination catalog** ("where to go") | hand-curated 50-80 places popular with travelers from Russia, tagged: sea, ski, city, nature, kids, visa, direct flights | curated | - | the inspiration stage depends on it |
 
 **Dead ends, don't start there:**
 - **Amadeus Self-Service APIs** shut down on **2026-07-17**. Tutorials built on them no longer work.
@@ -171,7 +171,7 @@ Strategy: **real where it's free and reliable, generated where it isn't, labeled
              │  SSE: text chunks + UI events (cards, checks, diffs)   │
 ┌────────────▼────────────────────────── FastAPI backend ────────────▼──────────┐
 │  Agent loop (LLM API, function calls)                                          │
-│    system prompt (rules)  +  today's date & trip state each turn               │
+│    analysis context (rules)  +  today's date & trip state each turn               │
 │    └─ tools ──► Planner core: plain, deterministic, unit-tested Python         │
 │                  brief · destinations · hotels · transport · transfers        │
 │                  ranking & total trip cost · checks · plan versions & diffs   │
@@ -239,7 +239,7 @@ Show `assumptions` as chips in the UI. A click edits the brief, which triggers r
 |---|---|
 | `update_brief(patch)` | Merges explicit and inferred needs, records assumptions. Returns missing blocking fields and which parts of the plan are now stale. Called on every new user input |
 | `ask_user(question, options)` | Shows a question with quick-reply buttons; the turn ends |
-| `suggest_destinations(...)` | Scores the catalog: climate and sea temperature for the dates, door-to-door time from the origin, estimated total for the party, visa, tags → top 3–5 with reasons |
+| `suggest_destinations(...)` | Scores the catalog: climate and sea temperature for the dates, door-to-door time from the origin, estimated total for the party, visa, tags → top 3-5 with reasons |
 | `search_transport(origin, dest, dates, pax, mode)` | Flights and/or trains with times, duration, price, baggage, pet rules |
 | `search_hotels(dest, dates, guests, filters)` | Top N with score breakdown and total trip cost |
 | `get_hotel(hotel_id, dates)` | All rates (meals × cancellation), policies, "best for / not for", review summary. Like a B2B "hotel page" |
@@ -270,14 +270,14 @@ Each tool also pushes a UI event (`destinations`, `hotels`, `plan`, `diff`, `car
 | Budget | total > budget (hard) or > +10% (soft) | cheaper swaps, saying what you lose |
 | Documents | visa needed; passport validity; time to get a visa before departure | warning |
 | Weather | rainy season; cool sea for small kids | info / warning |
-| Time zones | every time shown in local time at its place | — |
+| Time zones | every time shown in local time at its place | - |
 
 ### 5.5 Ranking and "total trip cost"
 
 - `score = Σ weight × criterion_score`, each criterion in [0, 1]: price fit, location (beach / center / venue), meals, cancellation flexibility, family fit, pet fit, quietness, rating, door-to-door time, timing fit (arrival vs check-in).
 - Weights start from the brief (family → family fit and meals up; tight budget → price up). The user can edit them in the UI.
-- **Total trip cost** = hotel + transport for everyone + transfers + fees (early check-in, pets, baggage) + an estimate for meals not included. That answers the task's «не съест ли трансфер всю экономию на отеле» with numbers: «Отель B дешевле на 6 000 ₽, но трансфер туда-обратно 7 400 ₽ — итого B дороже».
-- Explanations: the LLM writes 2–3 lines from the score breakdown: top reasons (why), weakest criterion (trade-off), failed checks (risks). Grounded, short, consistent.
+- **Total trip cost** = hotel + transport for everyone + transfers + fees (early check-in, pets, baggage) + an estimate for meals not included. That answers the task's «не съест ли трансфер всю экономию на отеле» with numbers: «Отель B дешевле на 6 000 ₽, но трансфер туда-обратно 7 400 ₽ - итого B дороже».
+- Explanations: the LLM writes 2-3 lines from the score breakdown: top reasons (why), weakest criterion (trade-off), failed checks (risks). Grounded, short, consistent.
 
 ### 5.6 Re-planning (task 6)
 
@@ -306,20 +306,20 @@ Each change creates plan v(n+1) plus a **diff card**: each component unchanged /
 
 - Pull everything you can from the first message, then fill gaps with sensible defaults: home city from memory; «ноябрь» → flexible dates in November, 7 nights; «недорого» → a budget band for this party and destination.
 - Ask only when a missing value blocks a sensible search or changes the price a lot: origin if unknown, rough dates if none, and children's ages when «с ребёнком» comes without an age (it changes prices and rules).
-- At most 1–2 questions per turn, each with quick-reply buttons and a «подбери без этого» option.
+- At most 1-2 questions per turn, each with quick-reply buttons and a «подбери без этого» option.
 - Show every assumption as an editable chip: «Вылет из Москвы ✎», «7 ночей ✎», «До 150 000 ₽ ✎».
-- Act first, refine later: show 3 destinations right after at most one round of questions. Target time to first recommendation: under ~30–40 s.
+- Act first, refine later: show 3 destinations right after at most one round of questions. Target time to first recommendation: under ~30-40 s.
 - Never pay without an explicit «Оплатить» from the user.
 - Resolve dates in code, not in the LLM: «через две недели», «на майские», «на выходных». Today's date is sent every turn.
 
 ### 6.2 Hidden requirements → explicit
 
-Put this table in the system prompt, and use the same presets in code:
+Put this table in the analysis context, and use the same presets in code:
 
 | They say | It implies |
 |---|---|
 | «с ребёнком» | ask the age; family room; kids' club or pool; gentle sandy beach; no night flights; child seat in the transfer |
-| «без долгих перелётов» | ≤ ~4–5 h; direct flights; door-to-door time matters |
+| «без долгих перелётов» | ≤ ~4-5 h; direct flights; door-to-door time matters |
 | «недорого» | a value band, not the cheapest at any cost; show total trip cost |
 | «с собакой» | pet-friendly hotel (weight limits, fee); airline or train pet rules; a car that allows pets; vet papers when crossing borders |
 | «медовый месяц» | adults-only or quiet; sea view; romantic extras |
@@ -333,28 +333,22 @@ Put this table in the system prompt, and use the same presets in code:
 «Хочу куда-нибудь к тёплому морю в ноябре, недорого, с ребёнком, без долгих перелётов»
 
 1. **Brief:** warm sea (hard); November, flexible dates; budget "low" (soft, needs a number); 2 adults (assumed) + 1 child (age unknown); flight ≤ ~5 h, direct, daytime (hidden); mood: relaxed family beach.
-2. **One question:** «Откуда летите и сколько лет ребёнку?» [Москва] [Санкт-Петербург] [другое] · [до 2] [2–6] [7–12] [13+]. The assumption chips are shown next to it.
+2. **One question:** «Откуда летите и сколько лет ребёнку?» [Москва] [Санкт-Петербург] [другое] · [до 2] [2-6] [7-12] [13+]. The assumption chips are shown next to it.
 3. **3 destinations**, for example Hurghada (warmest sea, ~5 h, cheapest all-inclusive) · Antalya (shortest flight, but the sea is cooling) · Dubai (warm, pricier). Each comes with the family's total, real sea and air temperatures, flight time and visa rules. Real numbers come from the tools; these are illustrative.
 4. **Pick one** → hotels compared on family fit, kids' club, beach distance, meals and free cancellation, each with why / trade-offs / risks; daytime direct flights; a transfer.
 5. **Plan timeline with checks** («прилёт 14:30 + 25 мин трансфер → заселение 15:00 ✓») → cart → prebook (any price change is shown) → mock payment → confirmation.
 6. **«А если на два дня позже?»** → diff plus price calendar. **«С нами едет собака»** → swap to a pet-friendly hotel with an explanation, airline pet rules added as a risk, a pet-friendly transfer.
 
-### 6.4 System prompt outline (short and stable, so it caches)
+### 6.4 AI response contract
 
-- Role: Ostrovok's travel agent. Reply in the user's language (Russian by default), briefly; the cards carry the details.
-- Process: brief → (destinations) → options → plan → checks → cart → purchase → after-purchase. Call `update_brief` whenever the user adds or changes anything.
-- The question policy (6.1) and the hidden-requirements table (6.2).
-- Grounding: only state hotels, prices, times and policies that came from tools. If a tool has no data, say so.
-- For every recommendation: why it fits, what you give up, risks.
-- Don't move to checkout with failing checks unless the user explicitly accepts the risk.
-- Say plainly that prices and availability are demo data.
+The analysis result includes the updated trip state, missing information, recommendations and provenance. Recommendations contain reasons, trade-offs and risks. Prices, schedules and policies come from provider responses. Demo values carry an explicit synthetic-data label.
 
 ---
 
 ## 7. UI
 
 - **Top:** a stage progress bar in the task's own words: Вдохновение → Направление → Подбор → Сравнение → Сборка → Покупка → После покупки. The jury sees coverage at a glance.
-- **Left:** chat with quick-reply buttons and a live activity feed («Ищу отели в Хургаде на 14–21 ноября для 2+1…», «Проверяю стыковки…»).
+- **Left:** chat with quick-reply buttons and a live activity feed («Ищу отели в Хургаде на 14-21 ноября для 2+1…», «Проверяю стыковки…»).
 - **Right, the trip canvas:**
   - «Что я понял»: brief chips, editable.
   - Destination cards: photo, why, total cost, air and sea temperature, door-to-door time, visa.
@@ -365,7 +359,7 @@ Put this table in the system prompt, and use the same presets in code:
 - **Data badges** (real / cached / synthetic) on numbers, and a «Источники данных» page.
 - **Mobile:** responsive layout with the canvas as tabs. Together with Telegram (a bot, or a Mini App that opens the same web UI) that covers bonus 4.
 
-**Fresh ideas** (the organizers say they value them; pick 2–3): door-to-door time instead of flight time, so plane vs train is compared fairly · price calendar for date shifts · "not for you if…" anti-recommendations · a share link so the family can decide together · voice input in the mobile UI · the tools exposed as an MCP server ("any AI assistant can sell a whole trip through it"; a couple of hours, since the tools are already Python functions).
+**Fresh ideas** (the organizers say they value them; pick 2-3): door-to-door time instead of flight time, so plane vs train is compared fairly · price calendar for date shifts · "not for you if…" anti-recommendations · a share link so the family can decide together · voice input in the mobile UI · the tools exposed as an MCP server ("any AI assistant can sell a whole trip through it"; a couple of hours, since the tools are already Python functions).
 
 ---
 
@@ -376,7 +370,7 @@ backend/
   app/main.py          FastAPI: POST /chat (SSE stream), GET /state, /trips, /metrics
   agent/llm.py         the only module that talks to the LLM API
   agent/loop.py        the agent loop
-  agent/prompts.py     system prompt
+  agent/policy.py     analysis context
   agent/tools.py       tool schemas + dispatch to core/
   core/models.py       TripBrief, Plan, Cart, Booking (Pydantic)
   core/destinations.py core/hotels.py core/transport.py core/transfers.py
@@ -416,7 +410,7 @@ Assumes about a week; earlier editions ran about a week, but **confirm the deadl
 | Day | Goal | Done when |
 |---|---|---|
 | 1 | Skeleton + loop + first tools | you can chat in the terminal and a hotel lands in the cart |
-| 2 | **End to end, ugly (P0):** destinations with Open-Meteo, flights (synthetic first), transfers, `build_plan` with 3–4 checks, mock checkout, a minimal web UI with cards | first message → mock payment works. Commit and record a backup video right away |
+| 2 | **End to end, ugly (P0):** destinations with Open-Meteo, flights (synthetic first), transfers, `build_plan` with 3-4 checks, mock checkout, a minimal web UI with cards | first message → mock payment works. Commit and record a backup video right away |
 | 3 | **Smart:** question policy and assumption chips, why / trade-offs / risks, score breakdown, total trip cost, re-planning with diffs, real data swapped in (OSM, marine, Rasp, Travelpayouts) | all 6 main tasks can be demoed |
 | 4 | **Robust:** eval set + simulated users + metrics; fix failures; edge cases; pre-caching; latency work (parallel tools, streaming, effort level) | completion rate ≥ 90% on your set |
 | 5 | **Bonuses that score:** after-purchase actions, memory, mobile + Telegram, metrics page | each bonus can be shown in under 30 s |
@@ -433,7 +427,7 @@ Assumes about a week; earlier editions ran about a week, but **confirm the deadl
 
 Agree on the interfaces on day 1, then build in parallel against mocks.
 
-- **A, agent:** loop, prompts, brief, question policy, re-planning.
+- **A, agent:** loop, policy, brief, question policy, re-planning.
 - **B, data and core:** providers, synthetic generator, scoring, checks, booking flow, tests.
 - **C, frontend:** chat, canvas, cards, checkout, mobile, Telegram.
 - **D, quality and story:** eval runner, metrics, README, slides, demo script. Also the person who tries to break the agent.
@@ -447,7 +441,7 @@ With 2 people: A+B and C+D. Solo: follow the day plan in order and use Streamlit
 **Test set** (`eval/scenarios.yaml`), 50+ queries in about 10 groups:
 
 - Vague inspiration: «хочу к морю в ноябре недорого с ребёнком», «куда поехать на новогодние, чтобы был снег и не очень дорого»
-- Exact booking: «Казань, 12–14 декабря, двое взрослых, до 8 000 ₽ за ночь, рядом с Кремлём»
+- Exact booking: «Казань, 12-14 декабря, двое взрослых, до 8 000 ₽ за ночь, рядом с Кремлём»
 - Families: infants, teenagers, three generations
 - Pets: «с собакой 15 кг на машине по Золотому кольцу»
 - Tight or impossible: «Мальдивы, 5 звёзд, 30 000 ₽ на двоих на неделю»
@@ -466,7 +460,7 @@ With 2 people: A+B and C+D. Solo: follow the day plan in order and use Streamlit
 |---|---|
 | Completion rate (reached a confirmed mock booking) | ≥ 90% |
 | Clarifying questions before the first recommendation | ≤ 2 |
-| Time to first recommendation | < 30–40 s |
+| Time to first recommendation | < 30-40 s |
 | Connection and policy errors left in final plans | 0 |
 | Hard-constraint violations (budget, pets, kids, flight time) | 0 |
 | Grounding errors (a hotel or price in the text that no tool returned; checked automatically) | 0 |
@@ -480,7 +474,7 @@ Simulated-user runs cost real tokens. Run the full set a few times, not after ev
 
 ## 11. Demo, pitch, README
 
-**Demo script (5–7 min), then the jury's own queries:**
+**Demo script (5-7 min), then the jury's own queries:**
 
 1. Hook (20 s): the 10-tabs pain, plus Ostrovok's own finding that travelers want control → "the agent drives, you keep the wheel".
 2. Live: the vague query → 1 question → 3 destinations with numbers → hotels with why / trade-offs / risks → a plan with a caught problem (early arrival → early check-in offered) → cart → prebook → payment → confirmation.
@@ -495,7 +489,7 @@ Simulated-user runs cost real tokens. Run the full set a few times, not after ev
 **README checklist** (an LLM may read it first):
 
 - [ ] One-paragraph pitch, a GIF or screenshots, links to the live demo and the video.
-- [ ] A table mapping features to main tasks 1–6 and bonuses 1–4.
+- [ ] A table mapping features to main tasks 1-6 and bonuses 1-4.
 - [ ] How to run: `docker compose up` + `.env.example`.
 - [ ] Architecture diagram, the list of tools, the data sources table (real / synthetic).
 - [ ] Metrics results and known limitations.

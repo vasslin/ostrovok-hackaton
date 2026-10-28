@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/godnota/pkg/generated/provider/v1"
 	"github.com/godnota/provider-service/internal/entity"
+	"github.com/ostrovok-hackathon-2026/godnota/providerkit"
 )
 
 type providerService interface {
@@ -14,7 +15,8 @@ type providerService interface {
 }
 
 type Controller struct {
-	service providerService
+	service  providerService
+	searcher *providerkit.Searcher
 }
 
 func New(service providerService) *Controller { return &Controller{service: service} }

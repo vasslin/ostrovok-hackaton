@@ -7,6 +7,7 @@ protoc \
   --go-grpc_out=pkg --go-grpc_opt=module=github.com/godnota/pkg \
   --go-grpc_opt=require_unimplemented_servers=false \
   api/common/v1/trip.proto \
+  api/provider/v1/parts.proto \
   api/session/v1/session.proto \
   api/user/v1/user.proto \
   api/order/v1/order.proto \

@@ -1,4 +1,4 @@
-# open_meteo — погода и температура моря
+# open_meteo - погода и температура моря
 
 **Open-Meteo.** Три ручки на трёх разных хостах (поэтому в `providers.json` три записи):
 
@@ -6,7 +6,7 @@
 |---|---|---|
 | `open_meteo.forecast` | прогноз на ≤16 дней | `api.open-meteo.com` |
 | `open_meteo_archive.archive` | история погоды с 1940 года (ERA5) | `archive-api.open-meteo.com` |
-| `open_meteo_marine.marine` | **температура моря** (история с 2022, прогноз 0–8 дней) | `marine-api.open-meteo.com` |
+| `open_meteo_marine.marine` | **температура моря** (история с 2022, прогноз 0-8 дней) | `marine-api.open-meteo.com` |
 
 **Статус:** ✓ все три проверены 2026-10-25, HTTP 200. **Ключ не нужен.**
 
@@ -27,9 +27,9 @@
 
 Параметры:
 - `latitude`*, `longitude`*;
-- `daily` — через запятую: `temperature_2m_max,temperature_2m_min,precipitation_sum`; `hourly`;
+- `daily` - через запятую: `temperature_2m_max,temperature_2m_min,precipitation_sum`; `hourly`;
 - `timezone=auto`;
-- `forecast_days` (1–16) или `start_date` / `end_date` (`YYYY-MM-DD`).
+- `forecast_days` (1-16) или `start_date` / `end_date` (`YYYY-MM-DD`).
 
 ```bash
 curl -s "https://api.open-meteo.com/v1/forecast?latitude=55.79&longitude=49.12&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&forecast_days=7"
@@ -60,7 +60,7 @@ curl -s "https://api.open-meteo.com/v1/forecast?latitude=55.79&longitude=49.12&d
 curl -s "https://archive-api.open-meteo.com/v1/archive?latitude=55.79&longitude=49.12&start_date=2025-12-12&end_date=2025-12-14&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto"
 ```
 
-Ответ (настоящий: Казань, 12–14 декабря 2025):
+Ответ (настоящий: Казань, 12-14 декабря 2025):
 
 ```json
 {"timezone": "Europe/Moscow",
@@ -76,14 +76,14 @@ curl -s "https://archive-api.open-meteo.com/v1/archive?latitude=55.79&longitude=
 Параметры:
 - `latitude`*, `longitude`*;
 - `hourly=sea_surface_temperature` (или `daily`);
-- `start_date` / `end_date` либо `forecast_days` (0–8);
+- `start_date` / `end_date` либо `forecast_days` (0-8);
 - `timezone`.
 
 ```bash
 curl -s "https://marine-api.open-meteo.com/v1/marine?latitude=27.26&longitude=33.84&hourly=sea_surface_temperature&start_date=2025-11-01&end_date=2025-11-07&timezone=auto"
 ```
 
-Ответ (настоящий: Хургада, 1–7 ноября 2025, 168 часовых значений; первые три):
+Ответ (настоящий: Хургада, 1-7 ноября 2025, 168 часовых значений; первые три):
 
 ```json
 {"timezone": "Africa/Cairo",
@@ -97,5 +97,5 @@ curl -s "https://marine-api.open-meteo.com/v1/marine?latitude=27.26&longitude=33
 ## Подводные камни
 
 - **Время в ответе ISO 8601 без явного смещения** (`2025-11-01T00:00`) и с полем `timezone`. Для дат со сменой летнего времени документация рекомендует `timeformat=unixtime` и преобразование по IANA-зоне; `timezone=auto` само по себе не делает локальные метки однозначными.
-- **Сетка ~5–10 км:** ответ приходит для ближайшей точки сетки, а не для твоих координат. Для моря брать точку **в воде**, а не на берегу.
+- **Сетка ~5-10 км:** ответ приходит для ближайшей точки сетки, а не для твоих координат. Для моря брать точку **в воде**, а не на берегу.
 - **Пропуски:** значения могут быть `null`, считать среднее без них.

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	commonv1 "github.com/godnota/pkg/generated/common/v1"
 	"github.com/godnota/session-service/internal/entity"
 )
 
@@ -39,27 +40,27 @@ type SaveRequest struct {
 	SessionID string
 	Summary   string
 	Status    string
+	Config    *commonv1.TripConfig
+	Messages  []entity.Message
 }
 
 func (s *Service) CreateSession(ctx context.Context, req CreateRequest) (CreateResponse, error) {
 	slog.Info("session-service: create session", "user_id", req.UserID)
-	_, _ = s.repo.Create(ctx, entity.Session{UserID: req.UserID})
-	return CreateResponse{}, nil
+	created, err := s.repo.Create(ctx, entity.Session{UserID: req.UserID})
+	return CreateResponse{SessionID: created.ID}, err
 }
 
 func (s *Service) GetSession(ctx context.Context, req GetRequest) (GetResponse, error) {
 	slog.Info("session-service: get session", "session_id", req.SessionID)
-	_, _ = s.repo.Find(ctx, req.SessionID)
-	return GetResponse{}, nil
+	found, err := s.repo.Find(ctx, req.SessionID)
+	return GetResponse{Session: found}, err
 }
 
 func (s *Service) GetContext(ctx context.Context, req GetRequest) (GetResponse, error) {
 	slog.Info("session-service: get context", "session_id", req.SessionID)
-	_, _ = s.repo.Find(ctx, req.SessionID)
-	return GetResponse{}, nil
+	return s.GetSession(ctx, req)
 }
 
 func (s *Service) SaveContext(ctx context.Context, req SaveRequest) error {
-	slog.Info("session-service: save context", "session_id", req.SessionID, "status", req.Status, "summary", req.Summary)
-	return s.repo.Save(ctx, entity.Session{ID: req.SessionID, Status: req.Status, Summary: req.Summary})
+	return s.repo.Save(ctx, entity.Session{ID: req.SessionID, Status: req.Status, Summary: req.Summary, Config: req.Config, Messages: req.Messages})
 }
