@@ -26,3 +26,15 @@ time=2026-10-28T20:04:18.575+03:00 level=INFO msg="grpc response" method=/godnot
 time=2026-10-28T20:04:18.576+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
 time=2026-10-28T20:04:18.576+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=4YO5DN7IWY4DSNUGX4DVOGE6O4 previous_limit=4
 time=2026-10-28T20:04:18.576+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-28T20:14:37.374+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-28T20:14:37.374+03:00 level=INFO msg="session-service: get session" session_id=4YO5DN7IWY4DSNUGX4DVOGE6O4
+time=2026-10-28T20:14:37.374+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-28T20:14:37.376+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-28T20:14:37.376+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=4YO5DN7IWY4DSNUGX4DVOGE6O4 previous_limit=4
+time=2026-10-28T20:14:37.376+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-28T20:14:39.220+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-28T20:14:39.220+03:00 level=INFO msg="session-service: get session" session_id=4YO5DN7IWY4DSNUGX4DVOGE6O4
+time=2026-10-28T20:14:39.220+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-28T20:14:39.221+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-28T20:14:39.221+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=4YO5DN7IWY4DSNUGX4DVOGE6O4 previous_limit=4
+time=2026-10-28T20:14:39.221+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK

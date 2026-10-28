@@ -4,3 +4,5 @@ time=2026-10-28T20:04:14.025+03:00 level=INFO msg="gateway request" method=POST 
 time=2026-10-28T20:04:16.990+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
 time=2026-10-28T20:04:17.724+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
 time=2026-10-28T20:04:18.574+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
+time=2026-10-28T20:14:37.372+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
+time=2026-10-28T20:14:39.220+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
