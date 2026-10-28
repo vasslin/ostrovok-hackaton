@@ -1,5 +1,8 @@
 # О!дин запрос
 
+Видео с демонстрацией работы приложения
+https://drive.google.com/file/d/1IZKVosGVRkv-xpQUUQEoMyVvkYlHbZcO/view?usp=share_link
+
 ## Запуск
 
 Для запуска екобходим Go 1.26.5+
