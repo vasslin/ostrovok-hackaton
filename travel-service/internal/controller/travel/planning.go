@@ -2,6 +2,7 @@ package travel
 
 import (
 	"context"
+	aiv1 "github.com/godnota/pkg/generated/ai/v1"
 	commonv1 "github.com/godnota/pkg/generated/common/v1"
 	providerv1 "github.com/godnota/pkg/generated/provider/v1"
 	routev1 "github.com/godnota/pkg/generated/route/v1"
@@ -12,13 +13,13 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/structpb"
 	"sync"
 	"time"
 )
 
-// PlanningController implements the stage-2 path; stage-1 handlers remain on Controller.
 type PlanningController struct {
+	ai    aiv1.AIServiceClient
+	aiKey string
 	*Controller
 	sessions  sessionv1.SessionServiceClient
 	providers providerv1.ProviderServiceClient
@@ -29,19 +30,8 @@ type PlanningController struct {
 	confirmed map[string]bool
 }
 type cachedParts struct {
-	config     *commonv1.TripConfig
-	parts      *providerv1.SearchPartsResponse
-	candidates []*structpb.Struct
-}
-
-func cloneCandidates(items []*structpb.Struct) []*structpb.Struct {
-	result := make([]*structpb.Struct, 0, len(items))
-	for _, item := range items {
-		if item != nil {
-			result = append(result, proto.Clone(item).(*structpb.Struct))
-		}
-	}
-	return result
+	config *commonv1.TripConfig
+	parts  *providerv1.SearchPartsResponse
 }
 
 func (c *Controller) WithPlanning(s sessionv1.SessionServiceClient, p providerv1.ProviderServiceClient, routeClients ...routev1.RouteServiceClient) *PlanningController {
@@ -69,7 +59,14 @@ func (c *PlanningController) load(ctx context.Context, userID, id string) (*sess
 	if userID == "" {
 		return nil, status.Error(codes.InvalidArgument, "user_id required")
 	}
-	return c.sessions.GetAgentContext(ctx, &sessionv1.GetAgentContextRequest{UserId: userID, ChatId: id})
+	loaded, err := c.sessions.GetAgentContext(ctx, &sessionv1.GetAgentContextRequest{UserId: userID, ChatId: id})
+	if err != nil {
+		return nil, err
+	}
+	if loaded == nil || loaded.GetUserId() != userID || loaded.GetChatId() != id {
+		return nil, status.Error(codes.DataLoss, "session returned mismatched context")
+	}
+	return loaded, nil
 }
 func (c *PlanningController) isConfirmed(id, remote string) bool {
 	c.mu.Lock()
@@ -81,13 +78,19 @@ func (c *PlanningController) isConfirmed(id, remote string) bool {
 	return remote == "confirmed"
 }
 func (c *PlanningController) GetConfig(ctx context.Context, r *pb.GetConfigRequest) (*pb.GetConfigResponse, error) {
+	unlock := c.lock(r.GetSessionId())
+	defer unlock()
 	agent, err := c.load(ctx, r.GetUserId(), r.GetSessionId())
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetConfigResponse{SessionId: r.GetSessionId(), Config: agent.GetCfg()}, nil
+	out := &pb.GetConfigResponse{SessionId: r.GetSessionId(), Config: agent.GetCfg()}
+	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
-func (c *PlanningController) save(ctx context.Context, userID, id string, config *commonv1.TripConfig, confirmed bool) error {
+func (c *PlanningController) save(ctx context.Context, userID, id string, config *commonv1.TripConfig, confirmed bool, replies ...proto.Message) error {
 	agent, err := c.load(ctx, userID, id)
 	if err != nil {
 		return err
@@ -111,7 +114,11 @@ func (c *PlanningController) save(ctx context.Context, userID, id string, config
 	if err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
-	_, err = c.sessions.SaveContext(ctx, &sessionv1.SaveContextRequest{UserId: userID, ChatId: id, Cfg: config})
+	if len(replies) > 0 {
+		err = c.record(ctx, userID, id, "", config, nil, replies[0], nil, nil, !confirmed)
+	} else {
+		_, err = c.sessions.SaveContext(ctx, &sessionv1.SaveContextRequest{UserId: userID, ChatId: id, Cfg: config})
+	}
 	if err == nil {
 		c.mu.Lock()
 		c.confirmed[id] = confirmed
@@ -126,18 +133,20 @@ func (c *PlanningController) UpdateConfig(ctx context.Context, r *pb.UpdateConfi
 	if r.GetConfig() == nil {
 		return nil, status.Error(codes.InvalidArgument, "config required")
 	}
-	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), false); err != nil {
+	out := &pb.UpdateConfigResponse{SessionId: r.GetSessionId(), Config: r.GetConfig()}
+	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), false, out); err != nil {
 		return nil, err
 	}
-	return &pb.UpdateConfigResponse{SessionId: r.GetSessionId(), Config: r.GetConfig()}, nil
+	return out, nil
 }
 func (c *PlanningController) ConfirmConfig(ctx context.Context, r *pb.ConfirmConfigRequest) (*pb.ConfirmConfigResponse, error) {
 	unlock := c.lock(r.GetSessionId())
 	defer unlock()
-	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), true); err != nil {
+	out := &pb.ConfirmConfigResponse{SessionId: r.GetSessionId(), Confirmed: true}
+	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), true, out); err != nil {
 		return nil, err
 	}
-	return &pb.ConfirmConfigResponse{SessionId: r.GetSessionId(), Confirmed: true}, nil
+	return out, nil
 }
 func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoutesRequest) (*pb.SearchRoutesResponse, error) {
 	unlock := c.lock(r.GetSessionId())
@@ -164,34 +173,29 @@ func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoute
 	if parts == nil {
 		return nil, status.Error(codes.DataLoss, "provider returned no response")
 	}
-	var candidates []*structpb.Struct
 	if len(parts.GetTransportParts()) > 0 || len(parts.GetHotelParts()) > 0 {
 		if c.routes == nil {
 			parts.Limitations = append(parts.Limitations, "route-service: handoff not configured")
 		} else {
 			handoff, cancel := context.WithTimeout(ctx, 750*time.Millisecond)
-			assembled, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
+			_, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
 			cancel()
-			if handoffErr == nil && assembled == nil {
-				handoffErr = status.Error(codes.DataLoss, "empty route response")
-			}
 			if handoffErr != nil {
 				if ctx.Err() != nil {
 					return nil, status.FromContextError(ctx.Err()).Err()
 				}
 				parts.Limitations = append(parts.Limitations, "route-service: "+status.Code(handoffErr).String()+"; stage-2 parts preserved")
-			} else {
-				candidates = cloneCandidates(assembled.GetCandidates())
-				if len(candidates) == 0 {
-					parts.Limitations = append(parts.Limitations, "route-service: no compatible complete routes; stage-2 parts preserved")
-				}
 			}
 		}
 	}
+	out := &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts}
+	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
+		return nil, err
+	}
 	c.mu.Lock()
-	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(agent.GetCfg()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse), candidates: cloneCandidates(candidates)}
+	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(agent.GetCfg()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)}
 	c.mu.Unlock()
-	return &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts, Candidates: candidates}, nil
+	return out, nil
 }
 func (c *PlanningController) GetRoutes(ctx context.Context, r *pb.GetRoutesRequest) (*pb.GetRoutesResponse, error) {
 	unlock := c.lock(r.GetSessionId())
@@ -210,5 +214,9 @@ func (c *PlanningController) GetRoutes(ctx context.Context, r *pb.GetRoutesReque
 	if !ok || !c.isConfirmed(r.GetSessionId(), session.GetStatus()) || !proto.Equal(cached.config, agent.GetCfg()) {
 		return nil, status.Error(codes.NotFound, "no search results for current config")
 	}
-	return &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse), Candidates: cloneCandidates(cached.candidates)}, nil
+	out := &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse)}
+	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

@@ -1,9 +1,6 @@
 .git
 .env
 .env.*
-!.env.example
-**/bin
-data
-reports
-*.zip
-*.exe
+secrets.env.age
+**/server
+**/*.test

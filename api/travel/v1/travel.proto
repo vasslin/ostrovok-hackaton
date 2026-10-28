@@ -6,7 +6,7 @@ option go_package = "github.com/godnota/pkg/generated/travel/v1;travelv1";
 
 import "api/common/v1/trip.proto";
 import "api/provider/v1/parts.proto";
-import "google/protobuf/struct.proto";
+import "api/ai/v1/ai.proto";
 
 // TravelService оркестрирует сценарий: конфиг, уточнения, поиск и выдача маршрутов.
 service TravelService {
@@ -32,6 +32,10 @@ message PlanTripResponse {
   godnota.common.v1.TripConfig config = 3;
   repeated godnota.common.v1.Question questions = 4;
   bool ready_for_search = 5;
+  repeated godnota.ai.v1.TravelIdea advice = 6;
+  string summary = 7;
+  repeated string missing_fields = 8;
+  repeated string warnings = 9;
 }
 
 message SubmitAnswersRequest {
@@ -45,6 +49,10 @@ message SubmitAnswersResponse {
   godnota.common.v1.TripConfig config = 2;
   repeated godnota.common.v1.Question questions = 3;
   bool ready_for_search = 4;
+  repeated godnota.ai.v1.TravelIdea advice = 5;
+  string summary = 6;
+  repeated string missing_fields = 7;
+  repeated string warnings = 8;
 }
 
 message SelectIdeaRequest {
@@ -58,6 +66,11 @@ message SelectIdeaResponse {
   string session_id = 1;
   godnota.common.v1.TripConfig config = 2;
   repeated godnota.common.v1.Question questions = 3;
+  repeated godnota.ai.v1.TravelIdea advice = 4;
+  string summary = 5;
+  repeated string missing_fields = 6;
+  repeated string warnings = 7;
+  bool ready_for_search = 8;
 }
 
 message GetConfigRequest {
@@ -100,7 +113,6 @@ message SearchRoutesRequest {
 message SearchRoutesResponse {
   string session_id = 1;
   godnota.provider.v1.SearchPartsResponse parts = 2;
-  repeated google.protobuf.Struct candidates = 3;
 }
 
 message GetRoutesRequest {
@@ -111,5 +123,4 @@ message GetRoutesRequest {
 message GetRoutesResponse {
   string session_id = 1;
   godnota.provider.v1.SearchPartsResponse parts = 2;
-  repeated google.protobuf.Struct candidates = 3;
 }

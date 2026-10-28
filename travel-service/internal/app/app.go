@@ -71,7 +71,7 @@ func New(cfg *config.Config) (*grpcapp.App, error) {
 	}
 
 	return grpcapp.New(cfg.GRPC.Port, closeFn, func(server *grpc.Server) {
-		travelv1.RegisterTravelServiceServer(server, travelctrl.New(service).WithPlanning(sessionv1.NewSessionServiceClient(sessionConn), providerv1.NewProviderServiceClient(providerConn), routev1.NewRouteServiceClient(routeConn)))
+		travelv1.RegisterTravelServiceServer(server, travelctrl.New(service).WithPlanning(sessionv1.NewSessionServiceClient(sessionConn), providerv1.NewProviderServiceClient(providerConn), routev1.NewRouteServiceClient(routeConn)).WithAgent(aiv1.NewAIServiceClient(aiConn), cfg.ServiceAPIKey))
 	}), nil
 }
 

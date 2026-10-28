@@ -17,22 +17,6 @@ import (
 
 var today = time.Date(2026, 10, 25, 12, 0, 0, 0, time.UTC)
 
-func TestItineraryDateValidation(t *testing.T) {
-	base := trip.TripRequest{SchemaVersion: "1.0", Locale: "ru", Currency: "RUB", Origin: trip.Place{City: "Москва"}, Destination: &trip.Destination{City: "Самара"}, Dates: trip.Dates{DepartureDate: "2026-12-12", ReturnDate: "2026-12-14"}, Travelers: trip.Travelers{Adults: 2}, Stops: []trip.ItineraryStop{{City: "Казань", CheckIn: "2026-12-12", CheckOut: "2026-12-13"}, {City: "Самара", CheckIn: "2026-12-13", CheckOut: "2026-12-14"}}}
-	if err := base.ValidateAt(today); err != nil {
-		t.Fatal(err)
-	}
-	base.Stops[1].CheckIn = "2026-12-12"
-	if err := base.ValidateAt(today); err == nil {
-		t.Fatal("overlapping stops accepted")
-	}
-	base.Stops[1].CheckIn = "2026-12-13"
-	base.Stops[1].City = "Другой город"
-	if err := base.ValidateAt(today); err == nil {
-		t.Fatal("incorrect final stop accepted")
-	}
-}
-
 func TestExamplesAreValid(t *testing.T) {
 	c := jsonschema.NewCompiler()
 	c.AssertFormat()

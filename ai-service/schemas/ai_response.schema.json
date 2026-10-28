@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AIPlanningResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "config", "advice", "questions"],
+  "properties": {
+    "status": {"enum": ["advice", "questions", "generate"]},
+    "config": {"type": "object", "description": "Partial TripRequest during clarification; validate against trip_request.schema.json before confirming/searching."},
+    "advice": {"type": "array", "maxItems": 3, "items": {"type": "object", "additionalProperties": false, "required": ["id", "city", "reason"], "properties": {"id": {"type": "string"}, "city": {"type": "string"}, "reason": {"type": "string"}}}},
+    "questions": {"type": "array", "maxItems": 2, "items": {"type": "object", "additionalProperties": false, "required": ["id", "field", "text", "required"], "properties": {"id": {"type": "string"}, "field": {"type": "string"}, "text": {"type": "string"}, "required": {"type": "boolean"}}}}
+  }
+}

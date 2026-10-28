@@ -139,33 +139,24 @@ type Money struct {
 	Scope       string `json:"scope"`
 }
 type TransportPart struct {
-	ID                string        `json:"id"`
-	Provider          string        `json:"provider"`
-	Source            string        `json:"source"`
-	FetchedAt         string        `json:"fetched_at"`
-	Mode              string        `json:"mode"`
-	Origin            string        `json:"origin"`
-	Destination       string        `json:"destination"`
-	DepartureAt       string        `json:"departure_at"`
-	ArrivalAt         string        `json:"arrival_at"`
-	Price             *Money        `json:"price,omitempty"`
-	BookingURL        string        `json:"booking_url,omitempty"`
-	Warnings          []string      `json:"warnings,omitempty"`
-	ReturnDepartureAt string        `json:"return_departure_at,omitempty"`
-	ReturnArrivalAt   string        `json:"return_arrival_at,omitempty"`
-	OriginCity        string        `json:"origin_city,omitempty"`
-	DestinationCity   string        `json:"destination_city,omitempty"`
-	Transfers         int           `json:"transfers"`
-	ReturnTransfers   int           `json:"return_transfers"`
-	Legs              []TransferLeg `json:"legs,omitempty"`
-}
-type TransferLeg struct {
-	OriginStation      string `json:"origin_station"`
-	DestinationStation string `json:"destination_station"`
-	DepartureAt        string `json:"departure_at"`
-	ArrivalAt          string `json:"arrival_at"`
-	Mode               string `json:"mode"`
-	ServiceID          string `json:"service_id"`
+	ID                string   `json:"id"`
+	Provider          string   `json:"provider"`
+	Source            string   `json:"source"`
+	FetchedAt         string   `json:"fetched_at"`
+	Mode              string   `json:"mode"`
+	Origin            string   `json:"origin"`
+	Destination       string   `json:"destination"`
+	DepartureAt       string   `json:"departure_at"`
+	ArrivalAt         string   `json:"arrival_at"`
+	Price             *Money   `json:"price,omitempty"`
+	BookingURL        string   `json:"booking_url,omitempty"`
+	Warnings          []string `json:"warnings,omitempty"`
+	ReturnDepartureAt string   `json:"return_departure_at,omitempty"`
+	ReturnArrivalAt   string   `json:"return_arrival_at,omitempty"`
+	OriginCity        string   `json:"origin_city,omitempty"`
+	DestinationCity   string   `json:"destination_city,omitempty"`
+	Transfers         int      `json:"transfers"`
+	ReturnTransfers   int      `json:"return_transfers"`
 }
 type HotelPart struct {
 	ID               string   `json:"id"`
@@ -234,9 +225,6 @@ func (s *Searcher) SearchParts(ctx context.Context, input TripRequest, resolved 
 	}
 	if s.Mode == "demo" {
 		return demoParts(ctx, input, now), nil
-	}
-	if len(input.Stops) > 0 {
-		return s.searchItinerary(ctx, input, resolved)
 	}
 	result.Limitations = mapping.Limitations
 	for _, field := range mapping.Missing {
@@ -361,9 +349,6 @@ func (s *Searcher) searchTransport(ctx context.Context, job Request, now time.Ti
 		return failure("not_configured", "Provider is not configured", false)
 	}
 	timeout := s.Timeout
-	if multiTimeout, ok := ctx.Value(itineraryTimeoutKey{}).(time.Duration); ok && multiTimeout > timeout {
-		timeout = multiTimeout
-	}
 	if cfg.TimeoutMS > 0 && time.Duration(cfg.TimeoutMS)*time.Millisecond < timeout {
 		timeout = time.Duration(cfg.TimeoutMS) * time.Millisecond
 	}

@@ -3,7 +3,8 @@ package config
 import "github.com/caarlos0/env/v10"
 
 type Config struct {
-	GRPC struct {
+	ServiceAPIKey string `env:"SERVICE_API_KEY"`
+	GRPC          struct {
 		Port string `env:"GRPC_PORT" envDefault:"50051"`
 	}
 

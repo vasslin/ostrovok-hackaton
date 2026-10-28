@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/structpb"
 	"strings"
 	"testing"
 	"time"
@@ -159,29 +158,5 @@ func TestRouteHandoffPreservesPartialResultsAndCache(t *testing.T) {
 	}}
 	if _, err = c.SearchRoutes(context.Background(), &pb.SearchRoutesRequest{SessionId: "s", UserId: "owner"}); err != nil {
 		t.Fatal(err)
-	}
-}
-
-func TestRouteCandidatesReturnedAndCachedIndependently(t *testing.T) {
-	s := &sessionsFake{state: planningState(), status: "confirmed"}
-	p := scriptedProvider{fn: func(context.Context, *providerv1.SearchPartsRequest) (*providerv1.SearchPartsResponse, error) {
-		return &providerv1.SearchPartsResponse{TransportParts: []*providerv1.TransportPart{{Id: "transport"}}}, nil
-	}}
-	route, err := structpb.NewStruct(map[string]any{"id": "route-one", "price_status": "unknown"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	r := scriptedRoutes{fn: func(context.Context, *routev1.BuildRoutesRequest) (*routev1.BuildRoutesResponse, error) {
-		return &routev1.BuildRoutesResponse{Candidates: []*structpb.Struct{route}}, nil
-	}}
-	c := New(nil).WithPlanning(s, p, r)
-	result, err := c.SearchRoutes(context.Background(), &pb.SearchRoutesRequest{SessionId: "s", UserId: "owner"})
-	if err != nil || len(result.GetCandidates()) != 1 {
-		t.Fatalf("missing candidates: %v", err)
-	}
-	result.Candidates[0].Fields["id"] = structpb.NewStringValue("mutated")
-	cached, err := c.GetRoutes(context.Background(), &pb.GetRoutesRequest{SessionId: "s", UserId: "owner"})
-	if err != nil || cached.GetCandidates()[0].GetFields()["id"].GetStringValue() != "route-one" {
-		t.Fatalf("cached candidates changed: %v", err)
 	}
 }

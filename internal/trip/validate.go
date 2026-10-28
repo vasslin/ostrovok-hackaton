@@ -84,30 +84,6 @@ func (t TripRequest) ValidateAt(now time.Time) error {
 			}
 		}
 	}
-	if len(t.Stops) > 0 {
-		if depErr != nil || t.Dates.ReturnDate == "" {
-			errs = append(errs, errors.New("/stops: exact departure and return dates are required"))
-		}
-		previous := dep
-		for _, stop := range t.Stops {
-			checkin, e1 := time.Parse(time.DateOnly, stop.CheckIn)
-			checkout, e2 := time.Parse(time.DateOnly, stop.CheckOut)
-			if e1 != nil || e2 != nil || checkin.Before(previous) || !checkout.After(checkin) {
-				errs = append(errs, errors.New("/stops: stays must be ordered, non-overlapping and have positive duration"))
-				break
-			}
-			previous = checkout
-		}
-		if t.Destination == nil || !strings.EqualFold(strings.TrimSpace(t.Stops[len(t.Stops)-1].City), strings.TrimSpace(t.Destination.City)) {
-			errs = append(errs, errors.New("/stops: last city must match destination"))
-		}
-		if previous.Format(time.DateOnly) != t.Dates.ReturnDate {
-			errs = append(errs, errors.New("/stops: last checkout must match return date"))
-		}
-	}
-	if t.Transport != nil && t.Transport.MinTransferMinutes > 0 && t.Transport.MaxWaitHours > 0 && t.Transport.MinTransferMinutes > t.Transport.MaxWaitHours*60 {
-		errs = append(errs, errors.New("/transport: minimum transfer time exceeds maximum wait"))
-	}
 	return errors.Join(errs...)
 }
 
