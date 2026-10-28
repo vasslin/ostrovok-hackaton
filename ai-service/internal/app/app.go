@@ -47,7 +47,15 @@ func Run() error {
 
 		return nil
 	}
-	baseURL := env("LLM_BASE_URL", "https://api.groq.com/openai/v1")
+	provider := env("LLM_PROVIDER", "ollama")
+	defaultURL, defaultModel := "http://localhost:11434/v1", "travel-qwen:4b"
+	if provider == "groq" || provider == "openai" {
+		defaultURL = "https://api.groq.com/openai/v1"
+		defaultModel = "openai/gpt-oss-20b"
+	} else if provider != "ollama" {
+		return errors.New("LLM_PROVIDER must be ollama, groq or openai")
+	}
+	baseURL := env("LLM_BASE_URL", defaultURL)
 	parsed, err := url.Parse(baseURL)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "https" && parsed.Scheme != "http") || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {
 		return errors.New("invalid LLM_BASE_URL")
@@ -59,9 +67,17 @@ func Run() error {
 		}
 	}
 
-	client := agent.New(baseURL, os.Getenv("LLM_API_KEY"), env("LLM_MODEL", "openai/gpt-oss-20b"))
+	client := agent.New(baseURL, os.Getenv("LLM_API_KEY"), env("LLM_MODEL", defaultModel))
+	if provider == "ollama" {
+		client = agent.NewLocal(baseURL, env("LLM_MODEL", defaultModel))
+	}
+	timeout, err := time.ParseDuration(env("LLM_TIMEOUT", client.HTTP.Timeout.String()))
+	if err != nil || timeout < time.Second || timeout > 10*time.Minute {
+		return errors.New("LLM_TIMEOUT must be between 1s and 10m")
+	}
+	client.HTTP.Timeout = timeout
 	svc := service.New(client)
-	server := &http.Server{Addr: ":" + port, Handler: httpapi.New(svc, os.Getenv("SERVICE_API_KEY")), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 55 * time.Second, IdleTimeout: 60 * time.Second}
+	server := &http.Server{Addr: ":" + port, Handler: httpapi.New(svc, os.Getenv("SERVICE_API_KEY")), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: timeout + 10*time.Second, IdleTimeout: 60 * time.Second}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	grpcPort := env("GRPC_PORT", "9090")
@@ -83,7 +99,7 @@ func Run() error {
 	go func() { done <- grpcServer.Serve(listener) }()
 	go func() { done <- server.ListenAndServe() }()
 	defer server.Close()
-	log.Printf("travel-ai HTTP=%s gRPC=:%s model=%s configured=%t", server.Addr, grpcPort, client.Model, client.APIKey != "")
+	log.Printf("travel-ai HTTP=%s gRPC=:%s model=%s configured=%t", server.Addr, grpcPort, client.Model, client.Configured())
 	select {
 	case err := <-done:
 		if errors.Is(err, http.ErrServerClosed) {
@@ -92,7 +108,7 @@ func Run() error {
 
 		return err
 	case <-ctx.Done():
-		shutdown, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		shutdown, cancel := context.WithTimeout(context.Background(), timeout+10*time.Second)
 		defer cancel()
 		grpcDone := make(chan struct{})
 		go func() { grpcServer.GracefulStop(); close(grpcDone) }()

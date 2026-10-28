@@ -1,0 +1,617 @@
+{
+  "main_revision": "adc122a",
+  "provider": "local Ollama travel-qwen:4b",
+  "scenarios": [
+    {
+      "scenario": "known_trip",
+      "seconds": 28.62,
+      "output": {
+        "status": "generate",
+        "config": {
+          "schema_version": "1.0",
+          "locale": "ru",
+          "currency": "RUB",
+          "origin": {
+            "city": "Москва"
+          },
+          "destination": {
+            "city": "Сочи"
+          },
+          "dates": {
+            "departure_date": "2026-11-10",
+            "return_date": "2026-11-17"
+          },
+          "travelers": {
+            "adults": 2
+          },
+          "transport": {
+            "direct_only": true,
+            "max_transfers": 0
+          },
+          "budget": {
+            "total": 80000,
+            "scope": "total"
+          },
+          "completeness": {
+            "missing_required": []
+          }
+        },
+        "advice": [],
+        "questions": [],
+        "assumptions": [],
+        "config_wrapper": {
+          "version": "1.0",
+          "request": {
+            "schema_version": "1.0",
+            "locale": "ru",
+            "currency": "RUB",
+            "origin": {
+              "city": "Москва"
+            },
+            "destination": {
+              "city": "Сочи"
+            },
+            "dates": {
+              "departure_date": "2026-11-10",
+              "return_date": "2026-11-17"
+            },
+            "travelers": {
+              "adults": 2
+            },
+            "transport": {
+              "direct_only": true,
+              "max_transfers": 0
+            },
+            "budget": {
+              "total": 80000,
+              "scope": "total"
+            },
+            "completeness": {
+              "missing_required": []
+            }
+          }
+        },
+        "missing_fields": [],
+        "summary": "{\"notes\":[\"Из Москвы в Сочи с 10 по 17 ноября 2026, двое взрослых, бюджет 80000 рублей на всю поездку, без пересадок.\"]}",
+        "warnings": []
+      }
+    },
+    {
+      "scenario": "missing_fields",
+      "seconds": 8.97,
+      "output": {
+        "status": "questions",
+        "config": {
+          "schema_version": "1.0",
+          "locale": "ru",
+          "currency": "RUB",
+          "origin": {
+            "city": "Москва"
+          },
+          "destination": {
+            "city": "Сочи"
+          },
+          "dates": {},
+          "travelers": {
+            "adults": 0
+          },
+          "completeness": {
+            "missing_required": [
+              "/dates/departure_date",
+              "/dates/return_date",
+              "/travelers/adults",
+              "/dates/departure_month"
+            ]
+          }
+        },
+        "advice": [],
+        "questions": [
+          {
+            "id": "dates_departure_date",
+            "field": "/dates/departure_date",
+            "text": "Укажите точную дату отправления в формате ГГГГ-ММ-ДД.",
+            "required": true
+          },
+          {
+            "id": "dates_return_date",
+            "field": "/dates/return_date",
+            "text": "Укажите дату возвращения или число ночей.",
+            "required": true
+          }
+        ],
+        "assumptions": [],
+        "config_wrapper": {
+          "version": "1.0",
+          "request": {
+            "schema_version": "1.0",
+            "locale": "ru",
+            "currency": "RUB",
+            "origin": {
+              "city": "Москва"
+            },
+            "destination": {
+              "city": "Сочи"
+            },
+            "dates": {},
+            "travelers": {
+              "adults": 0
+            },
+            "completeness": {
+              "missing_required": [
+                "/dates/departure_date",
+                "/dates/return_date",
+                "/travelers/adults",
+                "/dates/departure_month"
+              ]
+            }
+          }
+        },
+        "missing_fields": [
+          "/dates/departure_date",
+          "/dates/return_date",
+          "/travelers/adults",
+          "/dates/departure_month"
+        ],
+        "summary": "{\"notes\":[\"Хочу из Москвы в Сочи. Даты и состав пока уточняем.\"]}",
+        "warnings": []
+      }
+    },
+    {
+      "scenario": "answer_batch",
+      "seconds": 15.4,
+      "output": {
+        "status": "generate",
+        "config": {
+          "schema_version": "1.0",
+          "locale": "ru",
+          "currency": "RUB",
+          "origin": {
+            "city": "Москва"
+          },
+          "destination": {
+            "city": "Сочи"
+          },
+          "dates": {
+            "departure_date": "2026-11-10",
+            "return_date": "2026-11-17"
+          },
+          "travelers": {
+            "adults": 2
+          },
+          "completeness": {
+            "missing_required": []
+          }
+        },
+        "advice": [],
+        "questions": [],
+        "assumptions": [],
+        "config_wrapper": {
+          "version": "1.0",
+          "request": {
+            "schema_version": "1.0",
+            "locale": "ru",
+            "currency": "RUB",
+            "origin": {
+              "city": "Москва"
+            },
+            "destination": {
+              "city": "Сочи"
+            },
+            "dates": {
+              "departure_date": "2026-11-10",
+              "return_date": "2026-11-17"
+            },
+            "travelers": {
+              "adults": 2
+            },
+            "completeness": {
+              "missing_required": []
+            }
+          }
+        },
+        "missing_fields": [],
+        "summary": "{\"notes\":[\"Хочу из Москвы в Сочи. Даты и состав пока уточняем.\",\"Поедем с 10 по 17 ноября 2026, двое взрослых.\",\"С 10 по 17 ноября 2026 года, двое взрослых\"]}",
+        "warnings": []
+      }
+    },
+    {
+      "scenario": "inspiration",
+      "seconds": 13.89,
+      "output": {
+        "status": "advice",
+        "config": {
+          "schema_version": "1.0",
+          "locale": "ru",
+          "currency": "RUB",
+          "origin": {
+            "city": "Москва"
+          },
+          "dates": {
+            "departure_date": "2026-11-10",
+            "return_date": "2026-11-17"
+          },
+          "travelers": {
+            "adults": 2
+          },
+          "budget": {
+            "total": 80000,
+            "scope": "total"
+          },
+          "completeness": {
+            "missing_required": [
+              "/destination/city"
+            ]
+          }
+        },
+        "advice": [
+          {
+            "city": "Казань",
+            "reason": "Идея направления для обсуждения; цены, наличие и соответствие пожеланиям требуют проверки.",
+            "id": "idea-1",
+            "title": "Культурная поездка: Казань",
+            "description": "Идея направления: Казань. Предлагаемый сценарий — культурная поездка. Это не найденный тур: цены, наличие, погоду, условия въезда и соответствие пожеланиям необходимо проверить через источники.",
+            "config": {
+              "version": "1.0",
+              "request": {
+                "schema_version": "1.0",
+                "locale": "ru",
+                "currency": "RUB",
+                "origin": {
+                  "city": "Москва"
+                },
+                "destination": {
+                  "city": "Казань"
+                },
+                "dates": {
+                  "departure_date": "2026-11-10",
+                  "return_date": "2026-11-17"
+                },
+                "travelers": {
+                  "adults": 2
+                },
+                "budget": {
+                  "total": 80000,
+                  "scope": "total"
+                }
+              }
+            },
+            "reasons": [
+              "Альтернативное направление для обсуждения, а не подтверждённое предложение.",
+              "Известные даты, состав гостей и бюджет сохранены как пожелания пользователя, не как проверенные условия поездки."
+            ],
+            "assumptions": [
+              {
+                "field": "trip.destinations",
+                "value": "Казань",
+                "reason": "Направление предложено AI; условия и соответствие ограничениям ещё не проверены."
+              }
+            ],
+            "source": "ai_generated_idea"
+          },
+          {
+            "city": "Сочи",
+            "reason": "Идея направления для обсуждения; цены, наличие и соответствие пожеланиям требуют проверки.",
+            "id": "idea-2",
+            "title": "Спокойный отдых: Сочи",
+            "description": "Идея направления: Сочи. Предлагаемый сценарий — спокойный отдых. Это не найденный тур: цены, наличие, погоду, условия въезда и соответствие пожеланиям необходимо проверить через источники.",
+            "config": {
+              "version": "1.0",
+              "request": {
+                "schema_version": "1.0",
+                "locale": "ru",
+                "currency": "RUB",
+                "origin": {
+                  "city": "Москва"
+                },
+                "destination": {
+                  "city": "Сочи"
+                },
+                "dates": {
+                  "departure_date": "2026-11-10",
+                  "return_date": "2026-11-17"
+                },
+                "travelers": {
+                  "adults": 2
+                },
+                "budget": {
+                  "total": 80000,
+                  "scope": "total"
+                }
+              }
+            },
+            "reasons": [
+              "Альтернативное направление для обсуждения, а не подтверждённое предложение.",
+              "Известные даты, состав гостей и бюджет сохранены как пожелания пользователя, не как проверенные условия поездки."
+            ],
+            "assumptions": [
+              {
+                "field": "trip.destinations",
+                "value": "Сочи",
+                "reason": "Направление предложено AI; условия и соответствие ограничениям ещё не проверены."
+              }
+            ],
+            "source": "ai_generated_idea"
+          }
+        ],
+        "questions": [],
+        "assumptions": [],
+        "config_wrapper": {
+          "version": "1.0",
+          "request": {
+            "schema_version": "1.0",
+            "locale": "ru",
+            "currency": "RUB",
+            "origin": {
+              "city": "Москва"
+            },
+            "dates": {
+              "departure_date": "2026-11-10",
+              "return_date": "2026-11-17"
+            },
+            "travelers": {
+              "adults": 2
+            },
+            "budget": {
+              "total": 80000,
+              "scope": "total"
+            },
+            "completeness": {
+              "missing_required": [
+                "/destination/city"
+              ]
+            }
+          }
+        },
+        "missing_fields": [
+          "/destination/city"
+        ],
+        "summary": "{\"notes\":[\"Предложи два разных направления для спокойного отпуска. Из Москвы, двое взрослых, с 10 по 17 ноября 2026, бюджет 80000 рублей на всю поездку.\"]}",
+        "warnings": []
+      }
+    },
+    {
+      "scenario": "recommendations",
+      "seconds": 3.74,
+      "output": {
+        "advice": [
+          {
+            "city": "Казань",
+            "reason": "Идея направления для обсуждения; цены, наличие и соответствие пожеланиям требуют проверки.",
+            "id": "idea-1",
+            "title": "Культурная поездка: Казань",
+            "description": "Идея направления: Казань. Предлагаемый сценарий — культурная поездка. Это не найденный тур: цены, наличие, погоду, условия въезда и соответствие пожеланиям необходимо проверить через источники.",
+            "config": {
+              "version": "1.0",
+              "request": {
+                "schema_version": "1.0",
+                "locale": "ru",
+                "currency": "RUB",
+                "origin": {
+                  "city": "Москва"
+                },
+                "destination": {
+                  "city": "Казань"
+                },
+                "dates": {
+                  "departure_date": "2026-11-10",
+                  "return_date": "2026-11-17"
+                },
+                "travelers": {
+                  "adults": 2
+                },
+                "budget": {
+                  "total": 80000,
+                  "scope": "total"
+                }
+              }
+            },
+            "reasons": [
+              "Альтернативное направление для обсуждения, а не подтверждённое предложение.",
+              "Известные даты, состав гостей и бюджет сохранены как пожелания пользователя, не как проверенные условия поездки."
+            ],
+            "assumptions": [
+              {
+                "field": "trip.destinations",
+                "value": "Казань",
+                "reason": "Направление предложено AI; условия и соответствие ограничениям ещё не проверены."
+              }
+            ],
+            "source": "ai_generated_idea"
+          },
+          {
+            "city": "Сочи",
+            "reason": "Идея направления для обсуждения; цены, наличие и соответствие пожеланиям требуют проверки.",
+            "id": "idea-2",
+            "title": "Спокойный отдых: Сочи",
+            "description": "Идея направления: Сочи. Предлагаемый сценарий — спокойный отдых. Это не найденный тур: цены, наличие, погоду, условия въезда и соответствие пожеланиям необходимо проверить через источники.",
+            "config": {
+              "version": "1.0",
+              "request": {
+                "schema_version": "1.0",
+                "locale": "ru",
+                "currency": "RUB",
+                "origin": {
+                  "city": "Москва"
+                },
+                "destination": {
+                  "city": "Сочи"
+                },
+                "dates": {
+                  "departure_date": "2026-11-10",
+                  "return_date": "2026-11-17"
+                },
+                "travelers": {
+                  "adults": 2
+                },
+                "budget": {
+                  "total": 80000,
+                  "scope": "total"
+                }
+              }
+            },
+            "reasons": [
+              "Альтернативное направление для обсуждения, а не подтверждённое предложение.",
+              "Известные даты, состав гостей и бюджет сохранены как пожелания пользователя, не как проверенные условия поездки."
+            ],
+            "assumptions": [
+              {
+                "field": "trip.destinations",
+                "value": "Сочи",
+                "reason": "Направление предложено AI; условия и соответствие ограничениям ещё не проверены."
+              }
+            ],
+            "source": "ai_generated_idea"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "idea_selection_and_revision",
+      "seconds": 15.44,
+      "output": {
+        "status": "generate",
+        "config": {
+          "schema_version": "1.0",
+          "locale": "ru",
+          "currency": "RUB",
+          "origin": {
+            "city": "Москва"
+          },
+          "destination": {
+            "city": "Казань"
+          },
+          "dates": {
+            "departure_date": "2026-11-10",
+            "return_date": "2026-11-17"
+          },
+          "travelers": {
+            "adults": 2
+          },
+          "budget": {
+            "total": 60000,
+            "scope": "total"
+          },
+          "completeness": {
+            "missing_required": []
+          }
+        },
+        "advice": [],
+        "questions": [],
+        "assumptions": [],
+        "config_wrapper": {
+          "version": "1.0",
+          "request": {
+            "schema_version": "1.0",
+            "locale": "ru",
+            "currency": "RUB",
+            "origin": {
+              "city": "Москва"
+            },
+            "destination": {
+              "city": "Казань"
+            },
+            "dates": {
+              "departure_date": "2026-11-10",
+              "return_date": "2026-11-17"
+            },
+            "travelers": {
+              "adults": 2
+            },
+            "budget": {
+              "total": 60000,
+              "scope": "total"
+            },
+            "completeness": {
+              "missing_required": []
+            }
+          }
+        },
+        "missing_fields": [],
+        "summary": "{\"notes\":[\"Предложи два разных направления для спокойного отпуска. Из Москвы, двое взрослых, с 10 по 17 ноября 2026, бюджет 80000 рублей на всю поездку.\",\"Выбираю эту идею. Бюджет всей поездки уменьшим до 60000 рублей.\"]}",
+        "warnings": []
+      }
+    },
+    {
+      "scenario": "force_with_no_facts",
+      "seconds": 5.66,
+      "output": {
+        "status": "questions",
+        "config": {
+          "schema_version": "1.0",
+          "locale": "ru",
+          "currency": "RUB",
+          "origin": {
+            "city": ""
+          },
+          "dates": {},
+          "travelers": {
+            "adults": 0
+          },
+          "completeness": {
+            "missing_required": [
+              "/origin/city",
+              "/destination/city",
+              "/dates/departure_date",
+              "/dates/return_date",
+              "/travelers/adults",
+              "/dates/departure_month"
+            ]
+          }
+        },
+        "advice": [],
+        "questions": [
+          {
+            "id": "origin_city",
+            "field": "/origin/city",
+            "text": "Из какого города отправляемся?",
+            "required": true
+          },
+          {
+            "id": "destination_city",
+            "field": "/destination/city",
+            "text": "В какой город хотите поехать?",
+            "required": true
+          }
+        ],
+        "assumptions": [],
+        "config_wrapper": {
+          "version": "1.0",
+          "request": {
+            "schema_version": "1.0",
+            "locale": "ru",
+            "currency": "RUB",
+            "origin": {
+              "city": ""
+            },
+            "dates": {},
+            "travelers": {
+              "adults": 0
+            },
+            "completeness": {
+              "missing_required": [
+                "/origin/city",
+                "/destination/city",
+                "/dates/departure_date",
+                "/dates/return_date",
+                "/travelers/adults",
+                "/dates/departure_month"
+              ]
+            }
+          }
+        },
+        "missing_fields": [
+          "/origin/city",
+          "/destination/city",
+          "/dates/departure_date",
+          "/dates/return_date",
+          "/travelers/adults",
+          "/dates/departure_month"
+        ],
+        "summary": "{\"notes\":[\"Пользователь пока не сообщил параметры поездки.\"]}",
+        "warnings": [
+          "Для поиска не хватает обязательных или корректных полей; случайные значения не подставлены."
+        ]
+      }
+    }
+  ]
+}

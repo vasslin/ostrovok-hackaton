@@ -1,0 +1,68 @@
+syntax = "proto3";
+package godnota.provider.v1;
+option go_package = "github.com/godnota/pkg/generated/provider/v1;providerv1";
+import "google/protobuf/struct.proto";
+
+// config is the canonical configs/trip_request.schema.json document.
+// resolved is backend-owned: city codes must never be invented by the LLM.
+message SearchPartsRequest {
+  google.protobuf.Struct config = 1;
+  google.protobuf.Struct resolved = 2;
+}
+message ProviderConfig {
+  string provider = 1;
+  string endpoint = 2;
+  google.protobuf.Struct params = 3;
+}
+message SearchPartsResponse {
+  repeated TransportPart transport_parts = 1;
+  repeated HotelPart hotel_parts = 2;
+  repeated ProviderError errors = 3;
+  repeated string limitations = 4;
+}
+message Money {
+  int64 amount_minor = 1;
+  string currency = 2;
+  string scope = 3;
+}
+message TransportPart {
+  string id = 1;
+  string provider = 2;
+  string source = 3;
+  string fetched_at = 4;
+  string mode = 5;
+  string origin = 6;
+  string destination = 7;
+  string departure_at = 8;
+  string arrival_at = 9;
+  Money price = 10; // absent means unknown, never free
+  string booking_url = 11;
+  repeated string warnings = 12;
+  string return_departure_at = 13;
+  string return_arrival_at = 14;
+  string origin_city = 15;
+  string destination_city = 16;
+  int32 transfers = 17;
+  int32 return_transfers = 18;
+}
+message HotelPart {
+  string id = 1;
+  string provider = 2;
+  string source = 3;
+  string fetched_at = 4;
+  string city = 5;
+  string name = 6;
+  string check_in = 7;
+  string check_out = 8;
+  int32 stars = 9;
+  Money price = 10;
+  bool free_cancellation = 11;
+  repeated string warnings = 12;
+}
+message ProviderError {
+  string provider = 1;
+  string kind = 2;
+  string code = 3;
+  string message = 4;
+  bool retryable = 5;
+}

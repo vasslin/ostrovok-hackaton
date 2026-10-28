@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package godnota.route.v1;
+
+option go_package = "github.com/godnota/pkg/generated/route/v1;routev1";
+import "api/provider/v1/parts.proto";
+import "google/protobuf/struct.proto";
+
+// RouteService ищет предложения и собирает согласованные маршруты.
+// Сообщения намеренно пустые: поля контракта будут добавлены позже.
+service RouteService {
+  // Stage-2 handoff. Assembly/ranking is owned by the stage-3 implementation.
+  rpc BuildRoutes(BuildRoutesRequest) returns (BuildRoutesResponse);
+  rpc SearchRoutes(SearchRoutesRequest) returns (SearchRoutesResponse);
+}
+
+message SearchRoutesRequest {}
+message SearchRoutesResponse {}
+message BuildRoutesRequest {
+  string session_id = 1;
+  google.protobuf.Struct config = 2;
+  godnota.provider.v1.SearchPartsResponse parts = 3;
+}
+message BuildRoutesResponse {
+  repeated google.protobuf.Struct candidates = 1;
+}

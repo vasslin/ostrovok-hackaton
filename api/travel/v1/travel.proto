@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package godnota.travel.v1;
+
+option go_package = "github.com/godnota/pkg/generated/travel/v1;travelv1";
+
+import "api/common/v1/trip.proto";
+import "api/provider/v1/parts.proto";
+import "api/ai/v1/ai.proto";
+
+// TravelService оркестрирует сценарий: конфиг, уточнения, поиск и выдача маршрутов.
+service TravelService {
+  rpc PlanTrip(PlanTripRequest) returns (PlanTripResponse);
+  rpc SubmitAnswers(SubmitAnswersRequest) returns (SubmitAnswersResponse);
+  rpc SelectIdea(SelectIdeaRequest) returns (SelectIdeaResponse);
+  rpc GetConfig(GetConfigRequest) returns (GetConfigResponse);
+  rpc UpdateConfig(UpdateConfigRequest) returns (UpdateConfigResponse);
+  rpc ConfirmConfig(ConfirmConfigRequest) returns (ConfirmConfigResponse);
+  rpc SearchRoutes(SearchRoutesRequest) returns (SearchRoutesResponse);
+  rpc GetRoutes(GetRoutesRequest) returns (GetRoutesResponse);
+}
+
+message PlanTripRequest {
+  string session_id = 1;
+  string text = 2;
+  string user_id = 3;
+}
+
+message PlanTripResponse {
+  string session_id = 1;
+  string intent = 2;
+  godnota.common.v1.TripConfig config = 3;
+  repeated godnota.common.v1.Question questions = 4;
+  bool ready_for_search = 5;
+  repeated godnota.ai.v1.TravelIdea advice = 6;
+  string summary = 7;
+  repeated string missing_fields = 8;
+  repeated string warnings = 9;
+}
+
+message SubmitAnswersRequest {
+  string session_id = 1;
+  repeated godnota.common.v1.Answer answers = 2;
+  string user_id = 3;
+}
+
+message SubmitAnswersResponse {
+  string session_id = 1;
+  godnota.common.v1.TripConfig config = 2;
+  repeated godnota.common.v1.Question questions = 3;
+  bool ready_for_search = 4;
+  repeated godnota.ai.v1.TravelIdea advice = 5;
+  string summary = 6;
+  repeated string missing_fields = 7;
+  repeated string warnings = 8;
+}
+
+message SelectIdeaRequest {
+  string session_id = 1;
+  string idea_id = 2;
+  string comment = 3;
+  string user_id = 4;
+}
+
+message SelectIdeaResponse {
+  string session_id = 1;
+  godnota.common.v1.TripConfig config = 2;
+  repeated godnota.common.v1.Question questions = 3;
+  repeated godnota.ai.v1.TravelIdea advice = 4;
+  string summary = 5;
+  repeated string missing_fields = 6;
+  repeated string warnings = 7;
+  bool ready_for_search = 8;
+}
+
+message GetConfigRequest {
+  string session_id = 1;
+  string user_id = 2;
+}
+
+message GetConfigResponse {
+  string session_id = 1;
+  godnota.common.v1.TripConfig config = 2;
+}
+
+message UpdateConfigRequest {
+  string session_id = 1;
+  godnota.common.v1.TripConfig config = 2;
+  string user_id = 3;
+}
+
+message UpdateConfigResponse {
+  string session_id = 1;
+  godnota.common.v1.TripConfig config = 2;
+}
+
+message ConfirmConfigRequest {
+  string session_id = 1;
+  godnota.common.v1.TripConfig config = 2;
+  string user_id = 3;
+}
+
+message ConfirmConfigResponse {
+  string session_id = 1;
+  bool confirmed = 2;
+}
+
+message SearchRoutesRequest {
+  string session_id = 1;
+  string user_id = 2;
+}
+
+message SearchRoutesResponse {
+  string session_id = 1;
+  godnota.provider.v1.SearchPartsResponse parts = 2;
+}
+
+message GetRoutesRequest {
+  string session_id = 1;
+  string user_id = 2;
+}
+
+message GetRoutesResponse {
+  string session_id = 1;
+  godnota.provider.v1.SearchPartsResponse parts = 2;
+}

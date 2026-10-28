@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -15,6 +16,8 @@ import (
 type Client struct {
 	BaseURL, APIKey, Model string
 	HTTP                   *http.Client
+	Local                  bool
+	slots                  chan struct{}
 }
 
 type Error struct {
@@ -25,16 +28,43 @@ type Error struct {
 func (e *Error) Error() string { return fmt.Sprintf("provider HTTP %d", e.Status) }
 
 func New(url, key, model string) *Client {
-	return &Client{url, key, model, &http.Client{Timeout: 45 * time.Second}}
+	return &Client{BaseURL: url, APIKey: key, Model: model, HTTP: &http.Client{Timeout: 45 * time.Second}}
 }
 
+func NewLocal(url, model string) *Client {
+	c := New(url, "", model)
+	c.Local = true
+	c.slots = make(chan struct{}, 1)
+	c.HTTP.Timeout = 180 * time.Second
+	return c
+}
+func (c *Client) Configured() bool { return c.Local || c.APIKey != "" }
+
 func (c *Client) Complete(ctx context.Context, prompt string, input, output any) error {
+	ctx, cancel := context.WithTimeout(ctx, c.HTTP.Timeout)
+	defer cancel()
+	if c.Local {
+		select {
+		case c.slots <- struct{}{}:
+			defer func() { <-c.slots }()
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		prompt += "\n/no_think"
+	}
 	data, err := json.Marshal(input)
 	if err != nil {
 		return err
 	}
 
-	body, err := json.Marshal(map[string]any{"model": c.Model, "messages": []map[string]string{{"role": "system", "content": prompt}, {"role": "user", "content": string(data)}}, "response_format": map[string]string{"type": "json_object"}, "max_tokens": 2048})
+	payload := map[string]any{"model": c.Model, "messages": []map[string]string{{"role": "system", "content": prompt}, {"role": "user", "content": string(data)}}, "response_format": map[string]string{"type": "json_object"}, "max_tokens": 2048}
+	if c.Local {
+		payload["response_format"] = map[string]any{"type": "json_schema", "json_schema": map[string]any{"name": "travel_response", "strict": true, "schema": outputSchema(reflect.TypeOf(output))}}
+		payload["reasoning_effort"] = "none"
+		payload["temperature"] = 0
+		payload["max_tokens"] = 4096
+	}
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
@@ -44,7 +74,9 @@ func (c *Client) Complete(ctx context.Context, prompt string, input, output any)
 		return err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	if !c.Local {
+		req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.HTTP.Do(req)
 	if err != nil {

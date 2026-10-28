@@ -1,6 +1,7 @@
 package grpcapi
 
 import (
+	aiv1 "ai-service/api/ai/v1"
 	travelv1 "ai-service/api/travel/v1"
 	"ai-service/internal/service"
 	"context"
@@ -27,7 +28,7 @@ type Server struct {
 
 func New(svc *service.Service, key string) *grpc.Server {
 	interceptor := func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-		if key != "" && strings.HasPrefix(info.FullMethod, "/travel.v1.TravelAI/") {
+		if key != "" && (strings.HasPrefix(info.FullMethod, "/travel.v1.TravelAI/") || strings.HasPrefix(info.FullMethod, "/godnota.ai.v1.AIService/")) {
 			md, _ := metadata.FromIncomingContext(ctx)
 			values := md.Get("authorization")
 			if len(values) != 1 || subtle.ConstantTimeCompare([]byte(values[0]), []byte("Bearer "+key)) != 1 {
@@ -39,9 +40,11 @@ func New(svc *service.Service, key string) *grpc.Server {
 
 	server := grpc.NewServer(grpc.MaxRecvMsgSize(32<<10), grpc.MaxSendMsgSize(1<<20), grpc.UnaryInterceptor(interceptor))
 	travelv1.RegisterTravelAIServer(server, &Server{service: svc})
+	aiv1.RegisterAIServiceServer(server, &planningServer{service: svc})
 	healthServer := health.NewServer()
 	healthServer.SetServingStatus("", healthv1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("travel.v1.TravelAI", healthv1.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("godnota.ai.v1.AIService", healthv1.HealthCheckResponse_SERVING)
 	healthv1.RegisterHealthServer(server, healthServer)
 	reflection.Register(server)
 	return server

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "locale": "ru",
+  "currency": "RUB",
+  "origin": {"city": "Москва", "country_code": "RU"},
+  "destination": {"city": "Казань", "country_code": "RU"},
+  "dates": {"departure_date": "2026-12-12", "return_date": "2026-12-14", "nights": 2},
+  "travelers": {"adults": 2, "residency": "ru"},
+  "transport": {"modes": ["train", "plane"], "round_trip": true, "direct_only": true},
+  "hotel": {"needed": true, "rooms": 1, "star_rating_min": 3, "meal": "breakfast", "free_cancellation": true,
+            "price_per_night_max": 8000, "location": ["center", "walkable"], "near_place": "Казанский Кремль"},
+  "leisure": {"interests": ["museums", "theatres", "food"], "during_layovers": true, "max_items_per_stop": 5},
+  "budget": {"total": 40000, "scope": "total"},
+  "ai_context": {"trip_purpose": "leisure", "walkable_area": true},
+  "completeness": {"missing_required": []}
+}

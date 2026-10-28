@@ -1,0 +1,222 @@
+package travel
+
+import (
+	"context"
+	aiv1 "github.com/godnota/pkg/generated/ai/v1"
+	commonv1 "github.com/godnota/pkg/generated/common/v1"
+	providerv1 "github.com/godnota/pkg/generated/provider/v1"
+	routev1 "github.com/godnota/pkg/generated/route/v1"
+	sessionv1 "github.com/godnota/pkg/generated/session/v1"
+	pb "github.com/godnota/pkg/generated/travel/v1"
+	"github.com/godnota/pkg/tripconfig"
+	"github.com/ostrovok-hackathon-2026/godnota/providerkit"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
+	"sync"
+	"time"
+)
+
+type PlanningController struct {
+	ai    aiv1.AIServiceClient
+	aiKey string
+	*Controller
+	sessions  sessionv1.SessionServiceClient
+	providers providerv1.ProviderServiceClient
+	routes    routev1.RouteServiceClient
+	mu        sync.Mutex
+	locks     map[string]*sync.Mutex
+	cache     map[string]cachedParts
+	confirmed map[string]bool
+}
+type cachedParts struct {
+	config *commonv1.TripConfig
+	parts  *providerv1.SearchPartsResponse
+}
+
+func (c *Controller) WithPlanning(s sessionv1.SessionServiceClient, p providerv1.ProviderServiceClient, routeClients ...routev1.RouteServiceClient) *PlanningController {
+	controller := &PlanningController{Controller: c, sessions: s, providers: p, locks: map[string]*sync.Mutex{}, cache: map[string]cachedParts{}, confirmed: map[string]bool{}}
+	if len(routeClients) > 0 {
+		controller.routes = routeClients[0]
+	}
+	return controller
+}
+func (c *PlanningController) lock(id string) func() {
+	c.mu.Lock()
+	m := c.locks[id]
+	if m == nil {
+		m = &sync.Mutex{}
+		c.locks[id] = m
+	}
+	c.mu.Unlock()
+	m.Lock()
+	return m.Unlock
+}
+func (c *PlanningController) load(ctx context.Context, userID, id string) (*sessionv1.GetAgentContextResponse, error) {
+	if id == "" {
+		return nil, status.Error(codes.InvalidArgument, "session_id required")
+	}
+	if userID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id required")
+	}
+	loaded, err := c.sessions.GetAgentContext(ctx, &sessionv1.GetAgentContextRequest{UserId: userID, ChatId: id})
+	if err != nil {
+		return nil, err
+	}
+	if loaded == nil || loaded.GetUserId() != userID || loaded.GetChatId() != id {
+		return nil, status.Error(codes.DataLoss, "session returned mismatched context")
+	}
+	return loaded, nil
+}
+func (c *PlanningController) isConfirmed(id, remote string) bool {
+	c.mu.Lock()
+	value, ok := c.confirmed[id]
+	c.mu.Unlock()
+	if ok {
+		return value
+	}
+	return remote == "confirmed"
+}
+func (c *PlanningController) GetConfig(ctx context.Context, r *pb.GetConfigRequest) (*pb.GetConfigResponse, error) {
+	unlock := c.lock(r.GetSessionId())
+	defer unlock()
+	agent, err := c.load(ctx, r.GetUserId(), r.GetSessionId())
+	if err != nil {
+		return nil, err
+	}
+	out := &pb.GetConfigResponse{SessionId: r.GetSessionId(), Config: agent.GetCfg()}
+	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+func (c *PlanningController) save(ctx context.Context, userID, id string, config *commonv1.TripConfig, confirmed bool, replies ...proto.Message) error {
+	agent, err := c.load(ctx, userID, id)
+	if err != nil {
+		return err
+	}
+	if config == nil {
+		config = agent.GetCfg()
+	}
+	canonical, err := tripconfig.Canonical(config)
+	if err != nil {
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+	input, _, err := tripconfig.Decode(canonical, config.GetResolved())
+	if err != nil {
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+	if confirmed {
+		err = providerkit.ValidateSearch(input, time.Now())
+	} else {
+		err = input.ValidateAt(time.Now())
+	}
+	if err != nil {
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+	if len(replies) > 0 {
+		err = c.record(ctx, userID, id, "", config, nil, replies[0], nil, nil, !confirmed)
+	} else {
+		_, err = c.sessions.SaveContext(ctx, &sessionv1.SaveContextRequest{UserId: userID, ChatId: id, Cfg: config})
+	}
+	if err == nil {
+		c.mu.Lock()
+		c.confirmed[id] = confirmed
+		delete(c.cache, id)
+		c.mu.Unlock()
+	}
+	return err
+}
+func (c *PlanningController) UpdateConfig(ctx context.Context, r *pb.UpdateConfigRequest) (*pb.UpdateConfigResponse, error) {
+	unlock := c.lock(r.GetSessionId())
+	defer unlock()
+	if r.GetConfig() == nil {
+		return nil, status.Error(codes.InvalidArgument, "config required")
+	}
+	out := &pb.UpdateConfigResponse{SessionId: r.GetSessionId(), Config: r.GetConfig()}
+	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), false, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+func (c *PlanningController) ConfirmConfig(ctx context.Context, r *pb.ConfirmConfigRequest) (*pb.ConfirmConfigResponse, error) {
+	unlock := c.lock(r.GetSessionId())
+	defer unlock()
+	out := &pb.ConfirmConfigResponse{SessionId: r.GetSessionId(), Confirmed: true}
+	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), true, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoutesRequest) (*pb.SearchRoutesResponse, error) {
+	unlock := c.lock(r.GetSessionId())
+	defer unlock()
+	agent, err := c.load(ctx, r.GetUserId(), r.GetSessionId())
+	if err != nil {
+		return nil, err
+	}
+	session, err := c.sessions.GetSession(ctx, &sessionv1.GetSessionRequest{SessionId: r.GetSessionId()})
+	if err != nil {
+		return nil, err
+	}
+	if !c.isConfirmed(r.GetSessionId(), session.GetStatus()) {
+		return nil, status.Error(codes.FailedPrecondition, "confirm trip config before search")
+	}
+	canonical, err := tripconfig.Canonical(agent.GetCfg())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	parts, err := c.providers.SearchParts(ctx, &providerv1.SearchPartsRequest{Config: canonical, Resolved: agent.GetCfg().GetResolved()})
+	if err != nil {
+		return nil, err
+	}
+	if parts == nil {
+		return nil, status.Error(codes.DataLoss, "provider returned no response")
+	}
+	if len(parts.GetTransportParts()) > 0 || len(parts.GetHotelParts()) > 0 {
+		if c.routes == nil {
+			parts.Limitations = append(parts.Limitations, "route-service: handoff not configured")
+		} else {
+			handoff, cancel := context.WithTimeout(ctx, 750*time.Millisecond)
+			_, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
+			cancel()
+			if handoffErr != nil {
+				if ctx.Err() != nil {
+					return nil, status.FromContextError(ctx.Err()).Err()
+				}
+				parts.Limitations = append(parts.Limitations, "route-service: "+status.Code(handoffErr).String()+"; stage-2 parts preserved")
+			}
+		}
+	}
+	out := &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts}
+	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
+		return nil, err
+	}
+	c.mu.Lock()
+	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(agent.GetCfg()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)}
+	c.mu.Unlock()
+	return out, nil
+}
+func (c *PlanningController) GetRoutes(ctx context.Context, r *pb.GetRoutesRequest) (*pb.GetRoutesResponse, error) {
+	unlock := c.lock(r.GetSessionId())
+	defer unlock()
+	agent, err := c.load(ctx, r.GetUserId(), r.GetSessionId())
+	if err != nil {
+		return nil, err
+	}
+	session, err := c.sessions.GetSession(ctx, &sessionv1.GetSessionRequest{SessionId: r.GetSessionId()})
+	if err != nil {
+		return nil, err
+	}
+	c.mu.Lock()
+	cached, ok := c.cache[r.GetSessionId()]
+	c.mu.Unlock()
+	if !ok || !c.isConfirmed(r.GetSessionId(), session.GetStatus()) || !proto.Equal(cached.config, agent.GetCfg()) {
+		return nil, status.Error(codes.NotFound, "no search results for current config")
+	}
+	out := &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse)}
+	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
+		return nil, err
+	}
+	return out, nil
+}

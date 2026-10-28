@@ -1,0 +1,129 @@
+syntax = "proto3";
+package godnota.ai.v1;
+option go_package = "github.com/godnota/pkg/generated/ai/v1;aiv1";
+import "api/common/v1/trip.proto";
+import "api/provider/v1/parts.proto";
+service AIService {
+ rpc GenerateOrUpdateConfig(GenerateOrUpdateConfigRequest) returns (GenerateOrUpdateConfigResponse);
+ rpc UpdateConfig(UpdateConfigRequest) returns (UpdateConfigResponse);
+ rpc RefineConfig(RefineConfigRequest) returns (RefineConfigResponse);
+ rpc GenerateRecommendations(GenerateRecommendationsRequest) returns (GenerateRecommendationsResponse);
+ rpc RankRoutes(RankRoutesRequest) returns (RankRoutesResponse);
+ rpc RankJoinOptions(RankRoutesRequest) returns (RankRoutesResponse);
+ rpc RankFinalRoutes(RankRoutesRequest) returns (RankRoutesResponse);
+}
+message Message { string role = 1; string content = 2; }
+message ConversationContext { string summary = 1; repeated Message messages = 2; }
+message Assumption { string field = 1; string value = 2; string reason = 3; }
+message TravelIdea {
+ string id = 1;
+ string title = 2;
+ string description = 3;
+ godnota.common.v1.TripConfig config = 4;
+ repeated string reasons = 5;
+ repeated Assumption assumptions = 6;
+ string source = 7;
+ string city = 8;
+ string reason = 9;
+}
+message PreviousSession {godnota.common.v1.TripConfig config = 1;ConversationContext context = 2;}
+message GenerateOrUpdateConfigRequest {
+ string session_id = 1;
+ string text = 2;
+ godnota.common.v1.TripConfig config = 3;
+ ConversationContext context = 4;
+ repeated godnota.common.v1.Question questions = 5;
+ repeated godnota.common.v1.Answer answers = 6;
+ TravelIdea selected_idea = 7;
+ string current_date = 8;
+ bool force_generate = 9;
+}
+message GenerateOrUpdateConfigResponse {
+ string status = 1;
+ godnota.common.v1.TripConfig config = 2;
+ repeated TravelIdea advice = 3;
+ repeated godnota.common.v1.Question questions = 4;
+ repeated string missing_fields = 5;
+ repeated Assumption assumptions = 6;
+ string summary = 7;
+ repeated string warnings = 8;
+}
+message UpdateConfigRequest {
+ string session_id = 1;
+ string text = 2;
+ godnota.common.v1.TripConfig config = 3;
+ ConversationContext context = 4;
+ repeated godnota.common.v1.Question questions = 5;
+ repeated godnota.common.v1.Answer answers = 6;
+ TravelIdea selected_idea = 7;
+ string current_date = 8;
+ bool force_generate = 9;
+}
+message UpdateConfigResponse {
+ string status = 1;
+ godnota.common.v1.TripConfig config = 2;
+ repeated TravelIdea advice = 3;
+ repeated godnota.common.v1.Question questions = 4;
+ repeated string missing_fields = 5;
+ repeated Assumption assumptions = 6;
+ string summary = 7;
+ repeated string warnings = 8;
+}
+message RefineConfigRequest {
+ string session_id = 1;
+ string text = 2;
+ godnota.common.v1.TripConfig config = 3;
+ ConversationContext context = 4;
+ repeated godnota.common.v1.Question questions = 5;
+ repeated godnota.common.v1.Answer answers = 6;
+ TravelIdea selected_idea = 7;
+ string current_date = 8;
+ bool force_generate = 9;
+}
+message RefineConfigResponse {
+ string status = 1;
+ godnota.common.v1.TripConfig config = 2;
+ repeated TravelIdea advice = 3;
+ repeated godnota.common.v1.Question questions = 4;
+ repeated string missing_fields = 5;
+ repeated Assumption assumptions = 6;
+ string summary = 7;
+ repeated string warnings = 8;
+}
+message GenerateRecommendationsRequest {
+ string text = 1;
+ godnota.common.v1.TripConfig config = 2;
+ ConversationContext context = 3;
+ repeated PreviousSession last_sessions = 4;
+ string current_date = 5;
+}
+message GenerateRecommendationsResponse {repeated TravelIdea advice = 1;}
+message RouteCandidate {
+ string id = 1;
+ repeated string transport_part_ids = 2;
+ repeated string hotel_part_ids = 3;
+ bool connections_verified = 4;
+}
+message RankRoutesRequest {
+ godnota.common.v1.TripConfig config = 1;
+ ConversationContext context = 2;
+ godnota.provider.v1.SearchPartsResponse parts = 3;
+ repeated RouteCandidate candidates = 4;
+ int32 limit = 5;
+ string current_date = 6;
+}
+message RankedRoute {
+ string id = 1;
+ double score = 2;
+ string reason = 3;
+ repeated string risks = 4;
+ godnota.provider.v1.Money total_price = 5;
+ bool price_complete = 6;
+ bool requires_verification = 7;
+}
+message RejectedRoute {string id = 1; string reason = 2;}
+message RankRoutesResponse {
+ repeated RankedRoute results = 1;
+ repeated RejectedRoute rejected = 2;
+ godnota.provider.v1.SearchPartsResponse parts = 3;
+}

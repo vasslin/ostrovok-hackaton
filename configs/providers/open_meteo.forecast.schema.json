@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ostrovok-hackathon-2026/godnota/internal/providers/open-meteo-forecast",
+  "properties": {
+    "latitude": {
+      "type": "number",
+      "maximum": 90,
+      "minimum": -90
+    },
+    "longitude": {
+      "type": "number",
+      "maximum": 180,
+      "minimum": -180
+    },
+    "daily": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Comma-separated, e.g. temperature_2m_max,temperature_2m_min,precipitation_sum."
+    },
+    "hourly": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "timezone": {
+      "type": "string",
+      "maxLength": 64,
+      "default": "auto"
+    },
+    "forecast_days": {
+      "type": "integer",
+      "maximum": 16,
+      "minimum": 1
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "latitude",
+    "longitude"
+  ],
+  "title": "open_meteo.forecast request parameters"
+}

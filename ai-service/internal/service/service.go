@@ -13,7 +13,7 @@ import (
 type Service struct{ client *agent.Client }
 
 func New(client *agent.Client) *Service { return &Service{client: client} }
-func (s *Service) Configured() bool     { return s.client.APIKey != "" }
+func (s *Service) Configured() bool     { return s.client.Configured() }
 func (s *Service) Model() string        { return s.client.Model }
 
 type Error struct {
@@ -104,7 +104,7 @@ func validate(c Config) error {
 }
 
 func (s *Service) Extract(ctx context.Context, in ExtractInput) (*ExtractOutput, error) {
-	if s.client.APIKey == "" {
+	if !s.Configured() {
 		return nil, &Error{Status: 503, Message: "LLM_API_KEY is not configured"}
 	}
 
@@ -161,7 +161,7 @@ func (s *Service) Extract(ctx context.Context, in ExtractInput) (*ExtractOutput,
 }
 
 func (s *Service) RankHotels(ctx context.Context, in RankInput) (*RankOutput, error) {
-	if s.client.APIKey == "" {
+	if !s.Configured() {
 		return nil, &Error{Status: 503, Message: "LLM_API_KEY is not configured"}
 	}
 

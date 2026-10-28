@@ -3,10 +3,19 @@ services:
     platform: linux/amd64
     build: ./ai-service
     env_file: .env
+    environment:
+      APP_PORT: ${APP_PORT:-8080}
+      GRPC_PORT: ${GRPC_PORT:-9090}
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      LLM_MODEL: ${LLM_MODEL:-travel-qwen:4b}
+      LLM_TIMEOUT: ${LLM_TIMEOUT:-180s}
     ports:
       - "8080:8080"
       - "9090:9090"
-    stop_grace_period: 55s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stop_grace_period: 200s
     healthcheck:
       test: ["CMD", "/server", "healthcheck"]
       interval: 15s

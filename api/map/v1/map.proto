@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package godnota.map.v1;
+
+option go_package = "github.com/godnota/pkg/generated/map/v1;mapv1";
+import "api/provider/v1/parts.proto";
+import "google/protobuf/struct.proto";
+
+// MapService преобразует единый конфиг в конфиги провайдеров и маршруты в DTO фронтенда.
+// Сообщения намеренно пустые: поля контракта будут добавлены позже.
+service MapService {
+  rpc MapToProviderConfigs(MapToProviderConfigsRequest) returns (MapToProviderConfigsResponse);
+  rpc MapRoutesToFrontend(MapRoutesToFrontendRequest) returns (MapRoutesToFrontendResponse);
+}
+
+message MapToProviderConfigsRequest {
+  google.protobuf.Struct config = 1;
+  google.protobuf.Struct resolved = 2;
+}
+message MapToProviderConfigsResponse {
+  repeated godnota.provider.v1.ProviderConfig configs = 1;
+  repeated string missing = 2;
+  repeated string limitations = 3;
+}
+
+message MapRoutesToFrontendRequest {}
+message MapRoutesToFrontendResponse {}

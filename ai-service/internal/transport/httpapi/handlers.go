@@ -125,6 +125,57 @@ func New(svc *service.Service, serviceKey string) http.Handler {
 		}
 		reply(w, 200, out)
 	}))
+	analyze := func(refine bool) http.HandlerFunc {
+		return protect(func(w http.ResponseWriter, r *http.Request) {
+			var in service.PlanningInput
+			if !decode(w, r, &in) {
+				return
+			}
+			if refine {
+				in.ForceGenerate = true
+			}
+			out, err := svc.AnalyzeCanonical(r.Context(), in)
+			if err != nil {
+				serviceError(w, err)
+				return
+			}
+			if r.URL.Query().Get("include_metadata") == "true" {
+				reply(w, 200, map[string]any{"result": service.StrictAIResponse(out), "metadata": map[string]any{"summary": out.Summary, "missing_fields": out.MissingFields, "assumptions": out.Assumptions, "warnings": out.Warnings, "config_wrapper": out.Config}})
+			} else {
+				reply(w, 200, service.StrictAIResponse(out))
+			}
+		})
+	}
+	mux.HandleFunc("POST /v1/planning/analyze", analyze(false))
+	mux.HandleFunc("POST /v1/planning/update", analyze(false))
+	mux.HandleFunc("POST /v1/planning/refine", analyze(true))
+	mux.HandleFunc("POST /v1/planning/recommendations", protect(func(w http.ResponseWriter, r *http.Request) {
+		var in service.RecommendationsInput
+		if !decode(w, r, &in) {
+			return
+		}
+		out, err := svc.RecommendationsCanonical(r.Context(), in)
+		if err != nil {
+			serviceError(w, err)
+			return
+		}
+		reply(w, 200, out)
+	}))
+	rankRoutes := protect(func(w http.ResponseWriter, r *http.Request) {
+		var in service.RankRoutesInput
+		if !decode(w, r, &in) {
+			return
+		}
+		out, err := svc.RankRoutes(r.Context(), in)
+		if err != nil {
+			serviceError(w, err)
+			return
+		}
+		reply(w, 200, out)
+	})
+	mux.HandleFunc("POST /v1/ranking/routes", rankRoutes)
+	mux.HandleFunc("POST /v1/ranking/join-options", rankRoutes)
+	mux.HandleFunc("POST /v1/ranking/final-routes", rankRoutes)
 	return mux
 }
 
