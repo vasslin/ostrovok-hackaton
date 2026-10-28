@@ -65,12 +65,31 @@ services:
       retries: 12
       start_period: 5s
 
+  session-db:
+    image: postgres:16.6-alpine
+    environment:
+      POSTGRES_USER: session
+      POSTGRES_PASSWORD: session
+      POSTGRES_DB: session
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U session -d session"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
   session-service:
     build:
       context: .
       dockerfile: session-service/Dockerfile
     environment:
       GRPC_PORT: "50052"
+      SESSION_REPOSITORY: postgres
+      SESSION_POSTGRES_DSN: postgres://session:session@session-db:5432/session?sslmode=disable
+      SESSION_PREVIOUS_CHATS_LIMIT: "4"
+    depends_on:
+      session-db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "50052"]
       interval: 5s

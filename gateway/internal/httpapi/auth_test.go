@@ -55,6 +55,23 @@ func TestAuthorization(t *testing.T) {
 		t.Fatalf("unauthorized backend call, count=%d", calls)
 	}
 }
+func TestTravelRequestCarriesUserID(t *testing.T) {
+	user := auth.User{ID: "mine"}
+	backend := backendFunc(func(_ context.Context, op string, _ json.RawMessage) (json.RawMessage, error) {
+		if op == "/v1/session/get" {
+			return json.RawMessage(`{"user_id":"mine"}`), nil
+		}
+		return json.RawMessage(`{}`), nil
+	})
+	raw, err := authorize(context.Background(), backend, user, route{operation: "/v1/travel/search"}, json.RawMessage(`{"session_id":"s"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var body map[string]string
+	if err = json.Unmarshal(raw, &body); err != nil || body["user_id"] != "mine" || body["session_id"] != "s" {
+		t.Fatalf("%s %v", raw, err)
+	}
+}
 func TestCORS(t *testing.T) {
 	h := Handler(backendFunc(func(context.Context, string, json.RawMessage) (json.RawMessage, error) { return nil, nil }))
 	for _, origin := range []string{"https://untrusted.example", "http://localhost:5173"} {

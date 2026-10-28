@@ -6,11 +6,11 @@ option go_package = "github.com/godnota/pkg/generated/session/v1;sessionv1";
 
 import "api/common/v1/trip.proto";
 
-// SessionService хранит сессию, историю диалога и текущий конфиг поездки.
+// SessionService хранит сессию и контекст, который travel-service передаёт AI-агенту.
 service SessionService {
   rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
   rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
-  rpc GetContext(GetContextRequest) returns (GetContextResponse);
+  rpc GetAgentContext(GetAgentContextRequest) returns (GetAgentContextResponse);
   rpc SaveContext(SaveContextRequest) returns (SaveContextResponse);
 }
 
@@ -43,27 +43,40 @@ message GetSessionResponse {
   string updated_at = 8;
 }
 
-message GetContextRequest {
-  string session_id = 1;
+message PreviousChatSummary {
+  string chat_id = 1;
+  string summary = 2;
+  string updated_at = 3;
 }
 
-message GetContextResponse {
-  string session_id = 1;
-  string user_id = 2;
-  string status = 3;
-  string summary = 4;
-  godnota.common.v1.TripConfig trip_config = 5;
-  repeated DialogMessage messages = 6;
+message GetAgentContextRequest {
+  string user_id = 1;
+  string chat_id = 2;
+  // 0 означает лимит по умолчанию (4). Отрицательное значение отклоняется.
+  int32 previous_chats_limit = 3;
+}
+
+message GetAgentContextResponse {
+  string user_id = 1;
+  string chat_id = 2;
+  repeated DialogMessage chat_history = 3;
+  string chat_summary = 4;
+  repeated PreviousChatSummary previous_chats_summary = 5;
+  godnota.common.v1.TripConfig cfg = 6;
 }
 
 message SaveContextRequest {
-  string session_id = 1;
-  string summary = 2;
-  string status = 3;
-  godnota.common.v1.TripConfig trip_config = 4;
-  repeated DialogMessage messages = 5;
+  string user_id = 1;
+  string chat_id = 2;
+  // Непустой список дописывается в конец истории. Пустой список историю не меняет.
+  repeated DialogMessage messages = 3;
+  // Отсутствие поля оставляет резюме как есть. Пустая строка его очищает.
+  optional string summary = 4;
+  // Отсутствие поля оставляет конфиг как есть.
+  optional godnota.common.v1.TripConfig cfg = 5;
 }
 
 message SaveContextResponse {
-  string session_id = 1;
+  string user_id = 1;
+  string chat_id = 2;
 }
