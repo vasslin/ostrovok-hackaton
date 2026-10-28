@@ -71,7 +71,7 @@ Secrets come from env vars named in `providers.json`: `TRAVELPAYOUTS_TOKEN` and 
 
 ## From the AI config to provider requests
 
-`providerkit.BuildTripPlan` is the importable entry point. It accepts a validated `TripRequest` and resolved city codes and coordinates. It returns two maps keyed by provider: `discovery` for code lookup and `search` for configured provider requests. `missing` lists the facts needed before a request can be built; `limitations` identifies unavailable data sources, including hotels. Hotel preferences remain in `TripRequest`, but no hotel API request is generated because the mock was removed and no live provider credentials are available. The AI supplies human values only; code resolution must check country and city type when names are ambiguous.
+`providerkit.BuildTripPlan` is the importable entry point. It accepts a validated `TripRequest` and resolved city codes and coordinates. It returns maps keyed by provider: `discovery` for code lookup and `search` for configured provider requests. Hotel searches are handled separately by optional Hotelbeds evaluation and RateHawk adapters in provider-service. The AI supplies human values only; code resolution must check country and city type when names are ambiguous.
 
 ```bash
 go run ./cmd/maptrip -trip configs/examples/trip_request.kazan_weekend.json -resolved configs/examples/resolved_trip.kazan_weekend.json -now 2026-10-27
@@ -79,4 +79,4 @@ go run ./cmd/maptrip -trip configs/examples/trip_request.kazan_weekend.json -res
 
 The public Nominatim endpoint is used only for individual city geocoding, never for bulk lists of museums or cinemas. Layover activities require the actual stop coordinates and free interval after route search. The hotel API research and access requirement are in [hotels.md](../docs/providers/hotels.md).
 
-After merging with the multi-module `main` branch, add `.` to `go.work` before importing `github.com/ostrovok-hackathon-2026/godnota/providerkit` from a service. The current `provider-service` protobuf requests and responses are empty stubs, so a service adapter and DTO contract are still required. See [integration notes](../docs/providers/INTEGRATION.md).
+The root module is already included in `go.work`. Provider-service exposes search DTOs and adapters for the AI and frontend input shapes; full gateway and frontend integration still needs team work. See [integration notes](../docs/providers/INTEGRATION.md).

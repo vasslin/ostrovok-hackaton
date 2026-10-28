@@ -18,8 +18,11 @@ type ResolvedPlace struct {
 }
 
 type ResolvedTrip struct {
-	Origin      ResolvedPlace `json:"origin"`
-	Destination ResolvedPlace `json:"destination"`
+	Origin                ResolvedPlace `json:"origin"`
+	Destination           ResolvedPlace `json:"destination"`
+	HotelCheckin          string        `json:"hotel_checkin,omitempty"`
+	HotelCheckout         string        `json:"hotel_checkout,omitempty"`
+	HotelbedsSourceMarket string        `json:"hotelbeds_source_market,omitempty"`
 }
 
 type TripPlan struct {
@@ -136,7 +139,7 @@ func BuildTripPlan(input trip.TripRequest, resolved ResolvedTrip, now time.Time)
 	}
 
 	if input.Hotel == nil || input.Hotel.Needed == nil || *input.Hotel.Needed {
-		plan.Limitations = append(plan.Limitations, "поиск отелей пропущен: в конфигурации нет подключённого поставщика; требования к проживанию сохранены в TripRequest")
+		plan.Limitations = append(plan.Limitations, "поиск отелей выполняется отдельно и требует подтверждённых дат, гражданства гостей и партнёрского доступа")
 	}
 
 	if hasCoordinates(resolved.Destination) {

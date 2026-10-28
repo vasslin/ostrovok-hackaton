@@ -1,0 +1,6 @@
+{
+  "stay": {"checkIn": "2026-12-12", "checkOut": "2026-12-14"},
+  "occupancies": [{"rooms": 1, "adults": 2, "children": 1, "paxes": [{"type": "CH", "age": 7}]}],
+  "geolocation": {"latitude": 55.7987, "longitude": 49.1059, "radius": 3, "unit": "km"},
+  "sourceMarket": "RU"
+}

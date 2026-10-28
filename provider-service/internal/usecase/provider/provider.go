@@ -2,13 +2,13 @@ package provider
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/godnota/provider-service/internal/entity"
+	"github.com/ostrovok-hackathon-2026/godnota/providerkit"
 )
 
 type Repository interface {
-	Search(ctx context.Context, kind string) ([]entity.Offer, error)
+	Search(context.Context, providerkit.TripRequest, providerkit.ResolvedTrip, string) (entity.Result, error)
 }
 
 type Service struct {
@@ -17,20 +17,6 @@ type Service struct {
 
 func New(repo Repository) *Service { return &Service{repo: repo} }
 
-func (s *Service) SearchTransport(ctx context.Context) ([]entity.Offer, error) {
-	slog.Info("provider-service: search transport")
-	offers, _ := s.repo.Search(ctx, "transport")
-	return offers, nil
-}
-
-func (s *Service) SearchHotels(ctx context.Context) ([]entity.Offer, error) {
-	slog.Info("provider-service: search hotels")
-	offers, _ := s.repo.Search(ctx, "hotel")
-	return offers, nil
-}
-
-func (s *Service) SearchActivities(ctx context.Context) ([]entity.Offer, error) {
-	slog.Info("provider-service: search activities")
-	offers, _ := s.repo.Search(ctx, "activity")
-	return offers, nil
+func (s *Service) Search(ctx context.Context, trip providerkit.TripRequest, resolved providerkit.ResolvedTrip, kind string) (entity.Result, error) {
+	return s.repo.Search(ctx, trip, resolved, kind)
 }

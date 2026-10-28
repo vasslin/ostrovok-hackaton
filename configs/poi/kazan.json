@@ -1,0 +1,162 @@
+{
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+  "source": "https://www.openstreetmap.org/copyright",
+  "observed_at": "2026-10-25",
+  "coverage": "partial Kazan sample: 17 museums, one theatre and one cinema; opening hours and completeness not guaranteed",
+  "items": [
+    {
+      "id": "osm:node:1348003477",
+      "name": "Национальный музей Республики Татарстан",
+      "kind": "museum",
+      "latitude": 55.7958566,
+      "longitude": 49.1096731,
+      "source_url": "https://www.openstreetmap.org/node/1348003477"
+    },
+    {
+      "id": "osm:node:2951266146",
+      "name": "Музей А. М. Горького и Ф. И. Шаляпина",
+      "kind": "museum",
+      "latitude": 55.7935621,
+      "longitude": 49.1296637,
+      "source_url": "https://www.openstreetmap.org/node/2951266146"
+    },
+    {
+      "id": "osm:node:2494989015",
+      "name": "Литературный музей Г. Тукая",
+      "kind": "museum",
+      "latitude": 55.7775358,
+      "longitude": 49.1154559,
+      "source_url": "https://www.openstreetmap.org/node/2494989015"
+    },
+    {
+      "id": "osm:way:172548539",
+      "name": "Дом-музей В.И.Ленина",
+      "kind": "museum",
+      "latitude": 55.7868952,
+      "longitude": 49.1386954,
+      "source_url": "https://www.openstreetmap.org/way/172548539"
+    },
+    {
+      "id": "osm:node:5252474255",
+      "name": "Музей чак-чака",
+      "kind": "museum",
+      "latitude": 55.7820629,
+      "longitude": 49.1125533,
+      "source_url": "https://www.openstreetmap.org/node/5252474255"
+    },
+    {
+      "id": "osm:way:194234840",
+      "name": "Музей Баки Урманче",
+      "kind": "museum",
+      "latitude": 55.7917557,
+      "longitude": 49.1331636,
+      "source_url": "https://www.openstreetmap.org/way/194234840"
+    },
+    {
+      "id": "osm:node:12213924368",
+      "name": "Музей истории государственности татарского народа и Республики Татарстан",
+      "kind": "museum",
+      "latitude": 55.8008621,
+      "longitude": 49.1051535,
+      "source_url": "https://www.openstreetmap.org/node/12213924368"
+    },
+    {
+      "id": "osm:node:2809239000",
+      "name": "Музей социалистического быта",
+      "kind": "museum",
+      "latitude": 55.7870019,
+      "longitude": 49.1196117,
+      "source_url": "https://www.openstreetmap.org/node/2809239000"
+    },
+    {
+      "id": "osm:node:9883968512",
+      "name": "Геологический музей имени А. А. Штукенберга",
+      "kind": "museum",
+      "latitude": 55.7938485,
+      "longitude": 49.1144434,
+      "source_url": "https://www.openstreetmap.org/node/9883968512"
+    },
+    {
+      "id": "osm:node:9871773742",
+      "name": "Музей счастливого детства",
+      "kind": "museum",
+      "latitude": 55.7883026,
+      "longitude": 49.1208067,
+      "source_url": "https://www.openstreetmap.org/node/9871773742"
+    },
+    {
+      "id": "osm:node:2947497580",
+      "name": "Музей Салиха Сайдашева",
+      "kind": "museum",
+      "latitude": 55.794428,
+      "longitude": 49.1298285,
+      "source_url": "https://www.openstreetmap.org/node/2947497580"
+    },
+    {
+      "id": "osm:node:5316345744",
+      "name": "Музей Каюма Насыри",
+      "kind": "museum",
+      "latitude": 55.7802224,
+      "longitude": 49.1107044,
+      "source_url": "https://www.openstreetmap.org/node/5316345744"
+    },
+    {
+      "id": "osm:node:2947779441",
+      "name": "Музейно-мемориальный комплекс истории татарского народа",
+      "kind": "museum",
+      "latitude": 55.7998496,
+      "longitude": 49.1047301,
+      "source_url": "https://www.openstreetmap.org/node/2947779441"
+    },
+    {
+      "id": "osm:node:3413153869",
+      "name": "Музей Л. Н. Толстого",
+      "kind": "museum",
+      "latitude": 55.7955948,
+      "longitude": 49.110341,
+      "source_url": "https://www.openstreetmap.org/node/3413153869"
+    },
+    {
+      "id": "osm:node:2947471198",
+      "name": "Музей-мемориал Великой Отечественной войны",
+      "kind": "museum",
+      "latitude": 55.7985977,
+      "longitude": 49.1059102,
+      "source_url": "https://www.openstreetmap.org/node/2947471198"
+    },
+    {
+      "id": "osm:node:6929993786",
+      "name": "Музей Казанской Иконы",
+      "kind": "museum",
+      "latitude": 55.7985792,
+      "longitude": 49.1116079,
+      "source_url": "https://www.openstreetmap.org/node/6929993786"
+    },
+    {
+      "id": "osm:node:2947232896",
+      "name": "Музей естественной истории Татарстана",
+      "kind": "museum",
+      "latitude": 55.7984087,
+      "longitude": 49.1060898,
+      "source_url": "https://www.openstreetmap.org/node/2947232896"
+    },
+    {
+      "id": "osm:way:75658002",
+      "name": "Татарский театр оперы и балета им. Мусы Джалиля",
+      "kind": "theatre",
+      "latitude": 55.7953624,
+      "longitude": 49.1246675,
+      "source_url": "https://www.openstreetmap.org/way/75658002",
+      "observed_at": "2026-10-28T08:03:39Z"
+    },
+    {
+      "id": "osm:node:698271115",
+      "name": "КРЦ Родина",
+      "kind": "cinema",
+      "latitude": 55.791764,
+      "longitude": 49.1123762,
+      "source_url": "https://www.openstreetmap.org/node/698271115",
+      "observed_at": "2026-10-28T08:03:39Z"
+    }
+  ]
+}

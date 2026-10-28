@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-28",
+  "mode": "frontend demo; synthetic data; isolated browser storage; no backend integration",
+  "frontend_commit": "74f601e",
+  "runs": [
+    {
+      "case": "U01",
+      "status": "failed",
+      "input": "Москва — Казань, 12–14 декабря, 2 взрослых, поезд или самолёт, отель у Кремля до 8 000 рублей за ночь",
+      "observed": "The demo kept Istanbul and Antalya, used 14–21 December, retained one child and treated 8000 RUB as a total budget."
+    },
+    {
+      "case": "U02",
+      "status": "failed",
+      "input": "В ноябре к тёплому морю, дёшево, с ребёнком",
+      "observed": "The demo selected Istanbul and Antalya, showed 125620 RUB and asked no clarifying question. The initial screen labels the trip and prices as examples."
+    },
+    {
+      "case": "U10",
+      "status": "failed",
+      "input": "Set departure date to 2026-01-01 on 2026-10-28.",
+      "observed": "The form accepted the past date and updated the demo itinerary to 1–8 January."
+    },
+    {
+      "case": "U29",
+      "status": "partial",
+      "input": "Double-click the final demo booking confirmation.",
+      "observed": "One demo order appeared in browser history. Network timeout, backend retries and server-side idempotency were not tested."
+    },
+    {
+      "case": "U24",
+      "status": "partial",
+      "input": "Shift dates by two days, then reduce the budget to 100000 RUB.",
+      "observed": "The demo shifted 10–17 November to 12–19 November and changed the total from 125620 to 99234 RUB. It did not explicitly identify preserved segments or show a price delta."
+    }
+  ]
+}

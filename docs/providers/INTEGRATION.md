@@ -1,30 +1,39 @@
-# Integration notes for `providers-api`
+# Provider integration
 
-This page describes the checked state of the local `providers-api` working tree on 2026-10-27. No merge or commit has been made.
+The provider branch was merged into `main` at `0fcf00f`. The root module is in `go.work`; `.env` is ignored and no longer tracked, while `.env.example` lists the configuration names. The provider-service changes described here are local uncommitted work until committed by the team.
 
-## Git and workspace
+## Service contract
 
-The historical heads `origin/main` and `origin/providers-api` conflict on `.env.example` and `.gitignore`. The local files contain the intended union: service addresses, blank provider/AI credentials, and ignore rules for local secrets and Go artifacts. Whoever performs the merge must select those combined contents. `origin/main` also tracks `.env`; an ignore rule alone does not stop tracking it. Remove it from the Git index before placing secrets in that filename.
+`api/provider/v1/provider.proto` exposes `SearchTransport`, `SearchHotels` and `SearchActivities`. Each accepts `SearchInput` with:
 
-`origin/main` is a multi-module workspace and its `go.work` does not include the root module. Add `.` to the `use` block after merging. Then services can import `github.com/ostrovok-hackathon-2026/godnota/providerkit`. The implementation in `internal/providers` cannot be imported directly from `github.com/godnota/provider-service`; use the public wrapper.
+- `trip_request`: an object in the unified `TripRequest` shape, or the chosen adapter's input shape.
+- `input_format`: `trip_request` (default), `ai_config`, or `frontend_criteria`.
+- `resolved`: independently verified origin/destination provider codes and coordinates. Hotel search additionally requires confirmed `hotel_checkin` and `hotel_checkout`; Hotelbeds requires an explicit `hotelbeds_source_market`.
 
-## Data flow
+The result contains offers, provider issues, missing fields, limitations and discovery requests. A missing optional `price_minor` means unknown, never free. Protobuf JSON represents int64 values as strings; a gateway must convert them safely before sending the frontend's numeric minor-unit fields. Quote scope, currency, source, retrieval time and synthetic/sandbox status must travel with the offer.
 
-1. Convert the AI response into `TripRequest` and validate it against `configs/trip_request.schema.json` and `TripRequest.ValidateAt`. The current AI branch uses a flat `travel.v1.Config`; fields for pets, hotel filters, modes, country and month-only dates are absent there. Define an explicit adapter and preserve unknown values as unresolved.
-2. Resolve each city to IATA, Yandex code and coordinates. Match country, place type and city name; do not assume the first autocomplete hit is correct. Obtain the hotel region from the future hotel source or use resolved coordinates. Preserve the user's choice when multiple cities share a name.
-3. Determine hotel check-in and checkout from actual transport arrival/departure dates. A night train can shift check-in to the next calendar day. Pass those dates through `ResolvedTrip`.
-4. Call `providerkit.BuildTripPlan(input, resolved, now)`. Execute `Discovery` requests first, fill missing resolution values, then rebuild. Only execute `Search` requests whose required fields are resolved. `Missing` is actionable; `Limitations` must stay with the resulting offers.
-5. `providerkit.LoadRegistry` and `Registry.NewHTTPRequest` validate and encode typed provider requests. The caller still needs bounded responses, rate limiting, retry rules, caching and provider-specific response normalizers. Never follow a redirect carrying a provider credential. `cmd/smoke` demonstrates bounded reads and blocked redirects, but is a probe tool rather than a service client.
-6. Return normalized offers with provider, retrieval time, currency, amount scale, price scope, live/cached/synthetic status and missing data. `origin/main` provider/map/route protobuf requests and responses are empty; define these fields before wiring gRPC controllers. The current `provider-service` returns empty results.
-7. Adapt normalized routes to `origin/frontend`'s `Trip` shape. That UI expects stop/segment IDs, WGS84 coordinates, ISO datetimes with offsets, money in minor units, authoritative totals, a revision and idempotent demo booking. Its current demo adapter does not match `origin/main` gateway routes.
+The AI branch's flat config does not specify budget scope or structured preferences; the frontend criteria do not identify pet species, hotel room allocation or source market. The adapters return unresolved fields instead of guessing. The existing frontend expects a complete `Trip` and cannot safely render partial provider offers or unknown totals without a gateway/UI change.
 
-## Source boundaries
+## Running the provider service
 
-- Aviasales Data API provides cached fares, not confirmed seats or final checkout prices.
-- Yandex Rasp provides schedules, often without ticket prices. Missing price must stay unknown.
-- Hotel preferences remain in `TripRequest`, but no hotel provider is configured. ETG / RateHawk requires a contract and a separate HTTPS adapter; see `docs/providers/hotels.md`.
-- Wikimedia provides articles about nearby places, not opening hours or event inventory. Each image needs its own reuse information.
-- Public Nominatim is for individual geocoding, not automatic lists of museums or cinemas. A curated offline OSM index or a separately approved POI source is needed for those interests.
-- Layover activities require a real stop, free time, travel time to the place, opening hours and a margin before departure; city-centre proximity alone is insufficient.
+From the repository root, after supplying any credentials in a local environment:
 
-The report template and scenario matrix in `docs/` should be completed against the final integrated build, with fixture names and recorded evidence. Do not mark the full journey as passed based on this provider module alone.
+```sh
+go run ./provider-service/cmd/app
+go run ./provider-service/cmd/search -kind activity -resolved configs/examples/resolved_trip.kazan_weekend.json
+```
+
+The service reads `PROVIDERS_CONFIG` (default `configs/providers.json`) and `POI_INDEX_PATH` (default `configs/poi/kazan.json`). Docker Compose passes the ignored local `.env` to the provider service. No key values belong in request configs, logs, fixtures or reports.
+
+Transport uses Aviasales and Yandex schedules; Wikipedia and the local OSM index provide attractions. External responses are bounded, redirects are not followed, requests are rate-limited per provider, and successful GET responses are cached in process. City discovery requests are returned for a caller to resolve; the service does not select an ambiguous city automatically.
+
+Hotelbeds is enabled only with `HOTELBEDS_MODE=evaluation`, `HOTELBEDS_API_KEY` and `HOTELBEDS_SECRET`. RateHawk requires `RATEHAWK_MODE=sandbox` or `production`, `RATEHAWK_KEY_ID` and `RATEHAWK_API_KEY`. Hotel searches currently support one explicitly specified room. Neither path books a hotel. Sandbox/evaluation offers are labeled and must not be presented as live production inventory. Hotelbeds evaluation returned offers in an Aveiro test; wider destination coverage and RateHawk access remain unverified. See the [run report](../evidence/2026-10-28/RUN_REPORT.ru.md).
+
+The supplied OSM index is a partial Kazan snapshot: 17 museums captured on 2026-10-25 and one named theatre and cinema checked on 2026-10-28. It is not a complete venue directory. Import a licensed Overpass extract using `python3 scripts/import_osm_pois.py INPUT OUTPUT --coverage DESCRIPTION`; public Nominatim must not be used to download POI lists. OSM locations do not establish opening hours, ticket prices or feasibility during a layover.
+
+## Remaining team integration
+
+1. AI and frontend owners should convert their input into the documented contract, resolve missing fields with the traveler, and retain unsupported preferences. Their branches are still separate.
+2. The route/gateway owners must call the provider service, resolve the returned discovery candidates, define route/price contracts and normalize results. The current route and gateway code do not complete that path.
+3. Enforce hard traveler constraints, time-zone-aware connections, price scope, actual hotel details and prebook before recommending a complete trip. Cached Aviasales prices are not confirmed seats; Yandex schedules often lack fares.
+4. Run the manual scenario matrix against the integrated app and record evidence. Provider-level probes and the separate synthetic frontend demo do not by themselves establish an end-to-end pass.

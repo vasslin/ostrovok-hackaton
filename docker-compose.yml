@@ -143,7 +143,11 @@ services:
       context: .
       dockerfile: provider-service/Dockerfile
     environment:
+      GRPC_HOST: "0.0.0.0"
       GRPC_PORT: "50058"
+    env_file:
+      - path: .env
+        required: false
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "50058"]
       interval: 5s
