@@ -55,6 +55,23 @@ func TestAuthorization(t *testing.T) {
 		t.Fatalf("unauthorized backend call, count=%d", calls)
 	}
 }
+func TestTravelRequestCarriesUserID(t *testing.T) {
+	user := auth.User{ID: "mine"}
+	backend := backendFunc(func(_ context.Context, op string, _ json.RawMessage) (json.RawMessage, error) {
+		if op == "/v1/session/get" {
+			return json.RawMessage(`{"user_id":"mine"}`), nil
+		}
+		return json.RawMessage(`{}`), nil
+	})
+	raw, err := authorize(context.Background(), backend, user, route{operation: "/v1/travel/search"}, json.RawMessage(`{"session_id":"s"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var body map[string]string
+	if err = json.Unmarshal(raw, &body); err != nil || body["user_id"] != "mine" || body["session_id"] != "s" {
+		t.Fatalf("%s %v", raw, err)
+	}
+}
 func TestCORS(t *testing.T) {
 	h := Handler(backendFunc(func(context.Context, string, json.RawMessage) (json.RawMessage, error) { return nil, nil }))
 	for _, origin := range []string{"https://untrusted.example", "http://localhost:5173"} {
@@ -91,5 +108,28 @@ func TestForeignOrdersDeniedBeforeMutation(t *testing.T) {
 	}
 	if mutations != 0 {
 		t.Fatal("unauthorized mutation reached backend")
+	}
+}
+
+func TestOrderRouteLookupIncludesAuthenticatedOwner(t *testing.T) {
+	user := auth.User{ID: "owner"}
+	backend := backendFunc(func(_ context.Context, op string, raw json.RawMessage) (json.RawMessage, error) {
+		switch op {
+		case "/v1/session/get":
+			return json.RawMessage(`{"user_id":"owner"}`), nil
+		case "/v1/travel/routes":
+			var request map[string]string
+			if err := json.Unmarshal(raw, &request); err != nil || request["user_id"] != user.ID || request["session_id"] != "session" {
+				t.Fatalf("incorrect route lookup: %s", raw)
+			}
+			return json.RawMessage(`{"candidates":[{"id":"route"}]}`), nil
+		default:
+			t.Fatalf("unexpected operation %s", op)
+			return nil, nil
+		}
+	})
+	result, err := authorize(context.Background(), backend, user, route{operation: "/v1/order/create"}, json.RawMessage(`{"session_id":"session","route_id":"route"}`))
+	if err != nil || !strings.Contains(string(result), `"route_snapshot"`) {
+		t.Fatalf("route snapshot missing: %s, %v", result, err)
 	}
 }

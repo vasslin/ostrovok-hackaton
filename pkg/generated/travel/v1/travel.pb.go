@@ -28,6 +28,7 @@ type PlanTripRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -72,6 +73,13 @@ func (x *PlanTripRequest) GetSessionId() string {
 func (x *PlanTripRequest) GetText() string {
 	if x != nil {
 		return x.Text
+	}
+	return ""
+}
+
+func (x *PlanTripRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -156,6 +164,7 @@ type SubmitAnswersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Answers       []*v1.Answer           `protobuf:"bytes,2,rep,name=answers,proto3" json:"answers,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -202,6 +211,13 @@ func (x *SubmitAnswersRequest) GetAnswers() []*v1.Answer {
 		return x.Answers
 	}
 	return nil
+}
+
+func (x *SubmitAnswersRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 type SubmitAnswersResponse struct {
@@ -277,6 +293,7 @@ type SelectIdeaRequest struct {
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	IdeaId        string                 `protobuf:"bytes,2,opt,name=idea_id,json=ideaId,proto3" json:"idea_id,omitempty"`
 	Comment       string                 `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	UserId        string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -328,6 +345,13 @@ func (x *SelectIdeaRequest) GetIdeaId() string {
 func (x *SelectIdeaRequest) GetComment() string {
 	if x != nil {
 		return x.Comment
+	}
+	return ""
+}
+
+func (x *SelectIdeaRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -395,6 +419,7 @@ func (x *SelectIdeaResponse) GetQuestions() []*v1.Question {
 type GetConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -432,6 +457,13 @@ func (*GetConfigRequest) Descriptor() ([]byte, []int) {
 func (x *GetConfigRequest) GetSessionId() string {
 	if x != nil {
 		return x.SessionId
+	}
+	return ""
+}
+
+func (x *GetConfigRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -492,6 +524,7 @@ type UpdateConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Config        *v1.TripConfig         `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -538,6 +571,13 @@ func (x *UpdateConfigRequest) GetConfig() *v1.TripConfig {
 		return x.Config
 	}
 	return nil
+}
+
+func (x *UpdateConfigRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 type UpdateConfigResponse struct {
@@ -596,6 +636,7 @@ type ConfirmConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Config        *v1.TripConfig         `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -642,6 +683,13 @@ func (x *ConfirmConfigRequest) GetConfig() *v1.TripConfig {
 		return x.Config
 	}
 	return nil
+}
+
+func (x *ConfirmConfigRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 type ConfirmConfigResponse struct {
@@ -699,6 +747,7 @@ func (x *ConfirmConfigResponse) GetConfirmed() bool {
 type SearchRoutesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -736,6 +785,13 @@ func (*SearchRoutesRequest) Descriptor() ([]byte, []int) {
 func (x *SearchRoutesRequest) GetSessionId() string {
 	if x != nil {
 		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SearchRoutesRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -803,6 +859,7 @@ func (x *SearchRoutesResponse) GetCandidates() []*structpb.Struct {
 type GetRoutesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -840,6 +897,13 @@ func (*GetRoutesRequest) Descriptor() ([]byte, []int) {
 func (x *GetRoutesRequest) GetSessionId() string {
 	if x != nil {
 		return x.SessionId
+	}
+	return ""
+}
+
+func (x *GetRoutesRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -908,74 +972,82 @@ var File_api_travel_v1_travel_proto protoreflect.FileDescriptor
 
 const file_api_travel_v1_travel_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/travel/v1/travel.proto\x12\x11godnota.travel.v1\x1a\x18api/common/v1/trip.proto\x1a\x1bapi/provider/v1/parts.proto\x1a\x1cgoogle/protobuf/struct.proto\"D\n" +
+	"\x1aapi/travel/v1/travel.proto\x12\x11godnota.travel.v1\x1a\x18api/common/v1/trip.proto\x1a\x1bapi/provider/v1/parts.proto\x1a\x1cgoogle/protobuf/struct.proto\"]\n" +
 	"\x0fPlanTripRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
-	"\x04text\x18\x02 \x01(\tR\x04text\"\xe5\x01\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"\xe5\x01\n" +
 	"\x10PlanTripResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x16\n" +
 	"\x06intent\x18\x02 \x01(\tR\x06intent\x125\n" +
 	"\x06config\x18\x03 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\x129\n" +
 	"\tquestions\x18\x04 \x03(\v2\x1b.godnota.common.v1.QuestionR\tquestions\x12(\n" +
-	"\x10ready_for_search\x18\x05 \x01(\bR\x0ereadyForSearch\"j\n" +
+	"\x10ready_for_search\x18\x05 \x01(\bR\x0ereadyForSearch\"\x83\x01\n" +
 	"\x14SubmitAnswersRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x123\n" +
-	"\aanswers\x18\x02 \x03(\v2\x19.godnota.common.v1.AnswerR\aanswers\"\xd2\x01\n" +
+	"\aanswers\x18\x02 \x03(\v2\x19.godnota.common.v1.AnswerR\aanswers\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"\xd2\x01\n" +
 	"\x15SubmitAnswersResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x125\n" +
 	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\x129\n" +
 	"\tquestions\x18\x03 \x03(\v2\x1b.godnota.common.v1.QuestionR\tquestions\x12(\n" +
-	"\x10ready_for_search\x18\x04 \x01(\bR\x0ereadyForSearch\"e\n" +
+	"\x10ready_for_search\x18\x04 \x01(\bR\x0ereadyForSearch\"~\n" +
 	"\x11SelectIdeaRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
 	"\aidea_id\x18\x02 \x01(\tR\x06ideaId\x12\x18\n" +
-	"\acomment\x18\x03 \x01(\tR\acomment\"\xa5\x01\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\x17\n" +
+	"\auser_id\x18\x04 \x01(\tR\x06userId\"\xa5\x01\n" +
 	"\x12SelectIdeaResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x125\n" +
 	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\x129\n" +
-	"\tquestions\x18\x03 \x03(\v2\x1b.godnota.common.v1.QuestionR\tquestions\"1\n" +
+	"\tquestions\x18\x03 \x03(\v2\x1b.godnota.common.v1.QuestionR\tquestions\"J\n" +
 	"\x10GetConfigRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"i\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"i\n" +
 	"\x11GetConfigResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x125\n" +
-	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\"k\n" +
+	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\"\x84\x01\n" +
 	"\x13UpdateConfigRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x125\n" +
-	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\"l\n" +
+	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"l\n" +
 	"\x14UpdateConfigResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x125\n" +
-	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\"l\n" +
+	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\"\x85\x01\n" +
 	"\x14ConfirmConfigRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x125\n" +
-	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\"T\n" +
+	"\x06config\x18\x02 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x06config\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"T\n" +
 	"\x15ConfirmConfigResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x1c\n" +
-	"\tconfirmed\x18\x02 \x01(\bR\tconfirmed\"4\n" +
+	"\tconfirmed\x18\x02 \x01(\bR\tconfirmed\"M\n" +
 	"\x13SearchRoutesRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"\xae\x01\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xae\x01\n" +
 	"\x14SearchRoutesResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12>\n" +
 	"\x05parts\x18\x02 \x01(\v2(.godnota.provider.v1.SearchPartsResponseR\x05parts\x127\n" +
 	"\n" +
 	"candidates\x18\x03 \x03(\v2\x17.google.protobuf.StructR\n" +
-	"candidates\"1\n" +
+	"candidates\"J\n" +
 	"\x10GetRoutesRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"\xab\x01\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xab\x01\n" +
 	"\x11GetRoutesResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12>\n" +

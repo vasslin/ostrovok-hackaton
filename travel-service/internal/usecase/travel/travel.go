@@ -12,7 +12,7 @@ type Repository interface {
 }
 
 type SessionPort interface {
-	GetContext(ctx context.Context, sessionID string) error
+	GetAgentContext(ctx context.Context, sessionID string) error
 	SaveContext(ctx context.Context, sessionID string) error
 }
 
@@ -80,7 +80,7 @@ type SessionRequest struct {
 func (s *Service) PlanTrip(ctx context.Context, req PlanTripRequest) (Result, error) {
 	slog.Info("travel-service: plan trip", "session_id", req.SessionID)
 	_ = s.repo.Save(ctx, entity.Plan{SessionID: req.SessionID, Text: req.Text})
-	s.call(ctx, "session.GetContext", func(ctx context.Context) error { return s.sessions.GetContext(ctx, req.SessionID) })
+	s.call(ctx, "session.GetAgentContext", func(ctx context.Context) error { return s.sessions.GetAgentContext(ctx, req.SessionID) })
 	s.call(ctx, "ai.GenerateOrUpdateConfig", s.ai.GenerateOrUpdateConfig)
 	s.call(ctx, "session.SaveContext", func(ctx context.Context) error { return s.sessions.SaveContext(ctx, req.SessionID) })
 	return Result{}, nil
@@ -89,7 +89,7 @@ func (s *Service) PlanTrip(ctx context.Context, req PlanTripRequest) (Result, er
 func (s *Service) SubmitAnswers(ctx context.Context, req SubmitAnswersRequest) (Result, error) {
 	slog.Info("travel-service: submit answers", "session_id", req.SessionID)
 	_ = s.repo.Save(ctx, entity.Plan{SessionID: req.SessionID})
-	s.call(ctx, "session.GetContext", func(ctx context.Context) error { return s.sessions.GetContext(ctx, req.SessionID) })
+	s.call(ctx, "session.GetAgentContext", func(ctx context.Context) error { return s.sessions.GetAgentContext(ctx, req.SessionID) })
 	s.call(ctx, "ai.UpdateConfig", s.ai.UpdateConfig)
 	s.call(ctx, "session.SaveContext", func(ctx context.Context) error { return s.sessions.SaveContext(ctx, req.SessionID) })
 	return Result{}, nil
@@ -98,7 +98,7 @@ func (s *Service) SubmitAnswers(ctx context.Context, req SubmitAnswersRequest) (
 func (s *Service) SelectIdea(ctx context.Context, req SelectIdeaRequest) (Result, error) {
 	slog.Info("travel-service: select idea", "session_id", req.SessionID, "idea_id", req.IdeaID)
 	_ = s.repo.Save(ctx, entity.Plan{SessionID: req.SessionID, IdeaID: req.IdeaID, Comment: req.Comment})
-	s.call(ctx, "session.GetContext", func(ctx context.Context) error { return s.sessions.GetContext(ctx, req.SessionID) })
+	s.call(ctx, "session.GetAgentContext", func(ctx context.Context) error { return s.sessions.GetAgentContext(ctx, req.SessionID) })
 	s.call(ctx, "ai.RefineConfig", s.ai.RefineConfig)
 	s.call(ctx, "session.SaveContext", func(ctx context.Context) error { return s.sessions.SaveContext(ctx, req.SessionID) })
 	return Result{}, nil
@@ -106,7 +106,7 @@ func (s *Service) SelectIdea(ctx context.Context, req SelectIdeaRequest) (Result
 
 func (s *Service) GetConfig(ctx context.Context, req SessionRequest) (Result, error) {
 	slog.Info("travel-service: get config", "session_id", req.SessionID)
-	s.call(ctx, "session.GetContext", func(ctx context.Context) error { return s.sessions.GetContext(ctx, req.SessionID) })
+	s.call(ctx, "session.GetAgentContext", func(ctx context.Context) error { return s.sessions.GetAgentContext(ctx, req.SessionID) })
 	return Result{}, nil
 }
 

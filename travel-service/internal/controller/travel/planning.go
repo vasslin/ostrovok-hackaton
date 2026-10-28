@@ -26,6 +26,7 @@ type PlanningController struct {
 	mu        sync.Mutex
 	locks     map[string]*sync.Mutex
 	cache     map[string]cachedParts
+	confirmed map[string]bool
 }
 type cachedParts struct {
 	config     *commonv1.TripConfig
@@ -44,7 +45,7 @@ func cloneCandidates(items []*structpb.Struct) []*structpb.Struct {
 }
 
 func (c *Controller) WithPlanning(s sessionv1.SessionServiceClient, p providerv1.ProviderServiceClient, routeClients ...routev1.RouteServiceClient) *PlanningController {
-	controller := &PlanningController{Controller: c, sessions: s, providers: p, locks: map[string]*sync.Mutex{}, cache: map[string]cachedParts{}}
+	controller := &PlanningController{Controller: c, sessions: s, providers: p, locks: map[string]*sync.Mutex{}, cache: map[string]cachedParts{}, confirmed: map[string]bool{}}
 	if len(routeClients) > 0 {
 		controller.routes = routeClients[0]
 	}
@@ -61,26 +62,38 @@ func (c *PlanningController) lock(id string) func() {
 	m.Lock()
 	return m.Unlock
 }
-func (c *PlanningController) context(ctx context.Context, id string) (*sessionv1.GetContextResponse, error) {
+func (c *PlanningController) load(ctx context.Context, userID, id string) (*sessionv1.GetAgentContextResponse, error) {
 	if id == "" {
 		return nil, status.Error(codes.InvalidArgument, "session_id required")
 	}
-	return c.sessions.GetContext(ctx, &sessionv1.GetContextRequest{SessionId: id})
+	if userID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id required")
+	}
+	return c.sessions.GetAgentContext(ctx, &sessionv1.GetAgentContextRequest{UserId: userID, ChatId: id})
+}
+func (c *PlanningController) isConfirmed(id, remote string) bool {
+	c.mu.Lock()
+	value, ok := c.confirmed[id]
+	c.mu.Unlock()
+	if ok {
+		return value
+	}
+	return remote == "confirmed"
 }
 func (c *PlanningController) GetConfig(ctx context.Context, r *pb.GetConfigRequest) (*pb.GetConfigResponse, error) {
-	s, err := c.context(ctx, r.GetSessionId())
+	agent, err := c.load(ctx, r.GetUserId(), r.GetSessionId())
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetConfigResponse{SessionId: r.GetSessionId(), Config: s.GetTripConfig()}, nil
+	return &pb.GetConfigResponse{SessionId: r.GetSessionId(), Config: agent.GetCfg()}, nil
 }
-func (c *PlanningController) save(ctx context.Context, id string, config *commonv1.TripConfig, confirmed bool) error {
-	current, err := c.context(ctx, id)
+func (c *PlanningController) save(ctx context.Context, userID, id string, config *commonv1.TripConfig, confirmed bool) error {
+	agent, err := c.load(ctx, userID, id)
 	if err != nil {
 		return err
 	}
 	if config == nil {
-		config = current.GetTripConfig()
+		config = agent.GetCfg()
 	}
 	canonical, err := tripconfig.Canonical(config)
 	if err != nil {
@@ -98,13 +111,10 @@ func (c *PlanningController) save(ctx context.Context, id string, config *common
 	if err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
-	state := "draft"
-	if confirmed {
-		state = "confirmed"
-	}
-	_, err = c.sessions.SaveContext(ctx, &sessionv1.SaveContextRequest{SessionId: id, TripConfig: config, Summary: current.GetSummary(), Messages: current.GetMessages(), Status: state})
+	_, err = c.sessions.SaveContext(ctx, &sessionv1.SaveContextRequest{UserId: userID, ChatId: id, Cfg: config})
 	if err == nil {
 		c.mu.Lock()
+		c.confirmed[id] = confirmed
 		delete(c.cache, id)
 		c.mu.Unlock()
 	}
@@ -116,7 +126,7 @@ func (c *PlanningController) UpdateConfig(ctx context.Context, r *pb.UpdateConfi
 	if r.GetConfig() == nil {
 		return nil, status.Error(codes.InvalidArgument, "config required")
 	}
-	if err := c.save(ctx, r.GetSessionId(), r.GetConfig(), false); err != nil {
+	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), false); err != nil {
 		return nil, err
 	}
 	return &pb.UpdateConfigResponse{SessionId: r.GetSessionId(), Config: r.GetConfig()}, nil
@@ -124,7 +134,7 @@ func (c *PlanningController) UpdateConfig(ctx context.Context, r *pb.UpdateConfi
 func (c *PlanningController) ConfirmConfig(ctx context.Context, r *pb.ConfirmConfigRequest) (*pb.ConfirmConfigResponse, error) {
 	unlock := c.lock(r.GetSessionId())
 	defer unlock()
-	if err := c.save(ctx, r.GetSessionId(), r.GetConfig(), true); err != nil {
+	if err := c.save(ctx, r.GetUserId(), r.GetSessionId(), r.GetConfig(), true); err != nil {
 		return nil, err
 	}
 	return &pb.ConfirmConfigResponse{SessionId: r.GetSessionId(), Confirmed: true}, nil
@@ -132,18 +142,22 @@ func (c *PlanningController) ConfirmConfig(ctx context.Context, r *pb.ConfirmCon
 func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoutesRequest) (*pb.SearchRoutesResponse, error) {
 	unlock := c.lock(r.GetSessionId())
 	defer unlock()
-	s, err := c.context(ctx, r.GetSessionId())
+	agent, err := c.load(ctx, r.GetUserId(), r.GetSessionId())
 	if err != nil {
 		return nil, err
 	}
-	if s.GetStatus() != "confirmed" {
+	session, err := c.sessions.GetSession(ctx, &sessionv1.GetSessionRequest{SessionId: r.GetSessionId()})
+	if err != nil {
+		return nil, err
+	}
+	if !c.isConfirmed(r.GetSessionId(), session.GetStatus()) {
 		return nil, status.Error(codes.FailedPrecondition, "confirm trip config before search")
 	}
-	canonical, err := tripconfig.Canonical(s.GetTripConfig())
+	canonical, err := tripconfig.Canonical(agent.GetCfg())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	parts, err := c.providers.SearchParts(ctx, &providerv1.SearchPartsRequest{Config: canonical, Resolved: s.GetTripConfig().GetResolved()})
+	parts, err := c.providers.SearchParts(ctx, &providerv1.SearchPartsRequest{Config: canonical, Resolved: agent.GetCfg().GetResolved()})
 	if err != nil {
 		return nil, err
 	}
@@ -175,21 +189,25 @@ func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoute
 		}
 	}
 	c.mu.Lock()
-	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(s.GetTripConfig()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse), candidates: cloneCandidates(candidates)}
+	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(agent.GetCfg()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse), candidates: cloneCandidates(candidates)}
 	c.mu.Unlock()
 	return &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts, Candidates: candidates}, nil
 }
 func (c *PlanningController) GetRoutes(ctx context.Context, r *pb.GetRoutesRequest) (*pb.GetRoutesResponse, error) {
 	unlock := c.lock(r.GetSessionId())
 	defer unlock()
-	s, err := c.context(ctx, r.GetSessionId())
+	agent, err := c.load(ctx, r.GetUserId(), r.GetSessionId())
+	if err != nil {
+		return nil, err
+	}
+	session, err := c.sessions.GetSession(ctx, &sessionv1.GetSessionRequest{SessionId: r.GetSessionId()})
 	if err != nil {
 		return nil, err
 	}
 	c.mu.Lock()
 	cached, ok := c.cache[r.GetSessionId()]
 	c.mu.Unlock()
-	if !ok || s.GetStatus() != "confirmed" || !proto.Equal(cached.config, s.GetTripConfig()) {
+	if !ok || !c.isConfirmed(r.GetSessionId(), session.GetStatus()) || !proto.Equal(cached.config, agent.GetCfg()) {
 		return nil, status.Error(codes.NotFound, "no search results for current config")
 	}
 	return &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse), Candidates: cloneCandidates(cached.candidates)}, nil

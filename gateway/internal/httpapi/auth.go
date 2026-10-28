@@ -152,7 +152,7 @@ func authorize(ctx context.Context, backend Backend, user auth.User, spec route,
 	if value := get("user_id"); value != "" && value != user.ID {
 		return denied()
 	}
-	if spec.operation == "/v1/session/create" || spec.operation == "/v1/order/create" {
+	if spec.operation == "/v1/session/create" || spec.operation == "/v1/order/create" || strings.HasPrefix(spec.operation, "/v1/travel/") {
 		fields["user_id"], _ = json.Marshal(user.ID)
 	}
 	check := func(operation, idKey, id, resource string) error {
@@ -181,7 +181,7 @@ func authorize(ctx context.Context, backend Backend, user auth.User, spec route,
 			if id == "" {
 				return nil, &Error{Code: invalidArgument, Message: "route_id required"}
 			}
-			body, _ := json.Marshal(map[string]string{"session_id": sid})
+			body, _ := json.Marshal(map[string]string{"session_id": sid, "user_id": user.ID})
 			response, err := backend.Call(ctx, "/v1/travel/routes", body)
 			if err != nil {
 				return nil, err

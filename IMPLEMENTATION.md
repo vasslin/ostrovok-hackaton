@@ -1,8 +1,6 @@
 # Каркас Godnota
 
-Собран запускаемый скелет AI-агента для планирования поездки: protobuf-контракты, девять процессов и HTTP gateway. Бизнес-логика пока заглушки: доменный сервис пишет вход в лог и возвращает пустое значение, gRPC-контроллер всегда отвечает успехом.
-
-Проверено локально: `go run` всех сервисов, запросы через gateway на `http://127.0.0.1:8080` возвращают HTTP 200 и пустой JSON. В логах видно и сам запрос, и вызовы по цепочке (например, поиск идёт в map, route, provider и ai). Docker daemon в этой среде не был запущен, поэтому `docker compose up --build` здесь не прогонялся.
+Запускаемый набор сервисов AI-агента для планирования поездки: protobuf-контракты, процессы и HTTP gateway. Контекст диалога хранит `session-service`. Планирование в `travel-service` читает и записывает его по `user_id` и `session_id`. Остальные сценарии (ai, map, route, provider, user, order и черновой путь `PlanTrip`) по-прежнему в основном логируют вызов и возвращают пустой ответ.
 
 ## Контракты
 
@@ -10,10 +8,10 @@
 
 | Сервис | RPC | Сообщения |
 |---|---|---|
-| session-service | CreateSession, GetSession, GetContext, SaveContext | сессия, история, `TripConfig` |
+| session-service | CreateSession, GetSession, GetAgentContext, SaveContext | сессия; история, резюме и `TripConfig` чата |
 | user-service | GetUser, UpdatePreferences | профиль, язык, валюта |
 | order-service | CreateOrder, GetOrder, PayOrder, CancelOrder | заказ и статусы |
-| travel-service | PlanTrip, SubmitAnswers, SelectIdea, GetConfig, UpdateConfig, ConfirmConfig, SearchRoutes, GetRoutes | сценарий планирования |
+| travel-service | PlanTrip, SubmitAnswers, SelectIdea, GetConfig, UpdateConfig, ConfirmConfig, SearchRoutes, GetRoutes | сценарий планирования, в каждом запросе есть `user_id` |
 | ai-service | GenerateOrUpdateConfig, UpdateConfig, RefineConfig, RankRoutes | пустые, поля позже |
 | map-service | MapToProviderConfigs, MapRoutesToFrontend | пустые, поля позже |
 | route-service | SearchRoutes | пустые, поля позже |
@@ -21,16 +19,20 @@
 
 Общая модель поездки (`TripConfig`: откуда, куда, даты, гости, бюджет, транспорт, жильё, досуг) описана в `api/common/v1/trip.proto`.
 
+`GetAgentContext` возвращает историю текущего чата, его резюме, резюме последних чатов того же пользователя (по умолчанию 4) и один конфиг поездки. `SaveContext` меняет только переданные поля: непустой `messages` дописывается в историю, переданный `summary` заменяет резюме, переданный `cfg` заменяет конфиг. `chat_id` в этом сценарии равен `session_id`. Как вызывать сервис, описано в `session-service/AGENTS.md`.
+
+История и резюме лежат в репозитории истории, конфиг — в отдельном репозитории, один на чат. `SESSION_REPOSITORY=memory` держит их в процессе, `SESSION_REPOSITORY=postgres` — в PostgreSQL. В `docker-compose.yml` для этого поднят `session-db`. Запись сессии `CreateSession` / `GetSession` остаётся в памяти процесса и в эти репозитории не пишется.
+
 ## Структура
 
 Каждый микросервис - отдельный Go-модуль с гексагональной раскладкой:
 
 - `cmd/app` - процесс
-- `internal/controller` - gRPC, всегда `OK` и пустой ответ
-- `internal/usecase` - доменный сервис, логирует запрос и возвращает нулевое значение
+- `internal/controller` - gRPC
+- `internal/usecase` - сценарий
 - `internal/entity` - доменные модели
-- `internal/repository` - in-memory заглушка репозитория
-- `internal/adapter` - исходящие gRPC-клиенты там, где сервис кого-то вызывает
+- `internal/repository` - хранилище
+- `internal/adapter` - исходящие клиенты там, где сервис кого-то вызывает
 
 `travel-service` оркестрирует session, ai, map и route. `route-service` на поиске вызывает provider. Gateway снаружи ходит только в session, travel, user и order.
 
@@ -39,6 +41,8 @@
 ## Gateway
 
 Реализация повторяет BFF из референсного проекта: таблица HTTP-маршрутов, сбор JSON из path и тела, `protojson` и unary gRPC. Swagger UI: [http://localhost:8080/docs](http://localhost:8080/docs), спецификация: `/openapi.json`. Корень `/` перенаправляет на `/docs`. `GET /health` отвечает `{"status":"ok"}`.
+
+Рабочие маршруты требуют `Authorization: Bearer`. Токен выдают `POST /api/auth/register` и `POST /api/auth/login`. Gateway подставляет `user_id` вошедшего пользователя в создание сессии, создание заказа и все travel-запросы. Если клиент прислал другой `user_id`, запрос отклоняется. Перед travel- и order-вызовом gateway проверяет, что сессия или заказ принадлежат этому пользователю.
 
 | Метод | Путь | Куда уходит |
 |---|---|---|
@@ -71,12 +75,17 @@ Gateway: [http://localhost:8080/docs](http://localhost:8080/docs).
 Пример:
 
 ```bash
+curl -s -X POST http://localhost:8080/api/auth/register \
+  -H 'content-type: application/json' \
+  -d '{"email":"a@example.com","password":"long-demo-password"}'
+
 curl -s -X POST http://localhost:8080/api/sessions \
   -H 'content-type: application/json' \
-  -d '{"user_id":"user-123"}'
+  -H 'authorization: Bearer <access_token>' \
+  -d '{}'
 ```
 
-Ответ заглушки: `{"session_id":""}`.
+`user_id` в тело создания сессии дописывает gateway. В ответе приходит `session_id`.
 
 Логи входящих вызовов:
 
