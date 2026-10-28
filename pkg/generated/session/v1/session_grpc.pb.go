@@ -19,21 +19,21 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SessionService_CreateSession_FullMethodName = "/godnota.session.v1.SessionService/CreateSession"
-	SessionService_GetSession_FullMethodName    = "/godnota.session.v1.SessionService/GetSession"
-	SessionService_GetContext_FullMethodName    = "/godnota.session.v1.SessionService/GetContext"
-	SessionService_SaveContext_FullMethodName   = "/godnota.session.v1.SessionService/SaveContext"
+	SessionService_CreateSession_FullMethodName   = "/godnota.session.v1.SessionService/CreateSession"
+	SessionService_GetSession_FullMethodName      = "/godnota.session.v1.SessionService/GetSession"
+	SessionService_GetAgentContext_FullMethodName = "/godnota.session.v1.SessionService/GetAgentContext"
+	SessionService_SaveContext_FullMethodName     = "/godnota.session.v1.SessionService/SaveContext"
 )
 
 // SessionServiceClient is the client API for SessionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// SessionService хранит сессию, историю диалога и текущий конфиг поездки.
+// SessionService хранит сессию и контекст, который travel-service передаёт AI-агенту.
 type SessionServiceClient interface {
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
 	GetSession(ctx context.Context, in *GetSessionRequest, opts ...grpc.CallOption) (*GetSessionResponse, error)
-	GetContext(ctx context.Context, in *GetContextRequest, opts ...grpc.CallOption) (*GetContextResponse, error)
+	GetAgentContext(ctx context.Context, in *GetAgentContextRequest, opts ...grpc.CallOption) (*GetAgentContextResponse, error)
 	SaveContext(ctx context.Context, in *SaveContextRequest, opts ...grpc.CallOption) (*SaveContextResponse, error)
 }
 
@@ -65,10 +65,10 @@ func (c *sessionServiceClient) GetSession(ctx context.Context, in *GetSessionReq
 	return out, nil
 }
 
-func (c *sessionServiceClient) GetContext(ctx context.Context, in *GetContextRequest, opts ...grpc.CallOption) (*GetContextResponse, error) {
+func (c *sessionServiceClient) GetAgentContext(ctx context.Context, in *GetAgentContextRequest, opts ...grpc.CallOption) (*GetAgentContextResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetContextResponse)
-	err := c.cc.Invoke(ctx, SessionService_GetContext_FullMethodName, in, out, cOpts...)
+	out := new(GetAgentContextResponse)
+	err := c.cc.Invoke(ctx, SessionService_GetAgentContext_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,11 +89,11 @@ func (c *sessionServiceClient) SaveContext(ctx context.Context, in *SaveContextR
 // All implementations should embed UnimplementedSessionServiceServer
 // for forward compatibility.
 //
-// SessionService хранит сессию, историю диалога и текущий конфиг поездки.
+// SessionService хранит сессию и контекст, который travel-service передаёт AI-агенту.
 type SessionServiceServer interface {
 	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
 	GetSession(context.Context, *GetSessionRequest) (*GetSessionResponse, error)
-	GetContext(context.Context, *GetContextRequest) (*GetContextResponse, error)
+	GetAgentContext(context.Context, *GetAgentContextRequest) (*GetAgentContextResponse, error)
 	SaveContext(context.Context, *SaveContextRequest) (*SaveContextResponse, error)
 }
 
@@ -110,8 +110,8 @@ func (UnimplementedSessionServiceServer) CreateSession(context.Context, *CreateS
 func (UnimplementedSessionServiceServer) GetSession(context.Context, *GetSessionRequest) (*GetSessionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSession not implemented")
 }
-func (UnimplementedSessionServiceServer) GetContext(context.Context, *GetContextRequest) (*GetContextResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetContext not implemented")
+func (UnimplementedSessionServiceServer) GetAgentContext(context.Context, *GetAgentContextRequest) (*GetAgentContextResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAgentContext not implemented")
 }
 func (UnimplementedSessionServiceServer) SaveContext(context.Context, *SaveContextRequest) (*SaveContextResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SaveContext not implemented")
@@ -172,20 +172,20 @@ func _SessionService_GetSession_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SessionService_GetContext_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetContextRequest)
+func _SessionService_GetAgentContext_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAgentContextRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SessionServiceServer).GetContext(ctx, in)
+		return srv.(SessionServiceServer).GetAgentContext(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SessionService_GetContext_FullMethodName,
+		FullMethod: SessionService_GetAgentContext_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServiceServer).GetContext(ctx, req.(*GetContextRequest))
+		return srv.(SessionServiceServer).GetAgentContext(ctx, req.(*GetAgentContextRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -224,8 +224,8 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SessionService_GetSession_Handler,
 		},
 		{
-			MethodName: "GetContext",
-			Handler:    _SessionService_GetContext_Handler,
+			MethodName: "GetAgentContext",
+			Handler:    _SessionService_GetAgentContext_Handler,
 		},
 		{
 			MethodName: "SaveContext",

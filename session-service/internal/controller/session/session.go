@@ -10,7 +10,7 @@ import (
 type sessionService interface {
 	CreateSession(context.Context, usecase.CreateRequest) (usecase.CreateResponse, error)
 	GetSession(context.Context, usecase.GetRequest) (usecase.GetResponse, error)
-	GetContext(context.Context, usecase.GetRequest) (usecase.GetResponse, error)
+	GetAgentContext(context.Context, usecase.AgentContextRequest) (usecase.AgentContext, error)
 	SaveContext(context.Context, usecase.SaveRequest) error
 }
 type Controller struct{ service sessionService }
@@ -33,25 +33,6 @@ func (c *Controller) GetSession(ctx context.Context, r *pb.GetSessionRequest) (*
 	}
 	v := s.Session
 	return &pb.GetSessionResponse{SessionId: v.ID, UserId: v.UserID, Status: v.Status, Summary: v.Summary, TripConfig: v.Config, Messages: messages(v.Messages), CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}, nil
-}
-func (c *Controller) GetContext(ctx context.Context, r *pb.GetContextRequest) (*pb.GetContextResponse, error) {
-	s, e := c.service.GetContext(ctx, usecase.GetRequest{SessionID: r.GetSessionId()})
-	if e != nil {
-		return nil, e
-	}
-	v := s.Session
-	return &pb.GetContextResponse{SessionId: v.ID, UserId: v.UserID, Status: v.Status, Summary: v.Summary, TripConfig: v.Config, Messages: messages(v.Messages)}, nil
-}
-func (c *Controller) SaveContext(ctx context.Context, r *pb.SaveContextRequest) (*pb.SaveContextResponse, error) {
-	var v []entity.Message
-	for _, m := range r.GetMessages() {
-		v = append(v, entity.Message{Role: m.GetRole(), Text: m.GetText(), CreatedAt: m.GetCreatedAt()})
-	}
-	err := c.service.SaveContext(ctx, usecase.SaveRequest{SessionID: r.GetSessionId(), Summary: r.GetSummary(), Status: r.GetStatus(), Config: r.GetTripConfig(), Messages: v})
-	if err != nil {
-		return nil, err
-	}
-	return &pb.SaveContextResponse{SessionId: r.GetSessionId()}, nil
 }
 func messages(input []entity.Message) []*pb.DialogMessage {
 	out := make([]*pb.DialogMessage, 0, len(input))

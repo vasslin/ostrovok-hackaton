@@ -314,27 +314,29 @@ func (x *GetSessionResponse) GetUpdatedAt() string {
 	return ""
 }
 
-type GetContextRequest struct {
+type PreviousChatSummary struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	Summary       string                 `protobuf:"bytes,2,opt,name=summary,proto3" json:"summary,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetContextRequest) Reset() {
-	*x = GetContextRequest{}
+func (x *PreviousChatSummary) Reset() {
+	*x = PreviousChatSummary{}
 	mi := &file_api_session_v1_session_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetContextRequest) String() string {
+func (x *PreviousChatSummary) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetContextRequest) ProtoMessage() {}
+func (*PreviousChatSummary) ProtoMessage() {}
 
-func (x *GetContextRequest) ProtoReflect() protoreflect.Message {
+func (x *PreviousChatSummary) ProtoReflect() protoreflect.Message {
 	mi := &file_api_session_v1_session_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -346,116 +348,194 @@ func (x *GetContextRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetContextRequest.ProtoReflect.Descriptor instead.
-func (*GetContextRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use PreviousChatSummary.ProtoReflect.Descriptor instead.
+func (*PreviousChatSummary) Descriptor() ([]byte, []int) {
 	return file_api_session_v1_session_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetContextRequest) GetSessionId() string {
+func (x *PreviousChatSummary) GetChatId() string {
 	if x != nil {
-		return x.SessionId
+		return x.ChatId
 	}
 	return ""
 }
 
-type GetContextResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Summary       string                 `protobuf:"bytes,4,opt,name=summary,proto3" json:"summary,omitempty"`
-	TripConfig    *v1.TripConfig         `protobuf:"bytes,5,opt,name=trip_config,json=tripConfig,proto3" json:"trip_config,omitempty"`
-	Messages      []*DialogMessage       `protobuf:"bytes,6,rep,name=messages,proto3" json:"messages,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetContextResponse) Reset() {
-	*x = GetContextResponse{}
-	mi := &file_api_session_v1_session_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetContextResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetContextResponse) ProtoMessage() {}
-
-func (x *GetContextResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_session_v1_session_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetContextResponse.ProtoReflect.Descriptor instead.
-func (*GetContextResponse) Descriptor() ([]byte, []int) {
-	return file_api_session_v1_session_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetContextResponse) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
-}
-
-func (x *GetContextResponse) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *GetContextResponse) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *GetContextResponse) GetSummary() string {
+func (x *PreviousChatSummary) GetSummary() string {
 	if x != nil {
 		return x.Summary
 	}
 	return ""
 }
 
-func (x *GetContextResponse) GetTripConfig() *v1.TripConfig {
+func (x *PreviousChatSummary) GetUpdatedAt() string {
 	if x != nil {
-		return x.TripConfig
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type GetAgentContextRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// 0 означает лимит по умолчанию (4). Отрицательное значение отклоняется.
+	PreviousChatsLimit int32 `protobuf:"varint,3,opt,name=previous_chats_limit,json=previousChatsLimit,proto3" json:"previous_chats_limit,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *GetAgentContextRequest) Reset() {
+	*x = GetAgentContextRequest{}
+	mi := &file_api_session_v1_session_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentContextRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentContextRequest) ProtoMessage() {}
+
+func (x *GetAgentContextRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_session_v1_session_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentContextRequest.ProtoReflect.Descriptor instead.
+func (*GetAgentContextRequest) Descriptor() ([]byte, []int) {
+	return file_api_session_v1_session_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetAgentContextRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetAgentContextRequest) GetChatId() string {
+	if x != nil {
+		return x.ChatId
+	}
+	return ""
+}
+
+func (x *GetAgentContextRequest) GetPreviousChatsLimit() int32 {
+	if x != nil {
+		return x.PreviousChatsLimit
+	}
+	return 0
+}
+
+type GetAgentContextResponse struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	UserId               string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId               string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatHistory          []*DialogMessage       `protobuf:"bytes,3,rep,name=chat_history,json=chatHistory,proto3" json:"chat_history,omitempty"`
+	ChatSummary          string                 `protobuf:"bytes,4,opt,name=chat_summary,json=chatSummary,proto3" json:"chat_summary,omitempty"`
+	PreviousChatsSummary []*PreviousChatSummary `protobuf:"bytes,5,rep,name=previous_chats_summary,json=previousChatsSummary,proto3" json:"previous_chats_summary,omitempty"`
+	Cfg                  *v1.TripConfig         `protobuf:"bytes,6,opt,name=cfg,proto3" json:"cfg,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *GetAgentContextResponse) Reset() {
+	*x = GetAgentContextResponse{}
+	mi := &file_api_session_v1_session_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAgentContextResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAgentContextResponse) ProtoMessage() {}
+
+func (x *GetAgentContextResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_session_v1_session_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAgentContextResponse.ProtoReflect.Descriptor instead.
+func (*GetAgentContextResponse) Descriptor() ([]byte, []int) {
+	return file_api_session_v1_session_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetAgentContextResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetAgentContextResponse) GetChatId() string {
+	if x != nil {
+		return x.ChatId
+	}
+	return ""
+}
+
+func (x *GetAgentContextResponse) GetChatHistory() []*DialogMessage {
+	if x != nil {
+		return x.ChatHistory
 	}
 	return nil
 }
 
-func (x *GetContextResponse) GetMessages() []*DialogMessage {
+func (x *GetAgentContextResponse) GetChatSummary() string {
 	if x != nil {
-		return x.Messages
+		return x.ChatSummary
+	}
+	return ""
+}
+
+func (x *GetAgentContextResponse) GetPreviousChatsSummary() []*PreviousChatSummary {
+	if x != nil {
+		return x.PreviousChatsSummary
+	}
+	return nil
+}
+
+func (x *GetAgentContextResponse) GetCfg() *v1.TripConfig {
+	if x != nil {
+		return x.Cfg
 	}
 	return nil
 }
 
 type SaveContextRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Summary       string                 `protobuf:"bytes,2,opt,name=summary,proto3" json:"summary,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	TripConfig    *v1.TripConfig         `protobuf:"bytes,4,opt,name=trip_config,json=tripConfig,proto3" json:"trip_config,omitempty"`
-	Messages      []*DialogMessage       `protobuf:"bytes,5,rep,name=messages,proto3" json:"messages,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// Непустой список дописывается в конец истории. Пустой список историю не меняет.
+	Messages []*DialogMessage `protobuf:"bytes,3,rep,name=messages,proto3" json:"messages,omitempty"`
+	// Отсутствие поля оставляет резюме как есть. Пустая строка его очищает.
+	Summary *string `protobuf:"bytes,4,opt,name=summary,proto3,oneof" json:"summary,omitempty"`
+	// Отсутствие поля оставляет конфиг как есть.
+	Cfg           *v1.TripConfig `protobuf:"bytes,5,opt,name=cfg,proto3,oneof" json:"cfg,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SaveContextRequest) Reset() {
 	*x = SaveContextRequest{}
-	mi := &file_api_session_v1_session_proto_msgTypes[7]
+	mi := &file_api_session_v1_session_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -467,7 +547,7 @@ func (x *SaveContextRequest) String() string {
 func (*SaveContextRequest) ProtoMessage() {}
 
 func (x *SaveContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_session_v1_session_proto_msgTypes[7]
+	mi := &file_api_session_v1_session_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -480,35 +560,21 @@ func (x *SaveContextRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveContextRequest.ProtoReflect.Descriptor instead.
 func (*SaveContextRequest) Descriptor() ([]byte, []int) {
-	return file_api_session_v1_session_proto_rawDescGZIP(), []int{7}
+	return file_api_session_v1_session_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *SaveContextRequest) GetSessionId() string {
+func (x *SaveContextRequest) GetUserId() string {
 	if x != nil {
-		return x.SessionId
+		return x.UserId
 	}
 	return ""
 }
 
-func (x *SaveContextRequest) GetSummary() string {
+func (x *SaveContextRequest) GetChatId() string {
 	if x != nil {
-		return x.Summary
+		return x.ChatId
 	}
 	return ""
-}
-
-func (x *SaveContextRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *SaveContextRequest) GetTripConfig() *v1.TripConfig {
-	if x != nil {
-		return x.TripConfig
-	}
-	return nil
 }
 
 func (x *SaveContextRequest) GetMessages() []*DialogMessage {
@@ -518,16 +584,31 @@ func (x *SaveContextRequest) GetMessages() []*DialogMessage {
 	return nil
 }
 
+func (x *SaveContextRequest) GetSummary() string {
+	if x != nil && x.Summary != nil {
+		return *x.Summary
+	}
+	return ""
+}
+
+func (x *SaveContextRequest) GetCfg() *v1.TripConfig {
+	if x != nil {
+		return x.Cfg
+	}
+	return nil
+}
+
 type SaveContextResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SaveContextResponse) Reset() {
 	*x = SaveContextResponse{}
-	mi := &file_api_session_v1_session_proto_msgTypes[8]
+	mi := &file_api_session_v1_session_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -539,7 +620,7 @@ func (x *SaveContextResponse) String() string {
 func (*SaveContextResponse) ProtoMessage() {}
 
 func (x *SaveContextResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_session_v1_session_proto_msgTypes[8]
+	mi := &file_api_session_v1_session_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -552,12 +633,19 @@ func (x *SaveContextResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveContextResponse.ProtoReflect.Descriptor instead.
 func (*SaveContextResponse) Descriptor() ([]byte, []int) {
-	return file_api_session_v1_session_proto_rawDescGZIP(), []int{8}
+	return file_api_session_v1_session_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *SaveContextResponse) GetSessionId() string {
+func (x *SaveContextResponse) GetUserId() string {
 	if x != nil {
-		return x.SessionId
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SaveContextResponse) GetChatId() string {
+	if x != nil {
+		return x.ChatId
 	}
 	return ""
 }
@@ -592,36 +680,40 @@ const file_api_session_v1_session_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\tR\tupdatedAt\"2\n" +
-	"\x11GetContextRequest\x12\x1d\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"g\n" +
+	"\x13PreviousChatSummary\x12\x17\n" +
+	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x18\n" +
+	"\asummary\x18\x02 \x01(\tR\asummary\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"\xfd\x01\n" +
-	"\x12GetContextResponse\x12\x1d\n" +
+	"updated_at\x18\x03 \x01(\tR\tupdatedAt\"|\n" +
+	"\x16GetAgentContextRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\tR\x06chatId\x120\n" +
+	"\x14previous_chats_limit\x18\x03 \x01(\x05R\x12previousChatsLimit\"\xc4\x02\n" +
+	"\x17GetAgentContextResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\tR\x06chatId\x12D\n" +
+	"\fchat_history\x18\x03 \x03(\v2!.godnota.session.v1.DialogMessageR\vchatHistory\x12!\n" +
+	"\fchat_summary\x18\x04 \x01(\tR\vchatSummary\x12]\n" +
+	"\x16previous_chats_summary\x18\x05 \x03(\v2'.godnota.session.v1.PreviousChatSummaryR\x14previousChatsSummary\x12/\n" +
+	"\x03cfg\x18\x06 \x01(\v2\x1d.godnota.common.v1.TripConfigR\x03cfg\"\xee\x01\n" +
+	"\x12SaveContextRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\tR\x06chatId\x12=\n" +
+	"\bmessages\x18\x03 \x03(\v2!.godnota.session.v1.DialogMessageR\bmessages\x12\x1d\n" +
+	"\asummary\x18\x04 \x01(\tH\x00R\asummary\x88\x01\x01\x124\n" +
+	"\x03cfg\x18\x05 \x01(\v2\x1d.godnota.common.v1.TripConfigH\x01R\x03cfg\x88\x01\x01B\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12\x18\n" +
-	"\asummary\x18\x04 \x01(\tR\asummary\x12>\n" +
-	"\vtrip_config\x18\x05 \x01(\v2\x1d.godnota.common.v1.TripConfigR\n" +
-	"tripConfig\x12=\n" +
-	"\bmessages\x18\x06 \x03(\v2!.godnota.session.v1.DialogMessageR\bmessages\"\xe4\x01\n" +
-	"\x12SaveContextRequest\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x18\n" +
-	"\asummary\x18\x02 \x01(\tR\asummary\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12>\n" +
-	"\vtrip_config\x18\x04 \x01(\v2\x1d.godnota.common.v1.TripConfigR\n" +
-	"tripConfig\x12=\n" +
-	"\bmessages\x18\x05 \x03(\v2!.godnota.session.v1.DialogMessageR\bmessages\"4\n" +
-	"\x13SaveContextResponse\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId2\x90\x03\n" +
+	"\b_summaryB\x06\n" +
+	"\x04_cfg\"G\n" +
+	"\x13SaveContextResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\tR\x06chatId2\x9f\x03\n" +
 	"\x0eSessionService\x12d\n" +
 	"\rCreateSession\x12(.godnota.session.v1.CreateSessionRequest\x1a).godnota.session.v1.CreateSessionResponse\x12[\n" +
 	"\n" +
-	"GetSession\x12%.godnota.session.v1.GetSessionRequest\x1a&.godnota.session.v1.GetSessionResponse\x12[\n" +
-	"\n" +
-	"GetContext\x12%.godnota.session.v1.GetContextRequest\x1a&.godnota.session.v1.GetContextResponse\x12^\n" +
+	"GetSession\x12%.godnota.session.v1.GetSessionRequest\x1a&.godnota.session.v1.GetSessionResponse\x12j\n" +
+	"\x0fGetAgentContext\x12*.godnota.session.v1.GetAgentContextRequest\x1a+.godnota.session.v1.GetAgentContextResponse\x12^\n" +
 	"\vSaveContext\x12&.godnota.session.v1.SaveContextRequest\x1a'.godnota.session.v1.SaveContextResponseB7Z5github.com/godnota/pkg/generated/session/v1;sessionv1b\x06proto3"
 
 var (
@@ -636,39 +728,41 @@ func file_api_session_v1_session_proto_rawDescGZIP() []byte {
 	return file_api_session_v1_session_proto_rawDescData
 }
 
-var file_api_session_v1_session_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_api_session_v1_session_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_api_session_v1_session_proto_goTypes = []any{
-	(*DialogMessage)(nil),         // 0: godnota.session.v1.DialogMessage
-	(*CreateSessionRequest)(nil),  // 1: godnota.session.v1.CreateSessionRequest
-	(*CreateSessionResponse)(nil), // 2: godnota.session.v1.CreateSessionResponse
-	(*GetSessionRequest)(nil),     // 3: godnota.session.v1.GetSessionRequest
-	(*GetSessionResponse)(nil),    // 4: godnota.session.v1.GetSessionResponse
-	(*GetContextRequest)(nil),     // 5: godnota.session.v1.GetContextRequest
-	(*GetContextResponse)(nil),    // 6: godnota.session.v1.GetContextResponse
-	(*SaveContextRequest)(nil),    // 7: godnota.session.v1.SaveContextRequest
-	(*SaveContextResponse)(nil),   // 8: godnota.session.v1.SaveContextResponse
-	(*v1.TripConfig)(nil),         // 9: godnota.common.v1.TripConfig
+	(*DialogMessage)(nil),           // 0: godnota.session.v1.DialogMessage
+	(*CreateSessionRequest)(nil),    // 1: godnota.session.v1.CreateSessionRequest
+	(*CreateSessionResponse)(nil),   // 2: godnota.session.v1.CreateSessionResponse
+	(*GetSessionRequest)(nil),       // 3: godnota.session.v1.GetSessionRequest
+	(*GetSessionResponse)(nil),      // 4: godnota.session.v1.GetSessionResponse
+	(*PreviousChatSummary)(nil),     // 5: godnota.session.v1.PreviousChatSummary
+	(*GetAgentContextRequest)(nil),  // 6: godnota.session.v1.GetAgentContextRequest
+	(*GetAgentContextResponse)(nil), // 7: godnota.session.v1.GetAgentContextResponse
+	(*SaveContextRequest)(nil),      // 8: godnota.session.v1.SaveContextRequest
+	(*SaveContextResponse)(nil),     // 9: godnota.session.v1.SaveContextResponse
+	(*v1.TripConfig)(nil),           // 10: godnota.common.v1.TripConfig
 }
 var file_api_session_v1_session_proto_depIdxs = []int32{
-	9,  // 0: godnota.session.v1.GetSessionResponse.trip_config:type_name -> godnota.common.v1.TripConfig
+	10, // 0: godnota.session.v1.GetSessionResponse.trip_config:type_name -> godnota.common.v1.TripConfig
 	0,  // 1: godnota.session.v1.GetSessionResponse.messages:type_name -> godnota.session.v1.DialogMessage
-	9,  // 2: godnota.session.v1.GetContextResponse.trip_config:type_name -> godnota.common.v1.TripConfig
-	0,  // 3: godnota.session.v1.GetContextResponse.messages:type_name -> godnota.session.v1.DialogMessage
-	9,  // 4: godnota.session.v1.SaveContextRequest.trip_config:type_name -> godnota.common.v1.TripConfig
+	0,  // 2: godnota.session.v1.GetAgentContextResponse.chat_history:type_name -> godnota.session.v1.DialogMessage
+	5,  // 3: godnota.session.v1.GetAgentContextResponse.previous_chats_summary:type_name -> godnota.session.v1.PreviousChatSummary
+	10, // 4: godnota.session.v1.GetAgentContextResponse.cfg:type_name -> godnota.common.v1.TripConfig
 	0,  // 5: godnota.session.v1.SaveContextRequest.messages:type_name -> godnota.session.v1.DialogMessage
-	1,  // 6: godnota.session.v1.SessionService.CreateSession:input_type -> godnota.session.v1.CreateSessionRequest
-	3,  // 7: godnota.session.v1.SessionService.GetSession:input_type -> godnota.session.v1.GetSessionRequest
-	5,  // 8: godnota.session.v1.SessionService.GetContext:input_type -> godnota.session.v1.GetContextRequest
-	7,  // 9: godnota.session.v1.SessionService.SaveContext:input_type -> godnota.session.v1.SaveContextRequest
-	2,  // 10: godnota.session.v1.SessionService.CreateSession:output_type -> godnota.session.v1.CreateSessionResponse
-	4,  // 11: godnota.session.v1.SessionService.GetSession:output_type -> godnota.session.v1.GetSessionResponse
-	6,  // 12: godnota.session.v1.SessionService.GetContext:output_type -> godnota.session.v1.GetContextResponse
-	8,  // 13: godnota.session.v1.SessionService.SaveContext:output_type -> godnota.session.v1.SaveContextResponse
-	10, // [10:14] is the sub-list for method output_type
-	6,  // [6:10] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	10, // 6: godnota.session.v1.SaveContextRequest.cfg:type_name -> godnota.common.v1.TripConfig
+	1,  // 7: godnota.session.v1.SessionService.CreateSession:input_type -> godnota.session.v1.CreateSessionRequest
+	3,  // 8: godnota.session.v1.SessionService.GetSession:input_type -> godnota.session.v1.GetSessionRequest
+	6,  // 9: godnota.session.v1.SessionService.GetAgentContext:input_type -> godnota.session.v1.GetAgentContextRequest
+	8,  // 10: godnota.session.v1.SessionService.SaveContext:input_type -> godnota.session.v1.SaveContextRequest
+	2,  // 11: godnota.session.v1.SessionService.CreateSession:output_type -> godnota.session.v1.CreateSessionResponse
+	4,  // 12: godnota.session.v1.SessionService.GetSession:output_type -> godnota.session.v1.GetSessionResponse
+	7,  // 13: godnota.session.v1.SessionService.GetAgentContext:output_type -> godnota.session.v1.GetAgentContextResponse
+	9,  // 14: godnota.session.v1.SessionService.SaveContext:output_type -> godnota.session.v1.SaveContextResponse
+	11, // [11:15] is the sub-list for method output_type
+	7,  // [7:11] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_api_session_v1_session_proto_init() }
@@ -676,13 +770,14 @@ func file_api_session_v1_session_proto_init() {
 	if File_api_session_v1_session_proto != nil {
 		return
 	}
+	file_api_session_v1_session_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_session_v1_session_proto_rawDesc), len(file_api_session_v1_session_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

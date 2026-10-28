@@ -152,7 +152,7 @@ func authorize(ctx context.Context, backend Backend, user auth.User, spec route,
 	if value := get("user_id"); value != "" && value != user.ID {
 		return denied()
 	}
-	if spec.operation == "/v1/session/create" || spec.operation == "/v1/order/create" {
+	if spec.operation == "/v1/session/create" || spec.operation == "/v1/order/create" || strings.HasPrefix(spec.operation, "/v1/travel/") {
 		fields["user_id"], _ = json.Marshal(user.ID)
 	}
 	check := func(operation, idKey, id, resource string) error {

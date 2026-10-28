@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	commonv1 "github.com/godnota/pkg/generated/common/v1"
 	"github.com/godnota/session-service/internal/entity"
 )
 
@@ -15,10 +14,23 @@ type Repository interface {
 }
 
 type Service struct {
-	repo Repository
+	repo          Repository
+	history       HistoryRepository
+	configs       ConfigRepository
+	previousLimit int
 }
 
-func New(repo Repository) *Service { return &Service{repo: repo} }
+func New(repo Repository, history HistoryRepository, configs ConfigRepository) *Service {
+	return &Service{repo: repo, history: history, configs: configs, previousLimit: defaultPreviousChats}
+}
+
+// WithPreviousLimit sets how many earlier chat summaries GetAgentContext returns when the request limit is 0.
+func (s *Service) WithPreviousLimit(n int) *Service {
+	if n > 0 {
+		s.previousLimit = n
+	}
+	return s
+}
 
 type CreateRequest struct {
 	UserID string
@@ -36,14 +48,6 @@ type GetResponse struct {
 	Session entity.Session
 }
 
-type SaveRequest struct {
-	SessionID string
-	Summary   string
-	Status    string
-	Config    *commonv1.TripConfig
-	Messages  []entity.Message
-}
-
 func (s *Service) CreateSession(ctx context.Context, req CreateRequest) (CreateResponse, error) {
 	slog.Info("session-service: create session", "user_id", req.UserID)
 	created, err := s.repo.Create(ctx, entity.Session{UserID: req.UserID})
@@ -54,13 +58,4 @@ func (s *Service) GetSession(ctx context.Context, req GetRequest) (GetResponse, 
 	slog.Info("session-service: get session", "session_id", req.SessionID)
 	found, err := s.repo.Find(ctx, req.SessionID)
 	return GetResponse{Session: found}, err
-}
-
-func (s *Service) GetContext(ctx context.Context, req GetRequest) (GetResponse, error) {
-	slog.Info("session-service: get context", "session_id", req.SessionID)
-	return s.GetSession(ctx, req)
-}
-
-func (s *Service) SaveContext(ctx context.Context, req SaveRequest) error {
-	return s.repo.Save(ctx, entity.Session{ID: req.SessionID, Status: req.Status, Summary: req.Summary, Config: req.Config, Messages: req.Messages})
 }
