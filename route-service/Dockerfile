@@ -2,7 +2,7 @@ FROM golang:1.26.5 AS build
 WORKDIR /src
 COPY . .
 WORKDIR /src/route-service
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out/service ./cmd/app
+RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 GOOS=linux go build -o /out/service ./cmd/app
 
 FROM alpine:3.20
 RUN apk add --no-cache ca-certificates tzdata netcat-openbsd

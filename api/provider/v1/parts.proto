@@ -15,6 +15,7 @@ message ProviderConfig {
   google.protobuf.Struct params = 3;
 }
 message SearchPartsResponse {
+  google.protobuf.Struct resolved = 5;
   repeated TransportPart transport_parts = 1;
   repeated HotelPart hotel_parts = 2;
   repeated ProviderError errors = 3;

@@ -8,6 +8,18 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 const server = http.createServer(async (req, res) => {
     try {
         const url = new URL(req.url, 'http://localhost');
+        if (url.pathname.startsWith('/api/')) {
+            const target = new URL(req.url, process.env.GATEWAY_URL || 'http://127.0.0.1:8080');
+            const upstream = http.request(target, { method: req.method, headers: { ...req.headers, host: target.host } }, response => {
+                res.writeHead(response.statusCode || 502, response.headers);
+                response.pipe(res);
+            });
+            upstream.setTimeout(400000, () => upstream.destroy(new Error('Gateway timeout')));
+            upstream.on('error', () => { if (!res.headersSent) res.writeHead(502); res.end('Gateway unavailable'); });
+            req.on('aborted', () => upstream.destroy());
+            req.pipe(upstream);
+            return;
+        }
         const name = decodeURIComponent(url.pathname);
         const path = resolve(root, `.${name === '/' ? '/index.html' : name}`);
         if (path !== root && !path.startsWith(root + sep)) {

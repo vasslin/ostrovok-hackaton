@@ -4,3 +4,9 @@
 secrets.env.age
 **/server
 **/*.test
+
+bin
+data
+reports
+integration-tests/out
+.DS_Store

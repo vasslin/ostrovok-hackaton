@@ -9,6 +9,8 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,6 +27,8 @@ var defaultPorts = map[string]int{"gateway": 8080, "travel-service": 50051, "ses
 type Options struct {
 	Root, BinDir, DataDir, Mode, EnvFile string
 	RandomPorts                          bool
+	FullStack                            bool
+	WebPort, AIHTTPPort                  int
 	ExtraEnv                             map[string]string
 	Output                               io.Writer
 }
@@ -35,10 +39,12 @@ type child struct {
 	log  *os.File
 }
 type Cluster struct {
-	URL      string
-	Ports    map[string]int
-	children []*child
-	cancel   context.CancelFunc
+	URL           string
+	WebURL, AIURL string
+	web           *http.Server
+	Ports         map[string]int
+	children      []*child
+	cancel        context.CancelFunc
 }
 
 func RepoRoot(start string) (string, error) {
@@ -148,9 +154,13 @@ func Build(ctx context.Context, root, bin string, out io.Writer) error {
 	if err := os.MkdirAll(bin, 0755); err != nil {
 		return err
 	}
-	for _, name := range Services {
+	for _, name := range append(append([]string(nil), Services...), "user-service", "ai-service") {
 		fmt.Fprintln(out, "build", name)
-		cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(bin, binaryName(name)), "./"+name+"/cmd/app")
+		source := "./" + name + "/cmd/app"
+		if name == "ai-service" {
+			source = "./ai-service/cmd/server"
+		}
+		cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(bin, binaryName(name)), source)
 		cmd.Dir = root
 		cmd.Env = mergeEnv(os.Environ(), map[string]string{"GOOS": runtime.GOOS, "GOARCH": runtime.GOARCH, "CGO_ENABLED": "0"})
 		cmd.Stdout = out
@@ -187,6 +197,10 @@ func Start(ctx context.Context, opt Options) (cluster *Cluster, err error) {
 	configured["PROVIDER_MODE"] = opt.Mode
 	configured["AUTH_DATA_FILE"] = filepath.Join(opt.DataDir, "auth.json")
 	configured["PROVIDER_CONFIG_FILE"] = filepath.Join(opt.Root, "configs", "providers.json")
+	services := append([]string(nil), Services...)
+	if opt.FullStack {
+		services = append(services, "user-service", "ai-service")
+	}
 	ports := map[string]int{}
 	reserved := map[string]net.Listener{}
 	defer func() {
@@ -194,7 +208,7 @@ func Start(ctx context.Context, opt Options) (cluster *Cluster, err error) {
 			_ = l.Close()
 		}
 	}()
-	for _, name := range Services {
+	for _, name := range services {
 		port := defaultPorts[name]
 		if opt.RandomPorts {
 			port = 0
@@ -209,8 +223,33 @@ func Start(ctx context.Context, opt Options) (cluster *Cluster, err error) {
 	for _, entry := range []struct{ key, name string }{{"SESSION_GRPC_ADDR", "session-service"}, {"TRAVEL_GRPC_ADDR", "travel-service"}, {"MAP_GRPC_ADDR", "map-service"}, {"ROUTE_GRPC_ADDR", "route-service"}, {"PROVIDER_GRPC_ADDR", "provider-service"}, {"ORDER_GRPC_ADDR", "order-service"}} {
 		configured[entry.key] = net.JoinHostPort("127.0.0.1", strconv.Itoa(ports[entry.name]))
 	}
-	for key, value := range map[string]string{"USER_GRPC_ADDR": "127.0.0.1:50053", "AI_GRPC_ADDR": "127.0.0.1:50055"} {
-		configured[key] = value
+	for key, name := range map[string]string{"USER_GRPC_ADDR": "user-service", "AI_GRPC_ADDR": "ai-service"} {
+		port := defaultPorts[name]
+		if ports[name] != 0 {
+			port = ports[name]
+		}
+		configured[key] = net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
+	}
+	if opt.FullStack {
+		configured["WEB_DIR"] = filepath.Join(opt.Root, "ai-service", "web")
+		nativeModel(configured)
+		if value := os.Getenv("SESSION_REPOSITORY"); value != "" {
+			configured["SESSION_REPOSITORY"] = value
+		}
+		if configured["SESSION_REPOSITORY"] == "" {
+			configured["SESSION_REPOSITORY"] = "memory"
+		}
+		aiPort := opt.AIHTTPPort
+		if aiPort == 0 && !opt.RandomPorts {
+			aiPort = 8090
+		}
+		listener, e := net.Listen("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(aiPort)))
+		if e != nil {
+			return nil, fmt.Errorf("AI HTTP port unavailable: %w", e)
+		}
+		reserved["ai-http"] = listener
+		ports["ai-http"] = listener.Addr().(*net.TCPAddr).Port
+		configured["APP_PORT"] = strconv.Itoa(ports["ai-http"])
 	}
 	childCtx, cancel := context.WithCancel(ctx)
 	cluster = &Cluster{URL: "http://127.0.0.1:" + strconv.Itoa(ports["gateway"]), Ports: ports, cancel: cancel}
@@ -219,7 +258,7 @@ func Start(ctx context.Context, opt Options) (cluster *Cluster, err error) {
 			cluster.Close()
 		}
 	}()
-	for _, name := range Services {
+	for _, name := range services {
 		_ = reserved[name].Close()
 		delete(reserved, name)
 		log, e := os.OpenFile(filepath.Join(opt.DataDir, "logs", name+".log"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
@@ -232,6 +271,11 @@ func Start(ctx context.Context, opt Options) (cluster *Cluster, err error) {
 		}
 		values["GRPC_PORT"] = strconv.Itoa(ports[name])
 		values["HTTP_PORT"] = strconv.Itoa(ports[name])
+		if name == "ai-service" {
+			_ = reserved["ai-http"].Close()
+			delete(reserved, "ai-http")
+			cluster.AIURL = "http://127.0.0.1:" + configured["APP_PORT"]
+		}
 		cmd := exec.CommandContext(childCtx, filepath.Join(opt.BinDir, binaryName(name)))
 		cmd.Dir = opt.Root
 		cmd.Env = mergeEnv(os.Environ(), values)
@@ -249,6 +293,13 @@ func Start(ctx context.Context, opt Options) (cluster *Cluster, err error) {
 	defer cancelReady()
 	if err = cluster.ready(ready); err != nil {
 		return cluster, err
+	}
+	if opt.FullStack {
+		if err = cluster.startWeb(opt); err != nil {
+			return cluster, err
+		}
+		fmt.Fprintln(opt.Output, "UI:", cluster.WebURL)
+		fmt.Fprintln(opt.Output, "AI docs:", cluster.AIURL+"/docs")
 	}
 	fmt.Fprintln(opt.Output, "API:", cluster.URL, "mode:", opt.Mode)
 	return cluster, nil
@@ -315,6 +366,9 @@ func (c *Cluster) Close() {
 	if c == nil {
 		return
 	}
+	if c.web != nil {
+		_ = c.web.Close()
+	}
 	c.cancel()
 	for _, p := range c.children {
 		<-p.done
@@ -335,4 +389,24 @@ func Targets(root string) ([]string, error) {
 		}
 	}
 	return targets, nil
+}
+
+func (c *Cluster) startWeb(opt Options) error {
+	port := opt.WebPort
+	if port == 0 && !opt.RandomPorts {
+		port = 5173
+	}
+	listener, err := net.Listen("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
+	if err != nil {
+		return fmt.Errorf("UI port unavailable: %w", err)
+	}
+	target, _ := url.Parse(c.URL)
+	proxy := httputil.NewSingleHostReverseProxy(target)
+	mux := http.NewServeMux()
+	mux.Handle("/api/", proxy)
+	mux.Handle("/", http.FileServer(http.Dir(filepath.Join(opt.Root, "frontend", "dist"))))
+	c.web = &http.Server{Handler: mux, ReadHeaderTimeout: 5 * time.Second}
+	c.WebURL = "http://127.0.0.1:" + strconv.Itoa(listener.Addr().(*net.TCPAddr).Port)
+	go func() { _ = c.web.Serve(listener) }()
+	return nil
 }

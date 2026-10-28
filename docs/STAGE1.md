@@ -1,5 +1,7 @@
 # AI-сервис: этап 1 и контракт ранжирования
 
+В полном стеке прямой AI HTTP доступен на http://127.0.0.1:8090, внутренний gRPC — ai-service:50055. Порты 8080/9090 ниже относятся к отдельному запуску AI-модуля. Полный UI запускается по README.md.
+
 Актуальная интеграция сверена с `origin/main` (`adc122a`): `configs/trip_request.schema.json`, `configs/ai_response.schema.json`, `api/common/v1/trip.proto`, `api/provider/v1/parts.proto`. Копии JSON Schema лежат в `ai-service/schemas`. HTTP — 8080, gRPC — 9090. Локальная модель — Ollama `travel-qwen:4b`, инструкция в `LOCAL_QWEN.md`.
 
 ## Этап 1

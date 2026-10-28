@@ -35,6 +35,10 @@ func run() error {
 		mode := flags.String("mode", "demo", "demo or live")
 		random := flags.Bool("random-ports", false, "use free ports instead of default ports")
 		env := flags.String("env-file", ".env", "local configuration file")
+		full := flags.Bool("full", false, "include real AI, user service and UI")
+		data := flags.String("data-dir", filepath.Join(root, "data"), "local runtime state directory")
+		web := flags.Int("web-port", 0, "UI port (default 5173)")
+		aiHTTP := flags.Int("ai-http-port", 0, "AI HTTP port (default 8090)")
 		if err = flags.Parse(os.Args[2:]); err != nil {
 			return err
 		}
@@ -46,13 +50,15 @@ func run() error {
 		if !filepath.IsAbs(envPath) {
 			envPath = filepath.Join(root, envPath)
 		}
-		cluster, err := devtool.Start(ctx, devtool.Options{Root: root, BinDir: bin, DataDir: filepath.Join(root, "data"), Mode: *mode, EnvFile: envPath, RandomPorts: *random, Output: os.Stdout})
+		cluster, err := devtool.Start(ctx, devtool.Options{Root: root, BinDir: bin, DataDir: *data, Mode: *mode, EnvFile: envPath, RandomPorts: *random, FullStack: *full, WebPort: *web, AIHTTPPort: *aiHTTP, Output: os.Stdout})
 		if err != nil {
 			return err
 		}
 		defer cluster.Close()
 		fmt.Println("Docs:", cluster.URL+"/docs", "; Ctrl+C stops all child services")
 		return cluster.Wait(ctx)
+	case "build":
+		return devtool.Build(ctx, root, filepath.Join(root, "bin"), os.Stdout)
 	case "test":
 		race := flags.Bool("race", false, "enable Go race detector (requires C compiler)")
 		coverage := flags.Bool("cover", false, "write coverage profiles and HTML report")
@@ -89,6 +95,18 @@ func run() error {
 		return nil
 	case "e2e":
 		return command(ctx, root, "test", "-tags=e2e", "-count=1", "-v", "-timeout=5m", "./e2e")
+	case "doctor":
+		env := flags.String("env-file", ".env", "local configuration")
+		if err = flags.Parse(os.Args[2:]); err != nil {
+			return err
+		}
+		return devtool.Doctor(ctx, *env, os.Stdout)
+	case "ai-smoke":
+		url := flags.String("url", "http://127.0.0.1:8080", "running gateway or UI URL")
+		if err = flags.Parse(os.Args[2:]); err != nil {
+			return err
+		}
+		return devtool.AISmoke(ctx, *url, os.Stdout)
 	case "smoke":
 		url := flags.String("url", "http://127.0.0.1:8080", "running gateway URL")
 		if err = flags.Parse(os.Args[2:]); err != nil {

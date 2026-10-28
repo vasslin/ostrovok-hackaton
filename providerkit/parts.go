@@ -189,6 +189,7 @@ type ProviderError struct {
 	Retryable bool   `json:"retryable"`
 }
 type Parts struct {
+	Resolved       *ResolvedTrip   `json:"resolved,omitempty"`
 	TransportParts []TransportPart `json:"transport_parts"`
 	HotelParts     []HotelPart     `json:"hotel_parts"`
 	Errors         []ProviderError `json:"errors"`
@@ -202,14 +203,15 @@ type HotelAdapter interface {
 	SearchHotels(context.Context, HotelQuery) ([]HotelPart, error)
 }
 type Searcher struct {
-	Registry Registry
-	Client   HTTPDoer
-	Mode     string // demo or live; no automatic fallback
-	Timeout  time.Duration
-	Now      func() time.Time
-	Hotels   HotelAdapter
-	mu       sync.Mutex
-	next     map[string]time.Time
+	Registry       Registry
+	Client         HTTPDoer
+	Mode           string // demo or live; no automatic fallback
+	Timeout        time.Duration
+	Now            func() time.Time
+	Hotels         HotelAdapter
+	mu             sync.Mutex
+	discoveryCache map[string]discoveryCache
+	next           map[string]time.Time
 }
 
 func NewSearcher(reg Registry, mode string) (*Searcher, error) {
@@ -300,7 +302,7 @@ func (s *Searcher) searchHotels(ctx context.Context, q HotelQuery) ([]HotelPart,
 		return nil, &ProviderError{Provider: "hotel", Kind: "hotel", Code: code, Message: message, Retryable: retry}
 	}
 	if s.Hotels == nil {
-		return failure("not_configured", "No live hotel API configured; explicit demo mode provides synthetic hotels", false)
+		return failure("not_configured", "Поиск отелей не подключён. Подключите гостиничного провайдера или явно выберите поиск только транспорта.", false)
 	}
 	ctx, cancel := context.WithTimeout(ctx, s.Timeout)
 	defer cancel()

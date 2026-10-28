@@ -7,6 +7,7 @@ type TripRequest struct {
 	Origin        Place         `json:"origin" jsonschema:"required"`
 	Destination   *Destination  `json:"destination,omitempty" jsonschema_description:"Omit (or null) when the traveler doesn't know where to go: inspiration mode."`
 	Dates         Dates         `json:"dates" jsonschema:"required"`
+	Stops         []Stop        `json:"stops,omitempty" validate:"omitempty,max=6,dive" jsonschema:"maxItems=6" jsonschema_description:"Ordered stays between origin and the return home. Empty means one destination."`
 	Travelers     Travelers     `json:"travelers" jsonschema:"required"`
 	Transport     *Transport    `json:"transport,omitempty"`
 	Hotel         *Hotel        `json:"hotel,omitempty"`
@@ -19,6 +20,12 @@ type TripRequest struct {
 type Place struct {
 	City        string `json:"city" validate:"required,min=1,max=100" jsonschema:"required,minLength=1,maxLength=100" jsonschema_description:"City name as the traveler said it, e.g. Москва."`
 	CountryCode string `json:"country_code,omitempty" validate:"omitempty,len=2,uppercase" jsonschema:"pattern=^[A-Z]{2}$" jsonschema_description:"ISO 3166-1 alpha-2."`
+}
+
+type Stop struct {
+	City     string `json:"city" validate:"required,min=1,max=100" jsonschema:"required,minLength=1,maxLength=100"`
+	CheckIn  string `json:"check_in" validate:"required,datetime=2006-01-02" jsonschema:"required,format=date"`
+	CheckOut string `json:"check_out" validate:"required,datetime=2006-01-02" jsonschema:"required,format=date"`
 }
 
 type Destination struct {
@@ -42,19 +49,23 @@ type Travelers struct {
 	Residency    string `json:"residency,omitempty" validate:"omitempty,len=2,lowercase" jsonschema:"pattern=^[a-z]{2}$,default=ru" jsonschema_description:"Citizenship, ISO 3166-1 alpha-2 lowercase (hotel API format)."`
 }
 
+type Age int
+
 type Pet struct {
 	Kind     string  `json:"kind" validate:"required,oneof=dog cat other" jsonschema:"required,enum=dog,enum=cat,enum=other"`
 	WeightKg float64 `json:"weight_kg,omitempty" validate:"omitempty,gt=0,max=100" jsonschema:"exclusiveMinimum=0,maximum=100"`
 }
 
 type Transport struct {
-	Modes             []string `json:"modes,omitempty" validate:"omitempty,min=1,dive,oneof=plane train suburban bus water helicopter" jsonschema:"minItems=1,uniqueItems=true"`
-	RoundTrip         *bool    `json:"round_trip,omitempty" jsonschema:"default=true"`
-	DirectOnly        bool     `json:"direct_only,omitempty" jsonschema:"default=false"`
-	MaxTransfers      *int     `json:"max_transfers,omitempty" validate:"omitempty,min=0,max=3" jsonschema:"minimum=0,maximum=3"`
-	MaxDurationHours  float64  `json:"max_duration_hours,omitempty" validate:"omitempty,min=0.5,max=48" jsonschema:"minimum=0.5,maximum=48"`
-	DepartureTimeFrom string   `json:"departure_time_from,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$" jsonschema_description:"HH:MM, local time."`
-	DepartureTimeTo   string   `json:"departure_time_to,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$"`
+	Modes              []string `json:"modes,omitempty" validate:"omitempty,min=1,dive,oneof=plane train suburban bus water helicopter" jsonschema:"minItems=1,uniqueItems=true"`
+	RoundTrip          *bool    `json:"round_trip,omitempty" jsonschema:"default=true"`
+	DirectOnly         bool     `json:"direct_only,omitempty" jsonschema:"default=false"`
+	MaxTransfers       *int     `json:"max_transfers,omitempty" validate:"omitempty,min=0,max=3" jsonschema:"minimum=0,maximum=3"`
+	MinTransferMinutes int      `json:"min_transfer_minutes,omitempty" validate:"omitempty,min=0,max=1440" jsonschema:"minimum=0,maximum=1440"`
+	MaxWaitHours       int      `json:"max_wait_hours,omitempty" validate:"omitempty,min=0,max=48" jsonschema:"minimum=0,maximum=48"`
+	MaxDurationHours   float64  `json:"max_duration_hours,omitempty" validate:"omitempty,min=0.5,max=48" jsonschema:"minimum=0.5,maximum=48"`
+	DepartureTimeFrom  string   `json:"departure_time_from,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$" jsonschema_description:"HH:MM, local time."`
+	DepartureTimeTo    string   `json:"departure_time_to,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$"`
 }
 
 type Hotel struct {
@@ -104,5 +115,3 @@ type Assumption struct {
 type Completeness struct {
 	MissingRequired []string `json:"missing_required" jsonschema:"required" jsonschema_description:"JSON paths of required fields that are still empty."`
 }
-
-type Age int

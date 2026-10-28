@@ -10,9 +10,11 @@ import (
 	"encoding/json"
 	"github.com/ostrovok-hackathon-2026/godnota/internal/devtool"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -255,4 +257,44 @@ func TestStage2EndToEnd(t *testing.T) {
 			t.Fatal("smoke did not finish")
 		}
 	})
+}
+
+func TestFullStackStartsUIAndStopsEveryChild(t *testing.T) {
+	root, err := devtool.RepoRoot(".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bin := filepath.Join(t.TempDir(), "bin")
+	if err = devtool.Build(context.Background(), root, bin, io.Discard); err != nil {
+		t.Fatal(err)
+	}
+	cluster, err := devtool.Start(context.Background(), devtool.Options{Root: root, BinDir: bin, DataDir: t.TempDir(), Mode: "demo", RandomPorts: true, FullStack: true, Output: io.Discard})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(cluster.Close)
+	if err = devtool.Smoke(context.Background(), cluster.WebURL, io.Discard); err != nil {
+		t.Fatal("UI proxy:", err)
+	}
+	response, err := http.Get(cluster.WebURL + "/config.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, _ := io.ReadAll(response.Body)
+	response.Body.Close()
+	if !strings.Contains(string(data), "apiBaseUrl: '/api'") {
+		t.Fatal("UI still needs another device's localhost")
+	}
+	addresses := []string{strings.TrimPrefix(cluster.WebURL, "http://")}
+	for _, port := range cluster.Ports {
+		addresses = append(addresses, net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
+	}
+	cluster.Close()
+	for _, address := range addresses {
+		conn, err := net.DialTimeout("tcp", address, 100*time.Millisecond)
+		if err == nil {
+			conn.Close()
+			t.Fatalf("child port remained open after shutdown: %s", address)
+		}
+	}
 }

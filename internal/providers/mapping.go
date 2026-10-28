@@ -11,10 +11,12 @@ import (
 )
 
 type ResolvedPlace struct {
-	IATA       string   `json:"iata,omitempty"`
-	YandexCode string   `json:"yandex_code,omitempty"`
-	Latitude   *float64 `json:"latitude,omitempty"`
-	Longitude  *float64 `json:"longitude,omitempty"`
+	City        string   `json:"city,omitempty"`
+	CountryCode string   `json:"country_code,omitempty"`
+	IATA        string   `json:"iata,omitempty"`
+	YandexCode  string   `json:"yandex_code,omitempty"`
+	Latitude    *float64 `json:"latitude,omitempty"`
+	Longitude   *float64 `json:"longitude,omitempty"`
 }
 
 type ResolvedTrip struct {

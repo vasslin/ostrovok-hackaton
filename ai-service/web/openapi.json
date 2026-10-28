@@ -3506,6 +3506,35 @@
             "additionalProperties": false,
             "type": "object"
           },
+          "stops": {
+            "items": {
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "minLength": 1
+                },
+                "check_in": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "check_out": {
+                  "type": "string",
+                  "format": "date"
+                }
+              },
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "city",
+                "check_in",
+                "check_out"
+              ]
+            },
+            "type": "array",
+            "maxItems": 6,
+            "description": "Ordered stays between origin and the return home. Empty means one destination."
+          },
           "travelers": {
             "properties": {
               "adults": {
@@ -3590,6 +3619,16 @@
               "max_transfers": {
                 "type": "integer",
                 "maximum": 3,
+                "minimum": 0
+              },
+              "min_transfer_minutes": {
+                "type": "integer",
+                "maximum": 1440,
+                "minimum": 0
+              },
+              "max_wait_hours": {
+                "type": "integer",
+                "maximum": 48,
                 "minimum": 0
               },
               "max_duration_hours": {

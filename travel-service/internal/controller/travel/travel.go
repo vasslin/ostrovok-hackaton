@@ -20,6 +20,7 @@ type travelService interface {
 }
 
 type Controller struct {
+	pb.UnimplementedTravelServiceServer
 	service travelService
 }
 

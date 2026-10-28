@@ -23,7 +23,7 @@ export function addDays(date, days) {
     d.setUTCDate(d.getUTCDate() + days);
     return d.toISOString().slice(0, 10);
 }
-export function money(minor, currency = 'RUB') { return new Intl.NumberFormat('ru-RU', { style: 'currency', currency, maximumFractionDigits: 0 }).format(minor / 100); }
+export function money(minor, currency = 'RUB') { if (!Number.isFinite(minor)) return 'Цена уточняется'; return new Intl.NumberFormat('ru-RU', { style: 'currency', currency, maximumFractionDigits: 0 }).format(minor / 100); }
 export function dateLabel(date, opts = {}) { return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', timeZone: 'UTC', ...opts }).format(new Date(`${date.slice(0, 10)}T12:00:00Z`)).replace('.', ''); }
 export function localTime(date) { return date.slice(11, 16); }
 export function guestsLabel(c) { return `${c.adults} взр.${c.childrenAges.length ? ` · ${c.childrenAges.length} реб.` : ''}${c.pets ? ' · с питомцем' : ''}`; }

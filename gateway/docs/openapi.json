@@ -743,6 +743,42 @@
           }
         }
       }
+    },
+    "/api/sessions/{session_id}/capabilities": {
+      "get": {
+        "tags": [
+          "Planning"
+        ],
+        "summary": "Возможности настроенных провайдеров без секретов",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Режим, транспорт и доступность гостиничного API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {

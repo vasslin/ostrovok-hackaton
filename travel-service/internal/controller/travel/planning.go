@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
 	"sync"
 	"time"
 )
@@ -30,8 +31,9 @@ type PlanningController struct {
 	confirmed map[string]bool
 }
 type cachedParts struct {
-	config *commonv1.TripConfig
-	parts  *providerv1.SearchPartsResponse
+	candidates []*structpb.Struct
+	config     *commonv1.TripConfig
+	parts      *providerv1.SearchPartsResponse
 }
 
 func (c *Controller) WithPlanning(s sessionv1.SessionServiceClient, p providerv1.ProviderServiceClient, routeClients ...routev1.RouteServiceClient) *PlanningController {
@@ -114,6 +116,7 @@ func (c *PlanningController) save(ctx context.Context, userID, id string, config
 	if err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
+	config = retainResolved(agent.GetCfg(), config)
 	if len(replies) > 0 {
 		err = c.record(ctx, userID, id, "", config, nil, replies[0], nil, nil, !confirmed)
 	} else {
@@ -173,13 +176,27 @@ func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoute
 	if parts == nil {
 		return nil, status.Error(codes.DataLoss, "provider returned no response")
 	}
+	if parts.GetResolved() != nil {
+		agent.Cfg = proto.Clone(agent.GetCfg()).(*commonv1.TripConfig)
+		agent.Cfg.Resolved = proto.Clone(parts.GetResolved()).(*structpb.Struct)
+	}
+	var candidates []*structpb.Struct
 	if len(parts.GetTransportParts()) > 0 || len(parts.GetHotelParts()) > 0 {
 		if c.routes == nil {
 			parts.Limitations = append(parts.Limitations, "route-service: handoff not configured")
 		} else {
 			handoff, cancel := context.WithTimeout(ctx, 750*time.Millisecond)
-			_, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
+			assembled, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
 			cancel()
+			if handoffErr == nil && assembled == nil {
+				handoffErr = status.Error(codes.DataLoss, "empty route response")
+			}
+			if handoffErr == nil {
+				candidates = cloneCandidates(assembled.GetCandidates())
+				if len(candidates) == 0 {
+					parts.Limitations = append(parts.Limitations, "route-service: no compatible complete routes; stage-2 parts preserved")
+				}
+			}
 			if handoffErr != nil {
 				if ctx.Err() != nil {
 					return nil, status.FromContextError(ctx.Err()).Err()
@@ -188,12 +205,12 @@ func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoute
 			}
 		}
 	}
-	out := &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts}
-	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
+	out := &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts, Candidates: candidates}
+	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", agent.GetCfg(), nil, out, nil, nil, false); err != nil {
 		return nil, err
 	}
 	c.mu.Lock()
-	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(agent.GetCfg()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)}
+	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(agent.GetCfg()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse), candidates: cloneCandidates(candidates)}
 	c.mu.Unlock()
 	return out, nil
 }
@@ -214,9 +231,19 @@ func (c *PlanningController) GetRoutes(ctx context.Context, r *pb.GetRoutesReque
 	if !ok || !c.isConfirmed(r.GetSessionId(), session.GetStatus()) || !proto.Equal(cached.config, agent.GetCfg()) {
 		return nil, status.Error(codes.NotFound, "no search results for current config")
 	}
-	out := &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse)}
+	out := &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse), Candidates: cloneCandidates(cached.candidates)}
 	if err := c.record(ctx, r.GetUserId(), r.GetSessionId(), "", nil, nil, out, nil, nil, false); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+func cloneCandidates(items []*structpb.Struct) []*structpb.Struct {
+	result := make([]*structpb.Struct, 0, len(items))
+	for _, item := range items {
+		if item != nil {
+			result = append(result, proto.Clone(item).(*structpb.Struct))
+		}
+	}
+	return result
 }

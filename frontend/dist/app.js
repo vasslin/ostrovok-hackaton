@@ -1,3 +1,4 @@
+import { reviewRequest } from './planning.js';
 import { view, loadViews } from './templates.js';
 import { icon } from './icons.js';
 import { DEFAULT_CRITERIA, cities, createTrip, money, dateLabel, localTime, guestsLabel } from './model.js';
@@ -17,12 +18,12 @@ if (persisted?.trip && Array.isArray(persisted.trip.stops) && Array.isArray(pers
 }
 const state = {
     page: 'planner', tab: 'overview', trip: initialTrip,
-    messages: persisted?.messages?.length ? persisted.messages : [starterMessage],
+    messages: persisted?.messages?.length ? persisted.messages : [isDemo ? starterMessage : { role: 'assistant', text: 'Куда хотите отправиться? Расскажите о поездке. Перед поиском я покажу параметры для подтверждения.' }],
     profile: { name: 'Путешественник', email: '', phone: '' }, history: [],
     busy: false, bookingBusy: false, mobileView: 'route', drawer: null, modal: null,
     booking: persisted?.booking || null, error: null, draftText: '', profileBusy: false,
     loginEmail: '', loginError: '', loginBusy: false, authMode: 'login', pendingSend: null,
-    sessionId: isDemo ? '' : getSessionId(), answerDraft: {}
+    sessionId: isDemo ? '' : getSessionId(), answerDraft: {}, pendingConfig: null, capabilities: null, reviewOpen: false, reviewDraft: null
 };
 let map, lastFocus, toastTimer;
 const price = amount => Number.isFinite(amount) ? money(amount, state.trip?.totals.currency || 'RUB') : 'цена неизвестна';
@@ -78,7 +79,15 @@ function render() {
         renderedDrawer: renderDrawer(),
         renderedModal: renderModal()
     });
-    if (planner && state.trip) {
+    const review = document.querySelector("#review-form");
+ if (review && state.reviewDraft) {
+ for (const input of review.elements) {
+ if (!input.name || input.type === "submit") continue;
+ if (input.type === "checkbox") input.checked = state.reviewDraft.getAll(input.name).includes(input.value);
+ else if (state.reviewDraft.has(input.name)) input.value = state.reviewDraft.get(input.name);
+ }
+ }
+ if (planner && state.trip && !state.reviewOpen) {
         map = new RouteMap($('#route-map'), { onStop: id => openDrawer('stop', id), onSegment: id => openDrawer('segment', id) });
         map.update(state.trip, state.drawer?.type === 'stop' ? state.drawer.id : null);
     }
@@ -104,12 +113,13 @@ function renderPlanner() {
             }) : '',
             replace: esc(m.text).replace(/\n/g, '<br>'),
             conditional2: [
-                m.questions?.length && i === state.messages.findLastIndex(item => item.questions?.length) ? view('render-planner-questions', {
+                m.questions?.length && i === state.messages.findLastIndex(item => item.role === 'assistant') ? view('render-planner-questions', {
                     index: i,
                     disabled: state.busy ? 'disabled' : '',
                     fields: m.questions.map(question => view('render-planner-question', {
                         text: esc(question.text),
                         questionId: esc(question.questionId),
+ inputType: ["date","number"].includes(question.inputType) ? question.inputType : "text",
                         value: esc(state.answerDraft[question.questionId] || ''),
                         required: question.required ? 'required' : ''
                     })).join('')
@@ -135,7 +145,7 @@ function renderPlanner() {
         arrowIcon: icon('arrow'),
         shieldIcon: icon('shield'),
         conditional7: isDemo ? 'Без AI-вызовов. Настоящая модель подключается через backend.' : 'Ваши пожелания помогают собрать подходящую поездку.',
-        conditional8: state.trip ? renderTrip() : view('render-planner-empty-state', {
+        conditional8: !isDemo && state.pendingConfig && state.reviewOpen ? renderReview() : state.trip ? renderTrip() : view('render-planner-empty-state', {
             mapIcon: icon('map'),
             mobileChatButton: button('Открыть чат', 'mobile-chat', 'primary')
         })
@@ -173,6 +183,43 @@ function renderTrip() {
         summaryButton: button(`К оформлению ${icon('arrow')}`, 'summary', 'primary'),
         infoIcon: icon('info')
     });
+}
+function renderReview() {
+    const c = state.pendingConfig || {};
+    const hotels = state.capabilities?.hotels;
+    const unavailable = hotels?.status === 'not_configured';
+    const needed = c.hotel?.needed !== false;
+    const transportText = state.capabilities?.transport ? `Транспорт: Aviasales ${state.capabilities.transport.aviasales ? 'настроен' : 'не настроен'}, Яндекс.Расписания ${state.capabilities.transport.yandex_rasp ? 'настроен' : 'не настроен'}. ` : '';
+ const capabilityText = !state.capabilities ? 'Возможности провайдеров не получены. Повторите проверку перед поиском.' : state.capabilities.mode === 'demo' ? 'Включён demo-режим: транспорт и отели синтетические.' : unavailable ? 'Гостиничный API не настроен. Для проживания нужен партнёрский доступ RateHawk или Hotelbeds; транспортные ключи его не подключают.' : `Гостиничный провайдер: ${hotels?.provider || 'подключён'}. ${['sandbox', 'evaluation'].includes(hotels?.environment) ? 'Тестовая среда, реальное наличие не подтверждено.' : 'Наличие и тариф проверяются при поиске.'}`;
+    return view('render-review', {
+        capabilities: esc(transportText + capabilityText), origin: esc(c.origin?.city || ''), originCountry: esc(c.origin?.country_code || ''),
+        destination: esc(c.destination?.city || ''), destinationCountry: esc(c.destination?.country_code || ''),
+        departure: esc(c.dates?.departure_date || ''), returnDate: esc(c.dates?.return_date || ''), adults: esc(c.travelers?.adults || ''),
+        children: esc((c.travelers?.children_ages || []).join(', ')), residency: esc(c.travelers?.residency || ''), budget: esc(c.budget?.total || ''),
+        currencies: ['RUB', 'USD', 'EUR'].map(value => `<option ${value === (c.currency || 'RUB') ? 'selected' : ''}>${value}</option>`).join(''),
+        hotel: needed ? 'checked' : '', roundTrip: c.transport?.round_trip !== false ? 'checked' : '',
+        modes: [['plane','Самолёт'],['train','Поезд'],['bus','Автобус'],['suburban','Электричка'],['water','Водный'],['helicopter','Вертолёт']].map(([value,label]) => `<label class="review-check"><input type="checkbox" name="modes" value="${value}" ${(c.transport?.modes || ['plane','train']).includes(value) ? 'checked' : ''}>${label}</label>`).join(''),
+        extra: esc(c.stops?.length ? `Остановки: ${c.stops.map(stop => `${stop.city}: ${stop.check_in} — ${stop.check_out}`).join('; ')}. Для изменения остановок напишите в чат.` : c.travelers?.pets?.length ? 'Условия перевозки питомца сохранены. Их стоимость уточняется отдельно.' : 'Пустые поля не заполняются автоматически. Бюджет указан в основной единице валюты.'),
+        warning: needed && unavailable ? 'Отель остаётся в пожеланиях. Чтобы продолжить без него, явно выберите поиск только транспорта.' : '',
+        disabled: state.busy ? 'disabled' : '', searchDisabled: state.busy || !state.capabilities || (needed && unavailable) ? 'disabled' : '',
+        transportOnly: !state.capabilities ? button('Повторить проверку провайдеров', 'refresh-capabilities', 'button-light', 'type="button"') : needed ? `<button type="submit" name="intent" value="transport" class="button button-light" ${state.busy || !state.capabilities ? 'disabled' : ''}>Искать только транспорт</button>` : ''
+    });
+}
+async function acceptDialog(result) {
+    if (!isDemo && result.tripConfig) {
+        state.pendingConfig = result.tripConfig;
+        state.reviewDraft = null;
+        state.reviewOpen = !result.searched;
+        state.trip = result.trip || null;
+        state.booking = null;
+        state.bookingRequestId = null;
+        try { state.capabilities = await api.capabilities(state.sessionId || getSessionId()); }
+        catch { state.capabilities = null; }
+    }
+    if (result.trip) state.trip = result.trip;
+    const actions = [...(result.actions || [])];
+    if (result.searched && result.tripConfig?.hotel?.needed !== false && !(result.trip?.stops || []).some(stop => stop.hotel)) actions.push({ label: 'Продолжить только с транспортом', transportOnly: true });
+    state.messages.push({ role: 'assistant', text: [result.message, ...(result.warnings || [])].filter(Boolean).join('\n'), questions: result.questions || [], actions });
 }
 function renderBudgetWarning() { if (!state.trip || !Number.isFinite(state.trip.criteria.budgetMinor) || !Number.isFinite(state.trip.totals.totalMinor) || state.trip.totals.totalMinor <= state.trip.criteria.budgetMinor || state.trip.warnings.some(warning => warning.startsWith('Сумма неполная')))
     return ''; return view('render-budget-warning-notice', {
@@ -321,7 +368,7 @@ function renderSummary() { const t = state.trip; if (!t)
     price2: price(t.totals.totalMinor),
     guestsLabel2: guestsLabel(t.criteria),
     nights2: t.criteria.nights,
-    bookButton: button(t.status === 'booked' ? `${icon('check')} Заказ оформлен` : 'Забронировать поездку', 'book', 'primary full', `${state.bookingBusy || t.status === 'booked' ? 'disabled' : ''}`),
+    bookButton: button(t.status === 'booked' ? `${icon('check')} Заказ оформлен` : 'Забронировать поездку', 'book', 'primary full', `${state.bookingBusy || t.status === 'booked' || (!isDemo && !t.routeId) ? 'disabled' : ''}`),
     shieldIcon: icon('shield'),
     conditional: state.booking && t.status === 'booked' ? view('render-summary-booking-number', {
         id: esc(state.booking.id)
@@ -543,7 +590,7 @@ async function send(text, criteria) {
             state.booking = null;
             state.bookingRequestId = null;
         }
-        state.messages.push({ role: 'assistant', text: result.message, actions: result.actions || [], questions: result.questions || [] });
+        await acceptDialog(result);
         persist();
     }
     catch (e) {
@@ -579,7 +626,7 @@ async function chooseIdea(ideaId, label) {
             state.booking = null;
             state.bookingRequestId = null;
         }
-        state.messages.push({ role: 'assistant', text: result.message, actions: result.actions || [], questions: result.questions || [] });
+        await acceptDialog(result);
     }
     catch (error) {
         state.error = error.message;
@@ -669,16 +716,36 @@ app.addEventListener('click', async (e) => {
         const a = state.messages[Number(target.dataset.message)]?.actions?.[Number(target.dataset.index)];
         if (!a)
             return;
-        if (a.ideaId && !isDemo)
+        if (a.transportOnly) {
+ state.reviewOpen = true;
+ state.pendingConfig = { ...state.pendingConfig, hotel: { ...state.pendingConfig?.hotel, needed: false } };
+ render();
+ return;
+ }
+ if (a.ideaId && !isDemo)
             await chooseIdea(a.ideaId, a.label);
         else
             await send(a.value);
     }
-    if (action === 'retry' && state.lastRequest) {
+    if (action === 'refresh-capabilities') {
+ try { state.capabilities = await api.capabilities(state.sessionId); } catch (error) { notify(error.message); }
+ render(); return;
+ }
+ if (action === 'retry' && state.reviewOpen) {
+ try {state.capabilities = await api.capabilities(state.sessionId);} catch (error) {notify(error.message);}
+ render(); return;
+ }
+ if (action === 'retry' && state.lastRequest) {
         state.messages.pop();
         await send(state.lastRequest.text, state.lastRequest.criteria);
     }
-    if (action === 'edit-criteria') {
+    if (action === 'edit-criteria' && !isDemo) {
+ state.reviewOpen = true;
+ if (!state.pendingConfig) state.pendingConfig = state.trip?.requestConfig;
+ render();
+ return;
+ }
+ if (action === 'edit-criteria') {
         lastFocus = target;
         state.modal = 'criteria';
         render();
@@ -709,7 +776,8 @@ app.addEventListener('click', async (e) => {
         try {
             state.sessionId = await api.createSession();
             state.trip = null;
-            state.messages = [starterMessage];
+ state.pendingConfig = null; state.reviewOpen = false; state.reviewDraft = null;
+            state.messages = [{ role: 'assistant', text: 'Расскажите о новой поездке.' }];
         }
         catch (error) {
             showLogin(error);
@@ -796,6 +864,26 @@ app.addEventListener('click', async (e) => {
 app.addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
+    if (form.id === 'review-form') {
+        if (state.busy) return;
+        const data = new FormData(form);
+        const intent = e.submitter?.value || 'save';
+        state.reviewDraft = data;
+        let config;
+        try { config = reviewRequest(state.pendingConfig, data, intent === 'transport'); }
+        catch (error) { notify(error.message); return; }
+        state.pendingConfig = config;
+ state.reviewDraft = null;
+        state.error = null;
+        state.busy = true;
+        render();
+        try {
+            const result = intent === 'save' ? await api.saveRequest(state.sessionId, config) : await api.confirmSearch(state.sessionId, config);
+            await acceptDialog(result);
+        } catch (error) { state.error = error.message; showLogin(error); }
+        finally { state.busy = false; render(); }
+        return;
+    }
     if (form.id === 'chat-form') {
         const text = new FormData(form).get('message').trim();
         await send(text);
@@ -819,7 +907,7 @@ app.addEventListener('submit', async (e) => {
                 result.trip.id = state.sessionId;
             if (result.trip)
                 state.trip = result.trip;
-            state.messages.push({ role: 'assistant', text: result.message, actions: result.actions || [], questions: result.questions || [] });
+            await acceptDialog(result);
         }
         catch (error) {
             state.error = error.message;
@@ -853,7 +941,7 @@ app.addEventListener('submit', async (e) => {
                 result.trip.id = state.sessionId;
             if (result.trip)
                 state.trip = result.trip;
-            state.messages.push({ role: 'assistant', text: result.message, actions: result.actions || [], questions: result.questions || [] });
+            await acceptDialog(result);
         }
         catch (error) {
             state.error = error.message;
@@ -929,6 +1017,7 @@ app.addEventListener('submit', async (e) => {
 app.addEventListener('input', e => {
     if (e.target.id === 'chat-input')
         state.draftText = e.target.value;
+    if (e.target.closest('#review-form')) state.reviewDraft = new FormData(e.target.closest('form'));
     if (e.target.closest('#answers-form'))
         state.answerDraft = { ...state.answerDraft, [e.target.name]: e.target.value };
 });
@@ -957,7 +1046,16 @@ loadViews().then(() => {
     if (!isDemo && !getAccessToken())
         state.modal = 'login';
     render();
-    if (isDemo || getAccessToken()) {
+    if (!isDemo && getAccessToken() && getSessionId()) {
+ api.restoreSession(getSessionId()).then(async result => {
+ state.messages = result.messages.length ? result.messages : state.messages;
+ state.answerDraft = result.answerDraft || {};
+ await acceptDialog({ ...result, message: 'Восстановлены сохранённые параметры поездки.' });
+ try { const routes = await api.getRoutes(getSessionId()); if (routes.trip) { state.trip = routes.trip; state.reviewOpen = false; } } catch {}
+ render();
+ }).catch(error => { showLogin(error); notify(error.message); });
+ }
+ if (isDemo || getAccessToken()) {
         api.getProfile().then(result => {
             state.profile = result.profile;
             render();

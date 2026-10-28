@@ -6,6 +6,7 @@ import (
 	v12 "github.com/godnota/pkg/generated/provider/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -13,6 +14,7 @@ import (
 
 const (
 	_ = protoimpl.EnforceVersion(20 - protoimpl.MinVersion)
+
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
@@ -49,6 +51,7 @@ func (x *PlanTripRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*PlanTripRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{0}
 }
@@ -113,6 +116,7 @@ func (x *PlanTripResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*PlanTripResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{1}
 }
@@ -213,6 +217,7 @@ func (x *SubmitAnswersRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*SubmitAnswersRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{2}
 }
@@ -276,6 +281,7 @@ func (x *SubmitAnswersResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*SubmitAnswersResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{3}
 }
@@ -370,6 +376,7 @@ func (x *SelectIdeaRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*SelectIdeaRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{4}
 }
@@ -440,6 +447,7 @@ func (x *SelectIdeaResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*SelectIdeaResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{5}
 }
@@ -532,6 +540,7 @@ func (x *GetConfigRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*GetConfigRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{6}
 }
@@ -582,6 +591,7 @@ func (x *GetConfigResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*GetConfigResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{7}
 }
@@ -633,6 +643,7 @@ func (x *UpdateConfigRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*UpdateConfigRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{8}
 }
@@ -690,6 +701,7 @@ func (x *UpdateConfigResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*UpdateConfigResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{9}
 }
@@ -741,6 +753,7 @@ func (x *ConfirmConfigRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*ConfirmConfigRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{10}
 }
@@ -798,6 +811,7 @@ func (x *ConfirmConfigResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*ConfirmConfigResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{11}
 }
@@ -848,6 +862,7 @@ func (x *SearchRoutesRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*SearchRoutesRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{12}
 }
@@ -870,6 +885,7 @@ type SearchRoutesResponse struct {
 	state         protoimpl.MessageState   `protogen:"open.v1"`
 	SessionId     string                   `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Parts         *v12.SearchPartsResponse `protobuf:"bytes,2,opt,name=parts,proto3" json:"parts,omitempty"`
+	Candidates    []*structpb.Struct       `protobuf:"bytes,3,rep,name=candidates,proto3" json:"candidates,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -898,6 +914,7 @@ func (x *SearchRoutesResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*SearchRoutesResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{13}
 }
@@ -912,6 +929,13 @@ func (x *SearchRoutesResponse) GetSessionId() string {
 func (x *SearchRoutesResponse) GetParts() *v12.SearchPartsResponse {
 	if x != nil {
 		return x.Parts
+	}
+	return nil
+}
+
+func (x *SearchRoutesResponse) GetCandidates() []*structpb.Struct {
+	if x != nil {
+		return x.Candidates
 	}
 	return nil
 }
@@ -948,6 +972,7 @@ func (x *GetRoutesRequest) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*GetRoutesRequest) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{14}
 }
@@ -970,6 +995,7 @@ type GetRoutesResponse struct {
 	state         protoimpl.MessageState   `protogen:"open.v1"`
 	SessionId     string                   `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Parts         *v12.SearchPartsResponse `protobuf:"bytes,2,opt,name=parts,proto3" json:"parts,omitempty"`
+	Candidates    []*structpb.Struct       `protobuf:"bytes,3,rep,name=candidates,proto3" json:"candidates,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -998,6 +1024,7 @@ func (x *GetRoutesResponse) ProtoReflect() protoreflect.Message {
 	}
 	return mi.MessageOf(x)
 }
+
 func (*GetRoutesResponse) Descriptor() ([]byte, []int) {
 	return file_api_travel_v1_travel_proto_rawDescGZIP(), []int{15}
 }
@@ -1016,11 +1043,18 @@ func (x *GetRoutesResponse) GetParts() *v12.SearchPartsResponse {
 	return nil
 }
 
+func (x *GetRoutesResponse) GetCandidates() []*structpb.Struct {
+	if x != nil {
+		return x.Candidates
+	}
+	return nil
+}
+
 var File_api_travel_v1_travel_proto protoreflect.FileDescriptor
 
 const file_api_travel_v1_travel_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/travel/v1/travel.proto\x12\x11godnota.travel.v1\x1a\x18api/common/v1/trip.proto\x1a\x1bapi/provider/v1/parts.proto\x1a\x12api/ai/v1/ai.proto\"]\n" +
+	"\x1aapi/travel/v1/travel.proto\x12\x11godnota.travel.v1\x1a\x18api/common/v1/trip.proto\x1a\x1bapi/provider/v1/parts.proto\x1a\x12api/ai/v1/ai.proto\x1a\x1cgoogle/protobuf/struct.proto\"]\n" +
 	"\x0fPlanTripRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
@@ -1097,20 +1131,27 @@ const file_api_travel_v1_travel_proto_rawDesc = "" +
 	"\x13SearchRoutesRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"u\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xae\x01\n" +
 	"\x14SearchRoutesResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12>\n" +
-	"\x05parts\x18\x02 \x01(\v2(.godnota.provider.v1.SearchPartsResponseR\x05parts\"J\n" +
+	"\x05parts\x18\x02 \x01(\v2(.godnota.provider.v1.SearchPartsResponseR\x05parts\x127\n" +
+	"\n" +
+	"candidates\x18\x03 \x03(\v2\x17.google.protobuf.StructR\n" +
+	"candidates\"J\n" +
 	"\x10GetRoutesRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"r\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xab\x01\n" +
 	"\x11GetRoutesResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12>\n" +
-	"\x05parts\x18\x02 \x01(\v2(.godnota.provider.v1.SearchPartsResponseR\x05parts2\xf9\x05\n" +
-	"\rTravelService\x12S\n" +
+	"\x05parts\x18\x02 \x01(\v2(.godnota.provider.v1.SearchPartsResponseR\x05parts\x127\n" +
+	"\n" +
+	"candidates\x18\x03 \x03(\v2\x17.google.protobuf.StructR\n" +
+	"candidates2\xca\x06\n" +
+	"\rTravelService\x12O\n" +
+	"\x0fGetCapabilities\x12#.godnota.travel.v1.GetConfigRequest\x1a\x17.google.protobuf.Struct\x12S\n" +
 	"\bPlanTrip\x12\".godnota.travel.v1.PlanTripRequest\x1a#.godnota.travel.v1.PlanTripResponse\x12b\n" +
 	"\rSubmitAnswers\x12'.godnota.travel.v1.SubmitAnswersRequest\x1a(.godnota.travel.v1.SubmitAnswersResponse\x12Y\n" +
 	"\n" +
@@ -1156,6 +1197,7 @@ var file_api_travel_v1_travel_proto_goTypes = []any{
 	(*v11.TravelIdea)(nil),
 	(*v1.Answer)(nil),
 	(*v12.SearchPartsResponse)(nil),
+	(*structpb.Struct)(nil),
 }
 var file_api_travel_v1_travel_proto_depIdxs = []int32{
 	16,
@@ -1173,7 +1215,10 @@ var file_api_travel_v1_travel_proto_depIdxs = []int32{
 	16,
 	16,
 	20,
+	21,
 	20,
+	21,
+	6,
 	0,
 	2,
 	4,
@@ -1182,6 +1227,7 @@ var file_api_travel_v1_travel_proto_depIdxs = []int32{
 	10,
 	12,
 	14,
+	21,
 	1,
 	3,
 	5,
@@ -1190,10 +1236,10 @@ var file_api_travel_v1_travel_proto_depIdxs = []int32{
 	11,
 	13,
 	15,
-	24,
-	16,
-	16,
-	16,
+	27,
+	18,
+	18,
+	18,
 	0,
 }
 

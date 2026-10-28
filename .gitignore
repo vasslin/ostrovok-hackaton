@@ -2,3 +2,9 @@
 .env.*
 !.env.example
 ai-service/server
+
+.DS_Store
+/bin/
+/data/
+/reports/
+/integration-tests/out/

@@ -8,6 +8,7 @@ import "google/protobuf/struct.proto";
 import "api/provider/v1/parts.proto";
 
 service ProviderService {
+  rpc GetCapabilities(google.protobuf.Struct) returns (google.protobuf.Struct);
   rpc SearchParts(SearchPartsRequest) returns (SearchPartsResponse);
   rpc SearchTransport(SearchTransportRequest) returns (SearchTransportResponse);
   rpc SearchHotels(SearchHotelsRequest) returns (SearchHotelsResponse);

@@ -46,6 +46,7 @@ type route struct {
 }
 
 var routes = []route{
+	{pattern: "GET /api/sessions/{session_id}/capabilities", operation: "/v1/travel/capabilities", pathFields: []string{"session_id"}},
 	{pattern: "POST /api/providers/map", operation: "/v1/map/config"},
 	{pattern: "POST /api/sessions", operation: "/v1/session/create"},
 	{pattern: "GET /api/sessions/{session_id}", operation: "/v1/session/get", pathFields: []string{"session_id"}},
@@ -92,10 +93,7 @@ func HandlerWithAuth(backend Backend, store *auth.Store) http.Handler {
 				return
 			}
 			slog.Info("gateway request", "method", r.Method, "operation", spec.operation)
-			timeout := backendTimeout
-			if spec.operation == "/v1/travel/search" {
-				timeout = 30 * time.Second
-			}
+			timeout := OperationTimeout(spec.operation)
 			ctx, cancel := context.WithTimeout(r.Context(), timeout)
 			defer cancel()
 			raw, err = authorize(ctx, backend, user, spec, raw)

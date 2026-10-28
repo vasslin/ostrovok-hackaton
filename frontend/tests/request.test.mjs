@@ -108,26 +108,15 @@ test('questions stay fields and ideas are actions, without a synthetic trip', as
     assert.equal(result.actions[0].ideaId, 'sochi');
 });
 
-test('a ready config is confirmed and searched before the chat returns', async () => {
+test('a ready config is shown without confirming or searching', async () => {
     setAccessToken('token-1');
     const seen = [];
-    globalThis.fetch = async (url, options) => {
-        seen.push(`${options.method} ${url}`);
-        if (String(url).endsWith('/search'))
-            return jsonResponse({ parts: { limitations: ['synthetic demo'], errors: [] } });
-        if (String(url).endsWith('/confirm'))
-            return jsonResponse({ confirmed: true });
-        return jsonResponse({ summary: 'Можно искать', ready_for_search: true });
-    };
+    globalThis.fetch = async (url, options) => { seen.push(url); return jsonResponse({ summary: 'Можно искать', config: { request: { origin: { city: 'Москва' } } }, ready_for_search: true }); };
     const result = await api.sendMessage({ trip: { id: 'session-1' }, text: 'Москва Казань 12 декабря' });
-    assert.deepEqual(seen, [
-        'POST http://localhost:8080/api/sessions/session-1/messages',
-        'POST http://localhost:8080/api/sessions/session-1/confirm',
-        'POST http://localhost:8080/api/sessions/session-1/search'
-    ]);
+    assert.deepEqual(seen, ['http://localhost:8080/api/sessions/session-1/messages']);
     assert.equal(result.trip, null);
-    assert.match(result.message, /Можно искать/);
-    assert.match(result.message, /synthetic demo/);
+    assert.equal(result.readyForSearch, true);
+    assert.equal(result.tripConfig.origin.city, 'Москва');
 });
 
 test('answers go in one package and an idea is selected by id', async () => {
@@ -145,7 +134,7 @@ test('answers go in one package and an idea is selected by id', async () => {
     assert.deepEqual(bodies[1].body, { idea_id: 'sochi', comment: '' });
 });
 
-test('criteria replace the saved config in kopecks and then confirm the search', async () => {
+test('criteria save major-unit budget without launching a search', async () => {
     setAccessToken('token-1');
     const seen = [];
     globalThis.fetch = async (url, options) => {
@@ -161,17 +150,18 @@ test('criteria replace the saved config in kopecks and then confirm the search',
     assert.equal(patch.url, 'http://localhost:8080/api/sessions/session-1/config');
     assert.equal(patch.body.config.request.origin.city, 'Москва');
     assert.equal(patch.body.config.request.dates.return_date, '2026-12-14');
-    assert.equal(patch.body.config.request.budget.total, 15000000);
+    assert.equal(patch.body.config.request.budget.total, 150000);
     assert.deepEqual(patch.body.config.request.travelers.pets, [{ kind: 'dog' }]);
     assert.deepEqual(patch.body.config.request.transport.modes, ['train']);
-    assert.equal(seen.filter(call => call.method === 'POST').map(call => call.url).at(-1).endsWith('/search'), true);
-    assert.equal(result.trip.id, 'session-1');
-    assert.equal(result.trip.stops.length, 1);
+    assert.equal(seen.some(call => call.method === 'POST'), false);
+    assert.equal(result.trip, null);
+    assert.equal(result.tripConfig.destination.city, 'Казань');
 });
 
 test('search parts become a trip with kopeck prices, a single round-trip fare, and no invented zero', async () => {
     setAccessToken('token-1');
     globalThis.fetch = async (url) => {
+        if (url.endsWith('/config')) return jsonResponse({ config: {} });
         assert.equal(url, 'http://localhost:8080/api/sessions/session-1/routes');
         return jsonResponse({
             parts: {
@@ -211,4 +201,101 @@ test('search parts become a trip with kopeck prices, a single round-trip fare, a
     assert.ok(trip.warnings.some(warning => warning.startsWith('Сумма неполная')));
     assert.match(result.message, /демо-выдача/);
     assert.equal(trip.demo, true);
+});
+
+test('real dialogue hides internal JSON memory and preserves the adult count in route prices', async () => {
+    const config = { schema_version: '1.0', travelers: { adults: 2 }, budget: { total: 80000 } };
+    const transport = { id: 'flight', origin_city: 'Москва', destination_city: 'Сочи', departure_at: '2026-11-10T08:00:00+03:00', arrival_at: '2026-11-10T12:00:00+03:00', return_departure_at: '2026-11-17T16:00:00+03:00', return_arrival_at: '2026-11-17T20:00:00+03:00', price: { amount_minor: '500000', currency: 'RUB', scope: 'per_person_round_trip' } };
+    const hotel = { id: 'hotel', city: 'Сочи', check_in: '2026-11-10', check_out: '2026-11-17', price: { amount_minor: '3500000', currency: 'RUB', scope: 'stay_all_rooms' } };
+    const candidate = { id: 'backend-route', transport: [transport], hotel, price_status: 'estimated' };
+    globalThis.fetch = async url => {
+        if (url.endsWith('/messages')) return jsonResponse({ summary: '{"notes":["internal memory"]}', config: { request: config }, ready_for_search: true });
+        if (url.endsWith('/confirm')) return jsonResponse({ confirmed: true });
+        if (url.endsWith('/capabilities')) return jsonResponse({ hotels: { status: 'available' } });
+        if (url.endsWith('/config')) return jsonResponse({ config: { request: config } });
+        return jsonResponse({ candidates: [candidate], parts: { transport_parts: [transport], hotel_parts: [hotel] } });
+    };
+    const dialog = await api.sendMessage({ trip: { id: 'session-1' }, text: 'Двое взрослых' });
+    assert.equal(dialog.message.includes('internal memory'), false);
+    const result = await api.confirmSearch('session-1', dialog.tripConfig);
+    assert.equal(result.trip.criteria.adults, 2);
+    assert.equal(result.trip.routeId, 'backend-route');
+    assert.equal(result.trip.totals.totalMinor, 4500000);
+    globalThis.fetch = async (url, options) => {
+        assert.equal(url, 'http://localhost:8080/api/orders');
+        assert.equal(options.headers['Idempotency-Key'], 'order-key');
+        assert.deepEqual(JSON.parse(options.body), { session_id: 'session-1', route_id: 'backend-route' });
+        return jsonResponse({ order_id: 'order-1', status: 'demo_booked', mode: 'demo' });
+    };
+    const booked = await api.book(result.trip, 'order-key');
+    assert.equal(booked.booking.id, 'order-1');
+    assert.equal(booked.booking.demo, true);
+});
+
+test('booking history uses existing order endpoints and never calls the missing me/trips API', async () => {
+    const { setUserId } = await import('../dist/api.js');
+    setUserId('history-owner');
+    const local = new Map();
+    globalThis.localStorage = { getItem: key => local.get(key) || null, setItem: (key, value) => local.set(key, value), removeItem: key => local.delete(key) };
+    globalThis.fetch = async (url, options) => {
+        if (url.endsWith('/orders') && options.method === 'POST') return jsonResponse({ order_id: 'saved-order', status: 'demo_booked', mode: 'demo' });
+        assert.equal(url, 'http://localhost:8080/api/orders/saved-order');
+        return jsonResponse({ order_id: 'saved-order', status: 'demo_paid' });
+    };
+    await api.book({ id: 'saved-session', routeId: 'saved-route' }, 'history-key');
+    const history = await api.getHistory();
+    assert.equal(history.trips.length, 1);
+    assert.equal(history.trips[0].booking.status, 'demo_paid');
+    assert.equal((await api.getTrip('saved-session')).trip.routeId, 'saved-route');
+});
+
+test('hotel unavailable prevents confirmation and never changes the request silently', async () => {
+    const seen = [];
+    const config = { hotel: { needed: true } };
+    globalThis.fetch = async (url, options) => { seen.push(url); return jsonResponse({ mode: 'live', hotels: { status: 'not_configured' } }); };
+    await assert.rejects(() => api.confirmSearch('session-1', config), /только транспорт/);
+    assert.equal(config.hotel.needed, true);
+    assert.deepEqual(seen, ['http://localhost:8080/api/sessions/session-1/capabilities']);
+});
+
+test('explicit transport-only confirmation saves then confirms then searches', async () => {
+    const seen = [];
+    const config = { hotel: { needed: false } };
+    globalThis.fetch = async (url, options) => {
+        seen.push({ path: url.split('/').at(-1), method: options.method, body: options.body ? JSON.parse(options.body) : null });
+        if (url.endsWith('/capabilities')) return jsonResponse({ mode: 'live', hotels: { status: 'not_configured' } });
+        return jsonResponse({ config: { request: config }, parts: { errors: [] } });
+    };
+    await api.confirmSearch('session-1', config);
+    assert.deepEqual(seen.map(call => call.path), ['capabilities', 'config', 'confirm', 'search']);
+    assert.equal(seen[1].body.config.request.hotel.needed, false);
+});
+
+test('partial hotel failure preserves diagnostics and hides internal paths and false totals', async () => {
+    const config = { hotel: { needed: true }, travelers: { adults: 1 } };
+    const part = { id: 'train', provider: 'yandex_rasp', origin_city: 'Москва', destination_city: 'Париж', departure_at: '2026-11-04T10:00:00+03:00', arrival_at: '2026-11-05T10:00:00+01:00', price: { amount_minor: '500000', scope: 'per_person_one_way', currency: 'RUB' } };
+    globalThis.fetch = async url => {
+        if (url.endsWith('/config')) return jsonResponse({ config: { request: config } });
+        return jsonResponse({ parts: { transport_parts: [part], hotel_parts: [], errors: [{ provider: 'hotel', kind: 'hotel', code: 'missing_field', message: '/travelers/residency' }], limitations: ['route-service: internal'] } });
+    };
+    const result = await api.getRoutes('session-1');
+    assert.equal(result.trip.partial, true);
+    assert.equal(result.trip.totals.totalMinor, null);
+    assert.equal(result.trip.totals.hotelsMinor, null);
+    assert.equal(result.trip.totals.transferMinor, null);
+    assert.equal(result.trip.totals.activitiesMinor, null);
+    assert.equal(result.message.includes('/travelers/'), false);
+    assert.equal(result.message.includes('route-service'), false);
+    assert.match(result.message, /гражданство/);
+    assert.equal(result.providerIssues[0].code, 'missing_field');
+});
+
+test('restore session keeps latest questions and stored config despite read events', async () => {
+    const question = { id: 'q-date', text: 'Когда?', field: 'dates.departure_date', required: true };
+    const request = { origin: { city: 'Москва' } };
+    const turn = { kind: 'planning_turn', response: { config: { request }, questions: [question], summary: 'Нужна дата' } };
+    globalThis.fetch = async url => url.endsWith('/config') ? jsonResponse({ config: { request } }) : jsonResponse({ messages: [{ role: 'assistant', text: JSON.stringify(turn) }, { role: 'assistant', text: JSON.stringify({ kind: 'travel_response', response: { config: { request } } }) }] });
+    const result = await api.restoreSession('session-1');
+    assert.equal(result.questions[0].questionId, 'q-date');
+    assert.equal(result.tripConfig.origin.city, 'Москва');
 });
