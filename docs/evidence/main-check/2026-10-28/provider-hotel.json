@@ -1,0 +1,18 @@
+{
+  "issues": [
+    {
+      "provider": "hotels",
+      "code": "credentials_missing",
+      "message": "Configure Hotelbeds evaluation or RateHawk partner access."
+    }
+  ],
+  "limitations": [
+    "aviasales: цена из кэша, наличие и итоговую цену нужно проверить перед выбором",
+    "yandex_rasp: расписание может не содержать цену и наличие билетов",
+    "поиск отелей выполняется отдельно и требует подтверждённых дат, гражданства гостей и партнёрского доступа",
+    "досуг на пересадке ищется после получения конкретного сегмента, координат остановки и свободного времени",
+    "Wikimedia возвращает достопримечательности; афишу и наличие билетов на события этот запрос не подтверждает",
+    "Provider offers are preliminary: traveler constraints, group totals, connections and final availability must be verified before recommending or booking."
+  ],
+  "discovery": {}
+}

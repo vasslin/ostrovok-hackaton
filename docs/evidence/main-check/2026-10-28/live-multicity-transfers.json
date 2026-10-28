@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-10-28T17:31:01+03:00",
+  "mode": "live transport provider calls through local gateway; hotels disabled; connections allowed",
+  "route": [
+    "Москва",
+    "Казань",
+    "Самара",
+    "Москва"
+  ],
+  "dates": [
+    "2026-11-27",
+    "2026-11-28",
+    "2026-11-29"
+  ],
+  "transport_parts": 56,
+  "transfer_envelopes": 17,
+  "candidates": 20,
+  "candidates_with_transfers": 20,
+  "provider_errors": {},
+  "price_and_seats": "not confirmed; schedule fare may be unknown",
+  "frontend_included": false,
+  "booking_performed": false,
+  "result": "backend assembly passed for this request; one read-only sample"
+}

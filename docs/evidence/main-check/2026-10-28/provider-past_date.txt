@@ -1,0 +1,1 @@
+rpc error: code = InvalidArgument desc = invalid search: /dates/departure_date: 2026-01-01 is in the past

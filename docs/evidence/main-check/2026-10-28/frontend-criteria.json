@@ -1,0 +1,11 @@
+{
+  "origin": "Москва",
+  "destination": "Казань",
+  "startDate": "2026-11-27",
+  "nights": 2,
+  "adults": 2,
+  "childrenAges": [],
+  "budgetMinor": 4000000,
+  "currency": "RUB",
+  "pets": true
+}

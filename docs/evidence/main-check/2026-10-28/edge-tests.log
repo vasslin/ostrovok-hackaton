@@ -1,0 +1,38 @@
+=== RUN   TestRoundTripFareIsNotChargedTwice
+--- PASS: TestRoundTripFareIsNotChargedTwice (0.00s)
+=== RUN   TestUnknownAndConstraints
+=== RUN   TestUnknownAndConstraints/child_price_unknown
+=== RUN   TestUnknownAndConstraints/unknown_currency
+=== RUN   TestUnknownAndConstraints/hard_budget
+=== RUN   TestUnknownAndConstraints/invalid_hotel_dates
+=== RUN   TestUnknownAndConstraints/invalid_return
+=== RUN   TestUnknownAndConstraints/sandbox_warnings
+--- PASS: TestUnknownAndConstraints (0.00s)
+    --- PASS: TestUnknownAndConstraints/child_price_unknown (0.00s)
+    --- PASS: TestUnknownAndConstraints/unknown_currency (0.00s)
+    --- PASS: TestUnknownAndConstraints/hard_budget (0.00s)
+    --- PASS: TestUnknownAndConstraints/invalid_hotel_dates (0.00s)
+    --- PASS: TestUnknownAndConstraints/invalid_return (0.00s)
+    --- PASS: TestUnknownAndConstraints/sandbox_warnings (0.00s)
+=== RUN   TestMultiCityDemoItinerary
+--- PASS: TestMultiCityDemoItinerary (0.00s)
+=== RUN   TestTransferRules
+--- PASS: TestTransferRules (0.00s)
+=== RUN   TestProviderTransferEnvelopeSafety
+--- PASS: TestProviderTransferEnvelopeSafety (0.00s)
+PASS
+ok  	github.com/godnota/route-service/internal/routebuilder	2.821s
+=== RUN   TestDemoOrderLifecycleAndIdempotency
+--- PASS: TestDemoOrderLifecycleAndIdempotency (0.00s)
+PASS
+ok  	github.com/godnota/order-service/internal/controller/order	3.481s
+=== RUN   TestLiveItineraryMapsEveryLegWithoutInventingCodes
+--- PASS: TestLiveItineraryMapsEveryLegWithoutInventingCodes (0.01s)
+=== RUN   TestYandexTransferEnvelope
+--- PASS: TestYandexTransferEnvelope (0.00s)
+PASS
+ok  	github.com/ostrovok-hackathon-2026/godnota/providerkit	5.875s
+=== RUN   TestItineraryDateValidation
+--- PASS: TestItineraryDateValidation (0.00s)
+PASS
+ok  	github.com/ostrovok-hackathon-2026/godnota/internal/trip	4.487s
