@@ -3048,7 +3048,7 @@ select {
 
 }
 
-@media(max-width:760px) {
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
   .rail {
     width: 58px;
     height: 62px;
@@ -3950,7 +3950,7 @@ select {
   text-align: left
 }
 
-@media(max-width:760px) {
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
   .app-main {
     padding-bottom: 66px
   }
@@ -4011,4 +4011,179 @@ select {
     scroll-behavior: auto!important
   }
 
+}
+
+/* Phone layouts use the visible viewport, including keyboard and safe areas. */
+body.overlay-open {
+  overflow: hidden;
+  overscroll-behavior: none
+}
+
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
+  :root {
+    --mobile-header-height: calc(64px + env(safe-area-inset-top, 0px));
+    --mobile-nav-height: calc(64px + env(safe-area-inset-bottom, 0px))
+  }
+
+  .app-main {
+    padding-bottom: var(--mobile-nav-height)
+  }
+
+  .header {
+    height: var(--mobile-header-height);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: 70px
+  }
+
+  .rail { top: calc(10px + env(safe-area-inset-top, 0px)) }
+  .brand-mark, .profile-link { width: 44px; height: 44px }
+  .wordmark { font-size: 18px }
+  .wordmark span { font-size: 10px }
+  .mobile-bottom-nav {
+    top: calc(var(--viewport-top, 0px) + var(--app-height, 100dvh) - var(--mobile-nav-height));
+    bottom: auto;
+    right: auto;
+    width: 100vw;
+    max-width: 100%;
+    height: var(--mobile-nav-height);
+    min-height: var(--mobile-nav-height);
+    padding: 7px 15px calc(7px + env(safe-area-inset-bottom, 0px))
+  }
+  .mobile-bottom-nav button { font-size: 11px; min-height: 48px }
+
+  .workspace { padding-top: 0; min-height: 0 }
+  .mobile-switch {
+    position: sticky;
+    top: 0;
+    left: auto;
+    right: auto;
+    height: 60px;
+    padding: 8px 16px;
+    border-radius: 0;
+    gap: 4px;
+    background: var(--paper);
+    z-index: 8
+  }
+  .mobile-switch button { min-height: 44px; font-size: 14px; background: #ece7f3 }
+  .mobile-switch button.active { background: #fff }
+  .mobile-switch .icon { width: 18px; height: 18px }
+  .workspace.mobile-chat {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 60px minmax(0, 1fr);
+    height: calc(var(--app-height, 100dvh) - var(--mobile-header-height) - var(--mobile-nav-height));
+    min-height: 0;
+    overflow: hidden
+  }
+  .chat-panel { min-height: 0; height: 100%; overflow: hidden }
+  .workspace.mobile-chat .chat-panel { height: 100%; min-height: 0 }
+  .chat-heading { flex-shrink: 0; padding: 12px 16px }
+  .chat-heading h2 { font-size: 15px }
+  .chat-heading p { font-size: 12px }
+  .messages { min-height: 0; padding: 16px; -webkit-overflow-scrolling: touch }
+  .bubble { font-size: 14px; line-height: 1.65 }
+  .message-byline { font-size: 11px }
+  .chat-bottom { flex-shrink: 0; padding: 10px 16px 12px }
+  .quick-chips { overflow-x: auto; padding-bottom: 2px; scrollbar-width: none }
+  .quick-chips .suggestion { flex-shrink: 0; font-size: 12px }
+  .chat-note { font-size: 10px; margin-top: 8px }
+  .suggestion { min-height: 44px; font-size: 13px }
+  #chat-input { font-size: 16px; min-height: 48px; padding-right: 46px }
+  #chat-form { padding: 10px }
+  .send-button { width: 44px; height: 44px; right: 8px; bottom: 8px }
+  #app[data-page="planner"][data-mobile-view="chat"] .footer { display: none }
+  .keyboard-open .mobile-bottom-nav { display: none }
+  .keyboard-open .app-main { padding-bottom: 0 }
+  .keyboard-open .workspace.mobile-chat { height: calc(var(--app-height, 100dvh) - var(--mobile-header-height)) }
+  .keyboard-open .chat-heading, .keyboard-open .quick-label,
+  .keyboard-open .quick-chips, .keyboard-open .chat-note { display: none }
+
+  .trip-panel { padding: 20px 16px }
+  .trip-intro h1 { font-size: 27px; line-height: 1.22; letter-spacing: -.8px }
+  .trip-intro p { font-size: 13px; line-height: 1.6 }
+  .eyebrow { font-size: 10px }
+  .button-light.new-trip { width: 44px; height: 44px; min-width: 44px; min-height: 44px; font-size: 0; padding: 0!important }
+  .new-trip .icon { width: 18px; height: 18px }
+  .criteria-chip, .criteria-edit { min-height: 44px; font-size: 12px }
+  .route-steps { flex-wrap: wrap; font-size: 11px; gap: 8px }
+  .route-steps i { width: 12px }
+  .route-steps span { white-space: normal }
+  #route-map { height: 260px }
+  .map-controls button { width: 44px; height: 44px }
+  .map-controls .icon { width: 18px; height: 18px }
+  .map-marker { min-width: 44px; min-height: 44px; justify-content: center }
+  .marker-label { font-size: 12px; top: 39px }
+  .marker-label small { font-size: 10px }
+  .map-caption { font-size: 9px; max-width: calc(100% - 16px); text-align: right }
+  .map-legend { flex-wrap: wrap; gap: 10px; font-size: 11px }
+  .legend-action { display: none }
+  .tabs { gap: 16px }
+  .tabs button { min-height: 44px; font-size: 14px; padding-bottom: 10px }
+  .tabs button span { font-size: 11px }
+  .route-toolbar > .small-muted { display: none }
+  .stop-heading h3 { font-size: 16px }
+  .stop-heading h3 span, .stop-heading p { font-size: 12px }
+  .stop-main { padding: 14px 12px }
+  .icon-link { font-size: 12px; min-height: 44px; white-space: normal }
+  .hotel-mini { flex-wrap: wrap; gap: 10px }
+  .hotel-mini > div:nth-child(2) { min-width: 0; flex: 1 }
+  .hotel-mini h4 { font-size: 14px; overflow-wrap: anywhere }
+  .hotel-mini p, .hotel-mini-price strong { font-size: 12px }
+  .hotel-mini-price { margin-left: auto }
+  .hotel-mini-price span { font-size: 11px }
+  .hotel-kicker { font-size: 10px }
+  .activity-row, .transport-line { font-size: 12px; line-height: 1.5 }
+  .transport-line { min-height: 44px; flex-wrap: wrap }
+  .hotel-offer h4, .ticket-carrier strong { font-size: 15px; overflow-wrap: anywhere }
+  .hotel-offer p, .hotel-offer small, .ticket-offer small { font-size: 12px }
+  .hotel-offer-footer { gap: 8px; flex-wrap: wrap }
+  .hotel-offer-footer button, .primary, .button-light, .text-button { min-height: 44px; font-size: 14px }
+  .flight-times strong { font-size: 16px }
+  .offer-price strong { font-size: 17px }
+  .trip-total .small-muted, .total-detail, .demo-caption { font-size: 12px }
+  .trip-total strong { font-size: 26px }
+  .summary-route p, .summary-item p, .checkout-note { font-size: 12px }
+  .summary-item h3, .summary-item > strong { font-size: 14px }
+  .profile-card-head p, .history-body p, .draft-banner p { font-size: 13px }
+  .profile-card, .history-body, .summary-item { min-width: 0; overflow-wrap: anywhere }
+  .profile-card input { min-width: 0; font-size: 16px; min-height: 48px }
+
+  body.overlay-open { position: fixed; top: var(--overlay-scroll-top, 0); width: 100% }
+  .overlay { top: var(--viewport-top, 0); height: var(--app-height, 100dvh); bottom: auto; overflow: hidden }
+  .drawer { height: 100%; width: 100% }
+  .drawer-head { flex-shrink: 0; padding: max(12px, env(safe-area-inset-top, 0px)) 16px 12px }
+  .drawer-head h2 { font-size: 20px }
+  .drawer-body { min-height: 0; padding: 20px 16px max(20px, env(safe-area-inset-bottom, 0px)); overscroll-behavior: contain }
+  .drawer-body > .small-muted, .activity-detail p { font-size: 13px }
+  .drawer-body p { overflow-wrap: anywhere }
+  .icon-button { width: 44px; height: 44px }
+  .modal-overlay { padding: 0; align-items: flex-end }
+  .modal { width: 100%; max-width: 600px; max-height: calc(var(--app-height, 100dvh) - 12px); padding: 24px 20px max(24px, env(safe-area-inset-bottom, 0px)); border-radius: 22px 22px 0 0; overscroll-behavior: contain }
+  .modal-close { position: sticky; top: 0; float: right; margin: -8px -4px 4px 12px; z-index: 4; background: #fff }
+  .modal h2 { font-size: 25px; margin-right: 36px }
+  .modal label, .modal .muted { font-size: 14px }
+  .modal input, .modal select { min-width: 0; min-height: 48px; font-size: 16px }
+  .checkbox-label { min-height: 44px }
+  .checkbox-label input { min-height: 24px; min-width: 24px }
+  .modal-actions button { font-size: 14px; min-height: 44px }
+  #toast { bottom: calc(var(--mobile-nav-height) + 10px); font-size: 13px }
+  .keyboard-open #toast { bottom: 10px }
+}
+
+@media(max-width:480px) {
+  .form-grid { grid-template-columns: minmax(0, 1fr) }
+  .hotel-offer { grid-template-columns: minmax(0, 1fr) }
+  .hotel-offer > .hotel-art { min-height: 160px; height: 160px }
+  .hotel-offer-body { padding: 16px }
+}
+
+@media(max-width:760px) and (max-height:540px) {
+  .chat-heading, .chat-note, .quick-label { display: none }
+  .chat-bottom { padding-top: 6px; padding-bottom: 6px }
+  .quick-chips { margin-bottom: 6px }
+  #route-map { height: 220px }
+}
+
+@media(pointer:coarse) {
+  input, select, textarea { font-size: 16px }
 }

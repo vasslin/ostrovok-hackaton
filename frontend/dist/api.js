@@ -56,7 +56,7 @@ export const api = {
         const tradeoffs = [next.segments.some(s => !s.ticket.baggage) ? 'Часть билетов включает только ручную кладь.' : '', next.stops.some(s => s.hotel?.cancellation === 'Без возврата') ? 'У части отелей выбран невозвратный тариф.' : ''].filter(Boolean).join(' ');
         return {
             trip: next,
-            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} — ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
+            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} - ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
             actions: [{ label: 'На 2 дня позже', value: 'На два дня позже' }, { label: 'Найти дешевле', value: 'Хочу дешевле' }]
         };
     },

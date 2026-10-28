@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#7254e8">
-  <meta name="description" content="О!дин запрос — демонстрационный планировщик путешествий. Чат, маршрут на карте, отели и тестовое бронирование.">
-  <title>О!дин запрос — поездка начинается с идеи</title>
+  <meta name="description" content="О!дин запрос - демонстрационный планировщик путешествий. Чат, маршрут на карте, отели и тестовое бронирование.">
+  <title>О!дин запрос - поездка начинается с идеи</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='20' fill='%237254e8'/%3E%3Ctext x='11' y='46' font-size='44' font-family='Arial' font-weight='bold' fill='white'%3EО!%3C/text%3E%3C/svg%3E">
   <style>
 :root {
@@ -3057,7 +3057,7 @@ select {
 
 }
 
-@media(max-width:760px) {
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
   .rail {
     width: 58px;
     height: 62px;
@@ -3959,7 +3959,7 @@ select {
   text-align: left
 }
 
-@media(max-width:760px) {
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
   .app-main {
     padding-bottom: 66px
   }
@@ -4022,6 +4022,181 @@ select {
 
 }
 
+/* Phone layouts use the visible viewport, including keyboard and safe areas. */
+body.overlay-open {
+  overflow: hidden;
+  overscroll-behavior: none
+}
+
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
+  :root {
+    --mobile-header-height: calc(64px + env(safe-area-inset-top, 0px));
+    --mobile-nav-height: calc(64px + env(safe-area-inset-bottom, 0px))
+  }
+
+  .app-main {
+    padding-bottom: var(--mobile-nav-height)
+  }
+
+  .header {
+    height: var(--mobile-header-height);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: 70px
+  }
+
+  .rail { top: calc(10px + env(safe-area-inset-top, 0px)) }
+  .brand-mark, .profile-link { width: 44px; height: 44px }
+  .wordmark { font-size: 18px }
+  .wordmark span { font-size: 10px }
+  .mobile-bottom-nav {
+    top: calc(var(--viewport-top, 0px) + var(--app-height, 100dvh) - var(--mobile-nav-height));
+    bottom: auto;
+    right: auto;
+    width: 100vw;
+    max-width: 100%;
+    height: var(--mobile-nav-height);
+    min-height: var(--mobile-nav-height);
+    padding: 7px 15px calc(7px + env(safe-area-inset-bottom, 0px))
+  }
+  .mobile-bottom-nav button { font-size: 11px; min-height: 48px }
+
+  .workspace { padding-top: 0; min-height: 0 }
+  .mobile-switch {
+    position: sticky;
+    top: 0;
+    left: auto;
+    right: auto;
+    height: 60px;
+    padding: 8px 16px;
+    border-radius: 0;
+    gap: 4px;
+    background: var(--paper);
+    z-index: 8
+  }
+  .mobile-switch button { min-height: 44px; font-size: 14px; background: #ece7f3 }
+  .mobile-switch button.active { background: #fff }
+  .mobile-switch .icon { width: 18px; height: 18px }
+  .workspace.mobile-chat {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 60px minmax(0, 1fr);
+    height: calc(var(--app-height, 100dvh) - var(--mobile-header-height) - var(--mobile-nav-height));
+    min-height: 0;
+    overflow: hidden
+  }
+  .chat-panel { min-height: 0; height: 100%; overflow: hidden }
+  .workspace.mobile-chat .chat-panel { height: 100%; min-height: 0 }
+  .chat-heading { flex-shrink: 0; padding: 12px 16px }
+  .chat-heading h2 { font-size: 15px }
+  .chat-heading p { font-size: 12px }
+  .messages { min-height: 0; padding: 16px; -webkit-overflow-scrolling: touch }
+  .bubble { font-size: 14px; line-height: 1.65 }
+  .message-byline { font-size: 11px }
+  .chat-bottom { flex-shrink: 0; padding: 10px 16px 12px }
+  .quick-chips { overflow-x: auto; padding-bottom: 2px; scrollbar-width: none }
+  .quick-chips .suggestion { flex-shrink: 0; font-size: 12px }
+  .chat-note { font-size: 10px; margin-top: 8px }
+  .suggestion { min-height: 44px; font-size: 13px }
+  #chat-input { font-size: 16px; min-height: 48px; padding-right: 46px }
+  #chat-form { padding: 10px }
+  .send-button { width: 44px; height: 44px; right: 8px; bottom: 8px }
+  #app[data-page="planner"][data-mobile-view="chat"] .footer { display: none }
+  .keyboard-open .mobile-bottom-nav { display: none }
+  .keyboard-open .app-main { padding-bottom: 0 }
+  .keyboard-open .workspace.mobile-chat { height: calc(var(--app-height, 100dvh) - var(--mobile-header-height)) }
+  .keyboard-open .chat-heading, .keyboard-open .quick-label,
+  .keyboard-open .quick-chips, .keyboard-open .chat-note { display: none }
+
+  .trip-panel { padding: 20px 16px }
+  .trip-intro h1 { font-size: 27px; line-height: 1.22; letter-spacing: -.8px }
+  .trip-intro p { font-size: 13px; line-height: 1.6 }
+  .eyebrow { font-size: 10px }
+  .button-light.new-trip { width: 44px; height: 44px; min-width: 44px; min-height: 44px; font-size: 0; padding: 0!important }
+  .new-trip .icon { width: 18px; height: 18px }
+  .criteria-chip, .criteria-edit { min-height: 44px; font-size: 12px }
+  .route-steps { flex-wrap: wrap; font-size: 11px; gap: 8px }
+  .route-steps i { width: 12px }
+  .route-steps span { white-space: normal }
+  #route-map { height: 260px }
+  .map-controls button { width: 44px; height: 44px }
+  .map-controls .icon { width: 18px; height: 18px }
+  .map-marker { min-width: 44px; min-height: 44px; justify-content: center }
+  .marker-label { font-size: 12px; top: 39px }
+  .marker-label small { font-size: 10px }
+  .map-caption { font-size: 9px; max-width: calc(100% - 16px); text-align: right }
+  .map-legend { flex-wrap: wrap; gap: 10px; font-size: 11px }
+  .legend-action { display: none }
+  .tabs { gap: 16px }
+  .tabs button { min-height: 44px; font-size: 14px; padding-bottom: 10px }
+  .tabs button span { font-size: 11px }
+  .route-toolbar > .small-muted { display: none }
+  .stop-heading h3 { font-size: 16px }
+  .stop-heading h3 span, .stop-heading p { font-size: 12px }
+  .stop-main { padding: 14px 12px }
+  .icon-link { font-size: 12px; min-height: 44px; white-space: normal }
+  .hotel-mini { flex-wrap: wrap; gap: 10px }
+  .hotel-mini > div:nth-child(2) { min-width: 0; flex: 1 }
+  .hotel-mini h4 { font-size: 14px; overflow-wrap: anywhere }
+  .hotel-mini p, .hotel-mini-price strong { font-size: 12px }
+  .hotel-mini-price { margin-left: auto }
+  .hotel-mini-price span { font-size: 11px }
+  .hotel-kicker { font-size: 10px }
+  .activity-row, .transport-line { font-size: 12px; line-height: 1.5 }
+  .transport-line { min-height: 44px; flex-wrap: wrap }
+  .hotel-offer h4, .ticket-carrier strong { font-size: 15px; overflow-wrap: anywhere }
+  .hotel-offer p, .hotel-offer small, .ticket-offer small { font-size: 12px }
+  .hotel-offer-footer { gap: 8px; flex-wrap: wrap }
+  .hotel-offer-footer button, .primary, .button-light, .text-button { min-height: 44px; font-size: 14px }
+  .flight-times strong { font-size: 16px }
+  .offer-price strong { font-size: 17px }
+  .trip-total .small-muted, .total-detail, .demo-caption { font-size: 12px }
+  .trip-total strong { font-size: 26px }
+  .summary-route p, .summary-item p, .checkout-note { font-size: 12px }
+  .summary-item h3, .summary-item > strong { font-size: 14px }
+  .profile-card-head p, .history-body p, .draft-banner p { font-size: 13px }
+  .profile-card, .history-body, .summary-item { min-width: 0; overflow-wrap: anywhere }
+  .profile-card input { min-width: 0; font-size: 16px; min-height: 48px }
+
+  body.overlay-open { position: fixed; top: var(--overlay-scroll-top, 0); width: 100% }
+  .overlay { top: var(--viewport-top, 0); height: var(--app-height, 100dvh); bottom: auto; overflow: hidden }
+  .drawer { height: 100%; width: 100% }
+  .drawer-head { flex-shrink: 0; padding: max(12px, env(safe-area-inset-top, 0px)) 16px 12px }
+  .drawer-head h2 { font-size: 20px }
+  .drawer-body { min-height: 0; padding: 20px 16px max(20px, env(safe-area-inset-bottom, 0px)); overscroll-behavior: contain }
+  .drawer-body > .small-muted, .activity-detail p { font-size: 13px }
+  .drawer-body p { overflow-wrap: anywhere }
+  .icon-button { width: 44px; height: 44px }
+  .modal-overlay { padding: 0; align-items: flex-end }
+  .modal { width: 100%; max-width: 600px; max-height: calc(var(--app-height, 100dvh) - 12px); padding: 24px 20px max(24px, env(safe-area-inset-bottom, 0px)); border-radius: 22px 22px 0 0; overscroll-behavior: contain }
+  .modal-close { position: sticky; top: 0; float: right; margin: -8px -4px 4px 12px; z-index: 4; background: #fff }
+  .modal h2 { font-size: 25px; margin-right: 36px }
+  .modal label, .modal .muted { font-size: 14px }
+  .modal input, .modal select { min-width: 0; min-height: 48px; font-size: 16px }
+  .checkbox-label { min-height: 44px }
+  .checkbox-label input { min-height: 24px; min-width: 24px }
+  .modal-actions button { font-size: 14px; min-height: 44px }
+  #toast { bottom: calc(var(--mobile-nav-height) + 10px); font-size: 13px }
+  .keyboard-open #toast { bottom: 10px }
+}
+
+@media(max-width:480px) {
+  .form-grid { grid-template-columns: minmax(0, 1fr) }
+  .hotel-offer { grid-template-columns: minmax(0, 1fr) }
+  .hotel-offer > .hotel-art { min-height: 160px; height: 160px }
+  .hotel-offer-body { padding: 16px }
+}
+
+@media(max-width:760px) and (max-height:540px) {
+  .chat-heading, .chat-note, .quick-label { display: none }
+  .chat-bottom { padding-top: 6px; padding-bottom: 6px }
+  .quick-chips { margin-bottom: 6px }
+  #route-map { height: 220px }
+}
+
+@media(pointer:coarse) {
+  input, select, textarea { font-size: 16px }
+}
+
 </style>
 </head>
 <body>
@@ -4032,7 +4207,6 @@ select {
 <button class="{{cls}}" data-action="{{action}}" {{attrs}}>{{text}}</button>
 </template>
 
-<!-- cost-breakdown -->
 <template id="cost-breakdown-cost-breakdown">
 <dl class="cost-breakdown">
   <div>
@@ -4070,7 +4244,6 @@ select {
 </dl>
 </template>
 
-<!-- hotel-offer -->
 <template id="hotel-offer-hotel-offer">
 <article class="hotel-offer {{conditional}}">
   <div class="hotel-art {{oCover}}">
@@ -4100,33 +4273,28 @@ select {
 </article>
 </template>
 
-<!-- hotel-offer -->
 <template id="hotel-offer-p">
 <p>
   {{petIcon}} Можно с питомцем · доплата уточняется
 </p>
 </template>
 
-<!-- landscape -->
 <template id="landscape-svg">
 <svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="360" height="180" fill="#edcbb4"/><circle cx="285" cy="42" r="26" fill="#fff0d5"/><path d="M0 114 360 104V180H0" fill="#9db9c1"/><path d="M0 126h360v14H0" fill="#d3dad4"/><g fill="#bc8f79"><path d="M20 62h54v78H20zM80 85h34v55H80zM123 68h55v72h-55zM192 88h49v52h-49zM259 72h70v68h-70z"/></g><g fill="#8e6a66"><path d="m14 62 33-25 33 25M119 68l32-20 32 20M253 72l41-23 41 23"/></g><g fill="#fbe9cb"><path d="M29 79h10v16H29zM52 79h10v16H52zM133 84h12v18h-12zM156 84h12v18h-12zM270 89h12v16h-12zM304 89h12v16h-12z"/></g><path d="M177 140V41h6v99m-16-87h26m-18-15 5-14 5 14" stroke="#8b7972" fill="none" stroke-width="3"/><path d="M0 156q70-8 140 0t140 0 80 0" stroke="#c6dbdd" fill="none" stroke-width="3"/></svg>
 </template>
 
-<!-- landscape -->
 <template id="landscape-svg-2">
 <svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="360" height="180" fill="#cddfe2"/><circle cx="285" cy="38" r="24" fill="#fff1cf"/><path d="m-20 140 125-118 81 90 50-67 144 115" fill="#9aafa9"/><path d="m72 54 33-32 27 30-23-8-12 17Z" fill="#f3f4e9"/><path d="M0 138q90-60 180-3t180-8v53H0" fill="#689e8e"/><path d="M0 164q120-40 360 3v13H0" fill="#96c5b6"/><path d="M78 120h94v48H78z" fill="#f4e9d4"/><path d="m65 122 60-36 60 36" fill="#867a6a"/><path d="M91 137h15v18H91m17-18h15v18h-15m17-18h15v18h-15" fill="#a9c8c3"/></svg>
 </template>
 
-<!-- landscape -->
 <template id="landscape-svg-3">
 <svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="360" height="180" fill="#c8e1e4"/><circle cx="280" cy="40" r="25" fill="#fff1d6"/><path d="M0 83h360v97H0" fill="#79b6bf"/><path d="M0 122q110-24 192 6t168-7v59H0" fill="#9acbd0"/><path d="M0 151q90-35 173-8t187-5v42H0" fill="#f1ddbb"/><path d="M30 89h113v57H30z" fill="#f6ecdc"/><path d="M19 89h136v9H19z" fill="#ece0cb"/><path d="M44 108h18v25H44m15-25h18v25H59m15-25h18v25H74m15-25h18v25H89m15-25h18v25h-18" fill="#adc9c6"/><path d="M217 145q8-52 4-83" stroke="#8d9278" stroke-width="5" fill="none"/><path d="M221 65q-29-25-48 3 27-10 48-3m0 0q16-30 39-6-22-5-39 6m0 0q-28-5-36 23 21-20 36-23m0 0q23-7 38 16-24-10-38-16" fill="#658f7e"/></svg>
 </template>
 
-<!-- render -->
 <template id="render-app-shell">
 <div class="app-shell">
   <aside class="rail" aria-label="Основная навигация">
-    <a class="brand-mark" href="#planner" aria-label="О!дин запрос — главная">О!</a>
+    <a class="brand-mark" href="#planner" aria-label="О!дин запрос - главная">О!</a>
     <div class="rail-links">
       {{plannerButton}}{{historyButton}}{{profileButton}}
     </div>
@@ -4143,7 +4311,7 @@ select {
     </header>
     {{conditional2}}
     <footer class="footer">
-      <span>Одна идея — целое путешествие.</span><span>{{conditional3}}</span>
+      <span>Одна идея - целое путешествие.</span><span>{{conditional3}}</span>
     </footer>
     <nav class="mobile-bottom-nav" aria-label="Навигация на телефоне">
       {{plannerButton2}}{{historyButton2}}{{profileButton4}}
@@ -4153,14 +4321,12 @@ select {
 {{renderedDrawer}}{{renderedModal}}
 </template>
 
-<!-- render-budget-warning -->
 <template id="render-budget-warning-notice">
 <div class="notice warning">
   {{infoIcon}}<span>Выше бюджета на <b>{{price}}</b>. Попробуйте другой отель, даты или направление.</span>{{quickButton}}
 </div>
 </template>
 
-<!-- render-drawer -->
 <template id="render-drawer-activity-detail">
 <div class="activity-detail">
   <span>{{sunIcon}}</span>
@@ -4175,7 +4341,6 @@ select {
 </div>
 </template>
 
-<!-- render-drawer -->
 <template id="render-drawer-eyebrow">
 <span class="eyebrow">{{sCountry}} · {{conditional}}</span>
 <div class="stop-times">
@@ -4189,11 +4354,10 @@ select {
 {{conditional2}}
 </template>
 
-<!-- render-drawer -->
 <template id="render-drawer-eyebrow-2">
 <span class="eyebrow">ВЫБОР ПЕРЕЛЁТА · {{date}}</span>
 <p class="muted">
-  Цена на всех гостей. Время отправления и прибытия — местное.
+  Цена на всех гостей. Время отправления и прибытия - местное.
 </p>
 <div class="drawer-tickets">
   {{sOptions}}
@@ -4203,7 +4367,6 @@ select {
 </div>
 </template>
 
-<!-- render-drawer -->
 <template id="render-drawer-muted">
 <p class="muted">
   {{dateRange}} · {{guestsLabel}}
@@ -4217,14 +4380,12 @@ select {
 </div>
 </template>
 
-<!-- render-drawer -->
 <template id="render-drawer-notice">
 <div class="notice">
   {{infoIcon}}<span>Это {{conditional}} поездки. Проживание здесь не включено.</span>
 </div>
 </template>
 
-<!-- render-drawer -->
 <template id="render-drawer-overlay">
 <div class="overlay" data-action="close-overlay">
   <section class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
@@ -4241,7 +4402,6 @@ select {
 </div>
 </template>
 
-<!-- render-drawer -->
 <template id="render-drawer-section-label">
 <h3 class="section-label">
   Где остановимся
@@ -4265,7 +4425,6 @@ select {
 {{sActivities}}
 </template>
 
-<!-- render-history -->
 <template id="render-history-draft-banner">
 <section class="draft-banner">
   <span class="draft-icon">{{mapIcon}}</span>
@@ -4281,7 +4440,6 @@ select {
 </section>
 </template>
 
-<!-- render-history -->
 <template id="render-history-empty-state">
 <div class="empty-state history-empty">
   {{bagIcon}}
@@ -4295,7 +4453,6 @@ select {
 </div>
 </template>
 
-<!-- render-history -->
 <template id="render-history-history-card">
 <article class="history-card">
   <div class="history-art {{cover}}">
@@ -4317,14 +4474,12 @@ select {
 </article>
 </template>
 
-<!-- render-history -->
 <template id="render-history-history-grid">
 <div class="history-grid">
   {{history}}
 </div>
 </template>
 
-<!-- render-history -->
 <template id="render-history-page-content">
 <main class="page-content">
   <div class="page-title row">
@@ -4343,14 +4498,12 @@ select {
 </main>
 </template>
 
-<!-- render-hotels -->
 <template id="render-hotels-hotel-groups">
 <div class="hotel-groups">
   {{stops}}
 </div>
 </template>
 
-<!-- render-hotels -->
 <template id="render-hotels-offer-group">
 <section class="offer-group">
   <h3>
@@ -4362,7 +4515,6 @@ select {
 </section>
 </template>
 
-<!-- render-itinerary -->
 <template id="render-itinerary-hotel-mini">
 <div class="hotel-mini">
   <div class="hotel-art {{cover}}" aria-hidden="true">
@@ -4386,14 +4538,12 @@ select {
 </div>
 </template>
 
-<!-- render-itinerary -->
 <template id="render-itinerary-itinerary">
 <div class="itinerary">
   {{tStops}}
 </div>
 </template>
 
-<!-- render-itinerary -->
 <template id="render-itinerary-stop-card">
 {{conditional}}
 <article class="stop-card {{conditional2}}">
@@ -4417,12 +4567,10 @@ select {
 </article>
 </template>
 
-<!-- render-itinerary -->
 <template id="render-itinerary-transport-line">
 <button class="transport-line" data-action="segment" data-id="{{id}}"><span class="transport-icon">{{planeIcon}}</span><span>{{carrier}} · {{number}}</span><span class="transport-duration">{{duration}} · {{price}}</span>{{chevronIcon}}</button>
 </template>
 
-<!-- render-modal -->
 <template id="render-modal-eyebrow">
 <span class="eyebrow">ПОДСТРОИМ ПОД ВАС</span>
 <h2 id="modal-title">
@@ -4439,7 +4587,6 @@ select {
 </form>
 </template>
 
-<!-- render-modal -->
 <template id="render-modal-eyebrow-2">
 <span class="eyebrow">С ЧИСТОГО ЛИСТА</span>
 <h2 id="modal-title">
@@ -4453,7 +4600,6 @@ select {
 </div>
 </template>
 
-<!-- render-modal -->
 <template id="render-modal-modal-illustration">
 <div class="modal-illustration">
   {{bagIcon}}
@@ -4476,17 +4622,14 @@ select {
 {{confirmBookButton}}
 </template>
 
-<!-- render-modal -->
 <template id="render-modal-option">
 <option {{conditional}}>{{city}}</option>
 </template>
 
-<!-- render-modal -->
 <template id="render-modal-option-2">
 <option {{conditional}}>{{city}}</option>
 </template>
 
-<!-- render-modal -->
 <template id="render-modal-overlay">
 <div class="overlay modal-overlay" data-action="close-overlay">
   <section class="modal {{conditional}}" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -4498,7 +4641,6 @@ select {
 </div>
 </template>
 
-<!-- render-modal -->
 <template id="render-modal-success-icon">
 <div class="success-icon">
   {{checkIcon}}
@@ -4519,7 +4661,6 @@ select {
 </p>
 </template>
 
-<!-- render-planner -->
 <template id="render-planner-empty-state">
 <div class="empty-state">
   {{mapIcon}}
@@ -4527,20 +4668,18 @@ select {
     Начнём с вашей идеи
   </h1>
   <p>
-    Опишите поездку в чате — здесь появится маршрут.
+    Опишите поездку в чате - здесь появится маршрут.
   </p>
   {{mobileChatButton}}
 </div>
 </template>
 
-<!-- render-planner -->
 <template id="render-planner-inline-error">
 <div class="inline-error" role="alert">
   {{infoIcon}}<span>{{stateError}}</span>{{retryButton}}
 </div>
 </template>
 
-<!-- render-planner -->
 <template id="render-planner-message">
 <article class="message {{mRole}}">
   {{conditional}}
@@ -4553,32 +4692,28 @@ select {
 </article>
 </template>
 
-<!-- render-planner -->
 <template id="render-planner-message-actions">
 <div class="message-actions">
   {{mActions}}
 </div>
 </template>
 
-<!-- render-planner -->
 <template id="render-planner-message-avatar">
 <span class="message-avatar">{{sparkIcon}}</span>
 </template>
 
-<!-- render-planner -->
 <template id="render-planner-thinking">
 <div class="thinking" role="status">
   <span></span><span></span><span></span>Собираем варианты…
 </div>
 </template>
 
-<!-- render-planner -->
 <template id="render-planner-workspace">
 <main class="workspace {{conditional}}">
   <div class="mobile-switch" role="group" aria-label="Вид планировщика">
     {{mobileChatButton}}{{mobileRouteButton}}
   </div>
-  <section class="chat-panel" aria-label="Чат планирования">
+  <section class="chat-panel" id="chat-panel" aria-label="Чат планирования">
     <div class="chat-heading">
       <div class="assistant-avatar">
         {{sparkIcon}}
@@ -4612,13 +4747,12 @@ select {
       </p>
     </div>
   </section>
-  <section class="trip-panel" aria-label="План поездки">
+  <section class="trip-panel" id="trip-panel" aria-label="План поездки">
     {{conditional8}}
   </section>
 </main>
 </template>
 
-<!-- render-profile -->
 <template id="render-profile-page-content">
 <main class="page-content">
   <div class="page-title">
@@ -4627,7 +4761,7 @@ select {
       Личный кабинет
     </h1>
     <p>
-      Немного о вас — для следующих путешествий.
+      Немного о вас - для следующих путешествий.
     </p>
   </div>
   <div class="profile-grid">
@@ -4658,7 +4792,7 @@ select {
         Воспоминания начинаются с планов.
       </h2>
       <p>
-        Сохранённые поездки и тестовые бронирования — в одном месте.
+        Сохранённые поездки и тестовые бронирования - в одном месте.
       </p>
       {{historyButton}}
     </aside>
@@ -4666,41 +4800,34 @@ select {
 </main>
 </template>
 
-<!-- render -->
 <template id="render-span">
 {{userIcon}}<span>{{name}}</span>
 </template>
 
-<!-- render -->
 <template id="render-span-2">
 {{sparkIcon}}<span>Спланировать</span>
 </template>
 
-<!-- render -->
 <template id="render-span-3">
 {{bagIcon}}<span>Мои поездки</span>
 </template>
 
-<!-- render -->
 <template id="render-span-4">
 {{userIcon}}<span>Профиль</span>
 </template>
 
-<!-- render-summary -->
 <template id="render-summary-booking-number">
 <div class="booking-number">
   Заказ <b>{{id}}</b>
 </div>
 </template>
 
-<!-- render-summary -->
 <template id="render-summary-notice">
 <div class="notice">
   {{infoIcon}}<span>{{w}}</span>
 </div>
 </template>
 
-<!-- render-summary -->
 <template id="render-summary-page-content">
 <main class="page-content">
   <div class="empty-state">
@@ -4712,7 +4839,6 @@ select {
 </main>
 </template>
 
-<!-- render-summary -->
 <template id="render-summary-page-content-2">
 <main class="page-content summary-page">
   <div class="page-breadcrumb">
@@ -4724,7 +4850,7 @@ select {
       Ваша поездка сложилась.
     </h1>
     <p>
-      Проверьте детали. До нового приключения — одно подтверждение.
+      Проверьте детали. До нового приключения - одно подтверждение.
     </p>
   </div>
   <div class="summary-grid">
@@ -4794,7 +4920,6 @@ select {
 </main>
 </template>
 
-<!-- render-summary -->
 <template id="render-summary-summary-item">
 <div class="summary-item">
   {{planeIcon}}
@@ -4803,14 +4928,13 @@ select {
       {{sFrom}} → {{sTo}}
     </h3>
     <p>
-      {{date}}, {{localTime}} — {{localTime2}} · {{carrier}}
+      {{date}}, {{localTime}} - {{localTime2}} · {{carrier}}
     </p>
   </div>
   <strong>{{price}}</strong>
 </div>
 </template>
 
-<!-- render-summary -->
 <template id="render-summary-summary-item-2">
 <div class="summary-item">
   {{hotelIcon}}
@@ -4826,7 +4950,6 @@ select {
 </div>
 </template>
 
-<!-- render-tickets -->
 <template id="render-tickets-offer-group">
 <section class="offer-group">
   <h3>
@@ -4836,31 +4959,26 @@ select {
 </section>
 </template>
 
-<!-- render-tickets -->
 <template id="render-tickets-offer-groups">
 <div class="offer-groups">
   {{segments}}
 </div>
 </template>
 
-<!-- render-trip -->
 <template id="render-trip-notice">
 <div class="notice">
   {{infoIcon}}<span>{{w}}</span>
 </div>
 </template>
 
-<!-- render-trip -->
 <template id="render-trip-span">
 <span>{{length}}</span>
 </template>
 
-<!-- render-trip -->
 <template id="render-trip-span-2">
 <span>{{length}}</span>
 </template>
 
-<!-- render-trip -->
 <template id="render-trip-trip-intro">
 <div class="trip-intro">
   <div>
@@ -4906,17 +5024,15 @@ select {
   </div>
 </div>
 <p class="demo-caption">
-  {{infoIcon}} Все предложения — примеры, а не действующие тарифы. Стоимость указана на всю группу.
+  {{infoIcon}} Все предложения - примеры, а не действующие тарифы. Стоимость указана на всю группу.
 </p>
 </template>
 
-<!-- ticket-offer -->
 <template id="ticket-offer-ticket-offer">
-<button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>—</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
+<button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>-</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
 </template>
 </script>
-  <script>// For backend integration, use mode: 'api' and your HTTP gateway URL.
-// This is public frontend configuration. Never put provider/LLM secrets here.
+  <script>
 window.TRAVEL_CONFIG = { mode: 'demo', apiBaseUrl: '/api' };
 </script>
   <script type="module">
@@ -4971,7 +5087,7 @@ const cities = {
     'Санкт-Петербург': { lat: 59.9343, lng: 30.3351, timezone: '+03:00', country: 'Россия' }
 };
 const destinationInfo = {
-    'Анталья': { country: 'Турция', title: 'Два города. Одно маленькое приключение.', subtitle: 'Улицы Стамбула, а потом — море и спокойные дни в Анталье.', tags: ['Море и город', 'Для семьи', '7 ночей'], cover: 'sea', hotel: ['Lara Garden Residence', 'Old Town Family Hotel', 'Azure Coast Resort'], activity: ['Прогулка по старому городу', 'Семейный день у моря'], daily: 7900, flight: 12900 },
+    'Анталья': { country: 'Турция', title: 'Два города. Одно маленькое приключение.', subtitle: 'Улицы Стамбула, а потом - море и спокойные дни в Анталье.', tags: ['Море и город', 'Для семьи', '7 ночей'], cover: 'sea', hotel: ['Lara Garden Residence', 'Old Town Family Hotel', 'Azure Coast Resort'], activity: ['Прогулка по старому городу', 'Семейный день у моря'], daily: 7900, flight: 12900 },
     'Сочи': { country: 'Россия', title: 'К морю, ближе к горам.', subtitle: 'Неспешные прогулки по набережной и день среди горных вершин.', tags: ['Без пересадок', 'Море и горы', 'Для семьи'], cover: 'mountain', hotel: ['Зелёный мыс', 'Морской квартал', 'Гранд Парк Сочи'], activity: ['Прогулка по дендрарию', 'День в горах'], daily: 5200, flight: 8200 },
     'Тбилиси': { country: 'Грузия', title: 'Город, который умеет встречать.', subtitle: 'Старые улочки, уютные дворики и новые любимые места.', tags: ['Городские прогулки', 'Гастрономия', 'Культура'], cover: 'city', hotel: ['Courtyard Stories', 'Old Tbilisi Rooms', 'Terrace Boutique'], activity: ['Прогулка по старому Тбилиси', 'Музей и канатная дорога'], daily: 5600, flight: 11900 },
     'Калининград': { country: 'Россия', title: 'Балтика. Дюны. Время для себя.', subtitle: 'Прогулки у воды и короткие поездки к песчаным берегам.', tags: ['Короткий перелёт', 'Балтийское море', 'Прогулки'], cover: 'sea', hotel: ['Балтийские истории', 'Дом у реки', 'Amber Residence'], activity: ['Прогулка по острову Канта', 'День на Балтийском побережье'], daily: 4600, flight: 6900 }
@@ -4998,7 +5114,7 @@ function validateCriteria(c) {
     if (!Number.isInteger(c.adults) || c.adults < 1 || c.adults > 6)
         throw new Error('Выберите от 1 до 6 взрослых.');
     if (!Array.isArray(c.childrenAges) || c.childrenAges.length > 4 || c.childrenAges.some(a => !Number.isInteger(a) || a < 0 || a > 17))
-        throw new Error('Укажите до 4 детей, возраст — от 0 до 17 лет.');
+        throw new Error('Укажите до 4 детей, возраст - от 0 до 17 лет.');
     if (!Number.isFinite(c.budgetMinor) || c.budgetMinor <= 0)
         throw new Error('Бюджет должен быть больше нуля.');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(c.startDate) || !Number.isFinite(Date.parse(c.startDate)) || new Date(`${c.startDate}T12:00:00Z`).toISOString().slice(0, 10) !== c.startDate)
@@ -5055,7 +5171,6 @@ function createTrip(criteria, selected = {}, id = 'trip-demo') {
         })).filter(t => !c.pets || t.petsAllowed);
         const segment = { id: `segment-${i}`, fromStopId: from.id, toStopId: to.id, from: from.city, to: to.city, options, ticket: null };
         segment.ticket = options.find(t => t.id === selected[segment.id]) || options[0];
-        // Times at stops reflect the selected transport, not a separate hand-written schedule.
         to.arrival = segment.ticket.arrival;
         from.departure = segment.ticket.departure;
         segments.push(segment);
@@ -5221,7 +5336,7 @@ const api = {
         const tradeoffs = [next.segments.some(s => !s.ticket.baggage) ? 'Часть билетов включает только ручную кладь.' : '', next.stops.some(s => s.hotel?.cancellation === 'Без возврата') ? 'У части отелей выбран невозвратный тариф.' : ''].filter(Boolean).join(' ');
         return {
             trip: next,
-            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} — ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
+            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} - ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
             actions: [{ label: 'На 2 дня позже', value: 'На два дня позже' }, { label: 'Найти дешевле', value: 'Хочу дешевле' }]
         };
     },
@@ -5295,7 +5410,6 @@ function saveDemoBooking(booking, trip) {
 
 
 // templates.js
-/** HTML templates shared by the web app and the standalone demo. */
 const templates = new Map();
 
 async function loadViews() {
@@ -5311,7 +5425,6 @@ async function loadViews() {
   }
 
   for (const [, name, html] of source.matchAll(/<template id="([\w-]+)">([\s\S]*?)<\/template>/g)) {
-    // Trim only the newlines added around each template by the formatter.
     templates.set(name, html.replace(/^\n/, '').replace(/\n$/, ''));
   }
 }
@@ -5332,7 +5445,6 @@ function project(lng, lat, zoom) {
     return { x: (lng + 180) / 360 * size, y: (.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * size };
 }
 function escape(text) { return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-// Simplified geographic coastlines, always available without map-tile networking.
 const land = [
     [[-11, 36], [-9, 43], [-5, 44], [-4, 48], [-1, 49], [2, 51], [6, 54], [8, 57], [12, 57], [13, 54], [19, 55], [23, 60], [27, 66], [31, 70], [43, 69], [60, 70], [65, 55], [55, 47], [47, 46], [44, 42], [40, 41], [41, 39], [36, 37], [29, 36], [27, 40], [24, 41], [24, 38], [22, 36], [20, 40], [18, 42], [16, 41], [17, 39], [15, 38], [12, 42], [10, 44], [7, 44], [5, 43], [3, 42], [0, 40], [-1, 37]],
     [[26, 41], [29, 42], [34, 42], [36, 41], [40, 41], [42, 42], [46, 42], [50, 39], [48, 36], [44, 35], [41, 36], [36, 36], [35, 35], [33, 36], [30, 36], [28, 37], [27, 39]],
@@ -5378,6 +5490,8 @@ class RouteMap {
             }
         });
         this.el.addEventListener('pointerdown', e => {
+            // One finger scrolls the page; two fingers explicitly manipulate the map.
+            if (e.pointerType === 'touch') return;
             if (e.target.closest('button,a'))
                 return;
             this.start = { x: e.clientX, y: e.clientY, ox: this.offset.x, oy: this.offset.y };
@@ -5394,6 +5508,35 @@ class RouteMap {
         this.up = () => { this.dragging = false; };
         window.addEventListener('pointermove', this.move);
         window.addEventListener('pointerup', this.up);
+        window.addEventListener('pointercancel', this.up);
+        this.touchStart = e => {
+            if (e.touches.length !== 2) return;
+            e.preventDefault();
+            const [a, b] = e.touches;
+            const rect = this.el.getBoundingClientRect();
+            this.gesture = { distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), zoom: this.zoom, offset: { ...this.offset }, x: (a.clientX + b.clientX) / 2 - rect.left - rect.width / 2, y: (a.clientY + b.clientY) / 2 - rect.top - rect.height / 2 };
+            this.autoFit = false;
+            this.moved = true;
+        };
+        this.touchMove = e => {
+            if (!this.gesture || e.touches.length !== 2) return;
+            e.preventDefault();
+            const [a, b] = e.touches, start = this.gesture;
+            const rect = this.el.getBoundingClientRect();
+            const scale = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / Math.max(1, start.distance);
+            this.zoom = Math.max(2, Math.min(9, start.zoom + Math.log2(Math.max(.1, scale))));
+            const factor = 2 ** (this.zoom - start.zoom);
+            this.offset = { x: (start.offset.x - start.x) * factor + (a.clientX + b.clientX) / 2 - rect.left - rect.width / 2, y: (start.offset.y - start.y) * factor + (a.clientY + b.clientY) / 2 - rect.top - rect.height / 2 };
+            this.draw();
+        };
+        this.touchEnd = e => {
+            if (e.touches.length < 2) this.gesture = null;
+            if (!e.touches.length) this.moved = false;
+        };
+        this.el.addEventListener('touchstart', this.touchStart, { passive: false });
+        this.el.addEventListener('touchmove', this.touchMove, { passive: false });
+        this.el.addEventListener('touchend', this.touchEnd);
+        this.el.addEventListener('touchcancel', this.touchEnd);
         this.observer = new ResizeObserver(() => this.draw());
         this.observer.observe(element);
         geographyReady.then(() => this.draw());
@@ -5430,33 +5573,65 @@ class RouteMap {
         const path = coords => coords.map(([lng, lat], i) => { const p = point(lng, lat); return `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(' ') + 'Z';
         const dots = points.map(s => ({ ...s, ...point(s.lng, s.lat) }));
         const unique = dots.filter((s, i) => dots.findIndex(a => a.city === s.city) === i);
-        const lines = this.trip.segments.map((s, i) => { const a = dots.find(d => d.id === s.fromStopId), b = dots.find(d => d.id === s.toStopId); const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} — ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
+        const lines = this.trip.segments.map((s, i) => { const a = dots.find(d => d.id === s.fromStopId), b = dots.find(d => d.id === s.toStopId); const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} - ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
         const mapLand = countries ? countries.map(feature => {
             const polygons = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry.type === 'MultiPolygon' ? feature.geometry.coordinates : [];
             return polygons.map(rings => `<path d="${rings.map(path).join(' ')}" fill="#fafbf7" stroke="#d5dfd8" stroke-width=".8" fill-rule="evenodd"/>`).join('');
         }).join('') : land.map(c => `<path d="${path(c)}" fill="#fafbf7" stroke="#d5dfd8" stroke-width="1.3"/>`).join('');
-        this.el.innerHTML = `<svg class="geographic-map" viewBox="0 0 ${w} ${h}" aria-label="Географическая карта маршрута" role="img"><defs><pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#dce6e9" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="#e8f0f3"/><rect width="100%" height="100%" fill="url(#map-grid)"/>${mapLand}${seas.map(l => { const p = point(l.lng, l.lat); return `<text class="sea-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${labels.map(l => { const p = point(l.lng, l.lat); return `<text class="country-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${lines}</svg><div class="map-markers">${unique.map((s, i) => `<button class="map-marker ${s.id === this.selectedStop ? 'active' : ''}" style="left:${s.x}px;top:${s.y}px" data-map-stop="${s.id}" aria-label="${escape(s.city)}, подробности остановки"><span class="marker-dot">${i === 0 ? '<span class="home-dot"></span>' : i}</span><span class="marker-label">${escape(s.city)}${s.nights ? `<small>${s.nights} ноч.</small>` : ''}</span></button>`).join('')}</div><div class="map-top-badge">${icon('map')} Маршрут на карте <span>· ${unique.length} города</span></div><div class="map-controls"><button data-map-control="in" aria-label="Приблизить карту">${icon('plus')}</button><button data-map-control="out" aria-label="Отдалить карту">${icon('minus')}</button><button data-map-control="fit" aria-label="Показать весь маршрут">${icon('refresh')}</button></div><div class="map-caption">${countries ? '© Natural Earth · ' : ''}Линии — связи городов, не траектории рейсов</div>`;
+        this.el.innerHTML = `<svg class="geographic-map" viewBox="0 0 ${w} ${h}" aria-label="Географическая карта маршрута" role="img"><defs><pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#dce6e9" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="#e8f0f3"/><rect width="100%" height="100%" fill="url(#map-grid)"/>${mapLand}${seas.map(l => { const p = point(l.lng, l.lat); return `<text class="sea-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${labels.map(l => { const p = point(l.lng, l.lat); return `<text class="country-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${lines}</svg><div class="map-markers">${unique.map((s, i) => `<button class="map-marker ${s.id === this.selectedStop ? 'active' : ''}" style="left:${s.x}px;top:${s.y}px" data-map-stop="${s.id}" aria-label="${escape(s.city)}, подробности остановки"><span class="marker-dot">${i === 0 ? '<span class="home-dot"></span>' : i}</span><span class="marker-label">${escape(s.city)}${s.nights ? `<small>${s.nights} ноч.</small>` : ''}</span></button>`).join('')}</div><div class="map-top-badge">${icon('map')} Маршрут на карте <span>· ${unique.length} города</span></div><div class="map-controls"><button data-map-control="in" aria-label="Приблизить карту">${icon('plus')}</button><button data-map-control="out" aria-label="Отдалить карту">${icon('minus')}</button><button data-map-control="fit" aria-label="Показать весь маршрут">${icon('refresh')}</button></div><div class="map-caption">${countries ? '© Natural Earth · ' : ''}Линии - связи городов, не траектории рейсов</div>`;
         this.el.querySelectorAll('.route-hit').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             this.onSegment(el.dataset.mapSegment);
         } }));
     }
-    destroy() { this.observer.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); }
+    destroy() { this.observer.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); window.removeEventListener('pointercancel', this.up); this.el.removeEventListener('touchstart', this.touchStart); this.el.removeEventListener('touchmove', this.touchMove); this.el.removeEventListener('touchend', this.touchEnd); this.el.removeEventListener('touchcancel', this.touchEnd); }
+}
+
+
+// mobile.js
+// Keep chat and sheets inside the visible viewport when a mobile keyboard opens.
+function setupMobileViewport() {
+    const root = document.documentElement;
+    const viewport = window.visualViewport;
+    let width = window.innerWidth;
+    let referenceHeight = window.innerHeight;
+    let frame;
+    const update = () => {
+        const height = viewport?.height || window.innerHeight;
+        if (Math.abs(window.innerWidth - width) > 50) {
+            width = window.innerWidth;
+            referenceHeight = window.innerHeight;
+        }
+        referenceHeight = Math.max(referenceHeight, window.innerHeight, height);
+        const editing = document.activeElement?.matches('textarea, input:not([type="checkbox"]):not([type="radio"]), select');
+        const keyboard = window.matchMedia('(max-width: 760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse)').matches && editing && height < referenceHeight * .78;
+        root.style.setProperty('--app-height', `${Math.round(height)}px`);
+        root.style.setProperty('--viewport-top', `${Math.round(viewport?.offsetTop || 0)}px`);
+        root.classList.toggle('keyboard-open', Boolean(keyboard));
+    };
+    const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
+    window.addEventListener('resize', schedule);
+    viewport?.addEventListener('resize', schedule);
+    viewport?.addEventListener('scroll', schedule);
+    document.addEventListener('focusin', schedule);
+    document.addEventListener('focusout', schedule);
+    update();
 }
 
 
 // app.js
+setupMobileViewport();
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const app = $('#app');
-const starterMessage = { role: 'assistant', text: 'Привет! Куда хочется отправиться? Можно начать с идеи: «К морю с ребёнком, до 150 тысяч». Справа — пример: из Москвы, 10 ноября, на 7 ночей, 2 взрослых и ребёнок 7 лет. Все цены и варианты демонстрационные.', actions: [{ label: 'К морю с ребёнком', value: 'К морю с ребёнком до 150 тысяч' }, { label: 'В Сочи до 100 тысяч', value: 'В Сочи до 100 тысяч' }] };
+const starterMessage = { role: 'assistant', text: 'Привет! Куда хочется отправиться? Можно начать с идеи: «К морю с ребёнком, до 150 тысяч». Пример маршрута: из Москвы, 10 ноября, на 7 ночей, 2 взрослых и ребёнок 7 лет. Все цены и варианты демонстрационные.', actions: [{ label: 'К морю с ребёнком', value: 'К морю с ребёнком до 150 тысяч' }, { label: 'В Сочи до 100 тысяч', value: 'В Сочи до 100 тысяч' }] };
 let initialTrip = isDemo ? createTrip(DEFAULT_CRITERIA) : null;
 const persisted = isDemo ? readStorage('session', null) : null;
 if (persisted?.trip && Array.isArray(persisted.trip.stops) && Array.isArray(persisted.trip.segments)) {
     try {
         initialTrip = persisted.trip;
     }
-    catch { /* Keep a working sample when browser data is invalid. */ }
+    catch { }
 }
 const state = {
     page: 'planner', tab: 'overview', trip: initialTrip,
@@ -5465,7 +5640,17 @@ const state = {
     busy: false, bookingBusy: false, mobileView: 'route', drawer: null, modal: null,
     booking: persisted?.booking || null, error: null, draftText: '', profileBusy: false
 };
-let map, lastFocus, toastTimer;
+let map, lastFocus, toastTimer, overlayOpen = false, overlayScroll = 0, overlayPage;
+function rememberFocus(element) {
+    const attribute = ['data-action', 'data-map-stop', 'data-map-segment'].find(name => element?.hasAttribute(name));
+    if (!attribute) { lastFocus = null; return; }
+    const selector = `[${attribute}="${CSS.escape(element.getAttribute(attribute))}"]`;
+    lastFocus = { selector, index: [...document.querySelectorAll(selector)].indexOf(element) };
+}
+function restoreFocus() {
+    if (!lastFocus) return;
+    document.querySelectorAll(lastFocus.selector)[Math.max(0, lastFocus.index)]?.focus({ preventScroll: true });
+}
 const price = amount => money(amount, state.trip?.totals.currency || 'RUB');
 const button = (text, action, cls = '', attrs = '') => view('button-button', {
     cls: cls,
@@ -5477,8 +5662,19 @@ function notify(text) { $('#toast').textContent = text; $('#toast').classList.ad
 function persist() { if (isDemo && !writeStorage('session', { trip: state.trip, messages: state.messages.slice(-60), booking: state.booking }))
     notify('Память браузера недоступна: изменения сохранятся только до закрытия страницы.'); }
 function draftTrip() { return state.trip?.status === 'booked' ? { ...state.trip, id: `trip-${crypto.randomUUID()}`, status: 'draft' } : state.trip; }
-function formatRange(trip = state.trip) { return trip ? `${dateLabel(trip.startDate)} — ${dateLabel(trip.endDate)}` : 'Даты поездки'; }
+function formatRange(trip = state.trip) { return trip ? `${dateLabel(trip.startDate)} - ${dateLabel(trip.endDate)}` : 'Даты поездки'; }
 function render() {
+    app.dataset.page = state.page;
+    app.dataset.mobileView = state.mobileView;
+    const nextOverlay = Boolean(state.modal || state.drawer);
+    if (nextOverlay && !overlayOpen) {
+        overlayScroll = window.scrollY;
+        overlayPage = state.page;
+        document.body.style.setProperty('--overlay-scroll-top', `-${overlayScroll}px`);
+    }
+    document.body.classList.toggle('overlay-open', nextOverlay);
+    const restoreScroll = overlayOpen && !nextOverlay && overlayPage === state.page;
+    overlayOpen = nextOverlay;
     map?.destroy();
     map = null;
     const planner = state.page === 'planner';
@@ -5506,6 +5702,8 @@ function render() {
         renderedDrawer: renderDrawer(),
         renderedModal: renderModal()
     });
+    $('.app-shell').inert = nextOverlay;
+    if (restoreScroll) window.scrollTo({ top: overlayScroll, behavior: 'instant' });
     if (planner && state.trip) {
         map = new RouteMap($('#route-map'), { onStop: id => openDrawer('stop', id), onSegment: id => openDrawer('segment', id) });
         map.update(state.trip, state.drawer?.type === 'stop' ? state.drawer.id : null);
@@ -5521,8 +5719,8 @@ function render() {
 function renderPlanner() {
     return view('render-planner-workspace', {
         conditional: state.mobileView === 'chat' ? 'mobile-chat' : '',
-        mobileChatButton: button(`${icon('chat')} Чат`, 'mobile-chat', state.mobileView === 'chat' ? 'active' : ''),
-        mobileRouteButton: button(`${icon('map')} Маршрут`, 'mobile-route', state.mobileView === 'route' ? 'active' : ''),
+        mobileChatButton: button(`${icon('chat')} Чат`, 'mobile-chat', state.mobileView === 'chat' ? 'active' : '', `aria-pressed="${state.mobileView === 'chat'}" aria-controls="chat-panel"`),
+        mobileRouteButton: button(`${icon('map')} Маршрут`, 'mobile-route', state.mobileView === 'route' ? 'active' : '', `aria-pressed="${state.mobileView === 'route'}" aria-controls="trip-panel"`),
         sparkIcon: icon('spark'),
         conditional2: isDemo ? 'Демо-помощник · готов к идеям' : 'Помощник по путешествиям',
         stateMessages: state.messages.map((m, i) => view('render-planner-message', {
@@ -5562,7 +5760,7 @@ function renderTrip() {
     return view('render-trip-trip-intro', {
         tTitle: esc(t.title),
         tSubtitle: esc(t.subtitle),
-        newTripButton: button(icon('plus') + ' Новая поездка', 'new-trip', 'button-light new-trip'),
+        newTripButton: button(icon('plus') + ' Новая поездка', 'new-trip', 'button-light new-trip', 'aria-label="Начать новую поездку" title="Начать новую поездку"'),
         editCriteriaButton: button(`${icon('calendar')} ${formatRange()}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton2: button(`${icon('user')} ${guestsLabel(c)}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton3: button(`${icon('wallet')} до ${price(c.budgetMinor)}`, 'edit-criteria', 'criteria-chip'),
@@ -5612,7 +5810,7 @@ function renderItinerary() { const t = state.trip; return view('render-itinerary
         conditional4: i === 0 ? icon('pin') : i === t.stops.length - 1 ? icon('check') : i,
         sCity: esc(s.city),
         sCountry: esc(s.country),
-        conditional5: s.nights ? `${dateLabel(s.arrival)} — ${dateLabel(s.departure)} · ${s.nights} ноч.` : i === 0 ? `Отправление ${dateLabel(s.departure)}, ${localTime(s.departure)}` : `Возвращение ${dateLabel(s.arrival)}, ${localTime(s.arrival)}`,
+        conditional5: s.nights ? `${dateLabel(s.arrival)} - ${dateLabel(s.departure)} · ${s.nights} ноч.` : i === 0 ? `Отправление ${dateLabel(s.departure)}, ${localTime(s.departure)}` : `Возвращение ${dateLabel(s.arrival)}, ${localTime(s.arrival)}`,
         stopButton: button(s.nights ? 'Подробнее ' + icon('chevron') : icon('chevron'), 'stop', 'icon-link', `data-id="${s.id}" aria-label="Подробнее: ${esc(s.city)}"`),
         conditional6: s.hotel ? view('render-itinerary-hotel-mini', {
             cover: s.hotel.cover,
@@ -5791,7 +5989,7 @@ function renderHistory() { const history = state.history; return view('render-hi
         plannerButton: button('Составить поездку', 'planner', 'primary')
     })
 }); }
-function openDrawer(type, id) { lastFocus = document.activeElement; state.drawer = { type, id }; render(); }
+function openDrawer(type, id) { rememberFocus(document.activeElement); state.drawer = { type, id }; render(); }
 function renderDrawer() {
     if (!state.drawer || !state.trip)
         return '';
@@ -5973,7 +6171,7 @@ catch (e) {
 async function navigate(page) { state.page = page; state.drawer = null; state.modal = null; state.error = null; if (page === 'history')
     await loadHistory(); render(); window.scrollTo({ top: 0, behavior: 'instant' }); }
 function closeOverlay() { if (state.bookingBusy)
-    return; state.drawer = null; state.modal = null; render(); lastFocus?.focus?.(); }
+    return; state.drawer = null; state.modal = null; render(); restoreFocus(); }
 app.addEventListener('click', async (e) => {
     const target = e.target.closest('[data-action]');
     if (!target || target.disabled)
@@ -5996,6 +6194,7 @@ app.addEventListener('click', async (e) => {
     if (action === 'mobile-chat' || action === 'mobile-route') {
         state.mobileView = action === 'mobile-chat' ? 'chat' : 'route';
         render();
+        window.scrollTo({ top: 0, behavior: 'instant' });
     }
     if (action === 'quick') {
         await send(target.dataset.text);
@@ -6010,12 +6209,12 @@ app.addEventListener('click', async (e) => {
         await send(state.lastRequest.text, state.lastRequest.criteria);
     }
     if (action === 'edit-criteria') {
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'criteria';
         render();
     }
     if (action === 'new-trip') {
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'new-trip';
         render();
     }
@@ -6055,7 +6254,7 @@ app.addEventListener('click', async (e) => {
             notify('Дождитесь обновления поездки.');
             return;
         }
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'booking';
         render();
     }

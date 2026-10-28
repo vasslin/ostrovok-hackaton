@@ -53,6 +53,8 @@ export class RouteMap {
             }
         });
         this.el.addEventListener('pointerdown', e => {
+            // One finger scrolls the page; two fingers explicitly manipulate the map.
+            if (e.pointerType === 'touch') return;
             if (e.target.closest('button,a'))
                 return;
             this.start = { x: e.clientX, y: e.clientY, ox: this.offset.x, oy: this.offset.y };
@@ -69,6 +71,35 @@ export class RouteMap {
         this.up = () => { this.dragging = false; };
         window.addEventListener('pointermove', this.move);
         window.addEventListener('pointerup', this.up);
+        window.addEventListener('pointercancel', this.up);
+        this.touchStart = e => {
+            if (e.touches.length !== 2) return;
+            e.preventDefault();
+            const [a, b] = e.touches;
+            const rect = this.el.getBoundingClientRect();
+            this.gesture = { distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), zoom: this.zoom, offset: { ...this.offset }, x: (a.clientX + b.clientX) / 2 - rect.left - rect.width / 2, y: (a.clientY + b.clientY) / 2 - rect.top - rect.height / 2 };
+            this.autoFit = false;
+            this.moved = true;
+        };
+        this.touchMove = e => {
+            if (!this.gesture || e.touches.length !== 2) return;
+            e.preventDefault();
+            const [a, b] = e.touches, start = this.gesture;
+            const rect = this.el.getBoundingClientRect();
+            const scale = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / Math.max(1, start.distance);
+            this.zoom = Math.max(2, Math.min(9, start.zoom + Math.log2(Math.max(.1, scale))));
+            const factor = 2 ** (this.zoom - start.zoom);
+            this.offset = { x: (start.offset.x - start.x) * factor + (a.clientX + b.clientX) / 2 - rect.left - rect.width / 2, y: (start.offset.y - start.y) * factor + (a.clientY + b.clientY) / 2 - rect.top - rect.height / 2 };
+            this.draw();
+        };
+        this.touchEnd = e => {
+            if (e.touches.length < 2) this.gesture = null;
+            if (!e.touches.length) this.moved = false;
+        };
+        this.el.addEventListener('touchstart', this.touchStart, { passive: false });
+        this.el.addEventListener('touchmove', this.touchMove, { passive: false });
+        this.el.addEventListener('touchend', this.touchEnd);
+        this.el.addEventListener('touchcancel', this.touchEnd);
         this.observer = new ResizeObserver(() => this.draw());
         this.observer.observe(element);
         geographyReady.then(() => this.draw());
@@ -105,16 +136,16 @@ export class RouteMap {
         const path = coords => coords.map(([lng, lat], i) => { const p = point(lng, lat); return `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(' ') + 'Z';
         const dots = points.map(s => ({ ...s, ...point(s.lng, s.lat) }));
         const unique = dots.filter((s, i) => dots.findIndex(a => a.city === s.city) === i);
-        const lines = this.trip.segments.map((s, i) => { const a = dots.find(d => d.id === s.fromStopId), b = dots.find(d => d.id === s.toStopId); const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} — ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
+        const lines = this.trip.segments.map((s, i) => { const a = dots.find(d => d.id === s.fromStopId), b = dots.find(d => d.id === s.toStopId); const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} - ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
         const mapLand = countries ? countries.map(feature => {
             const polygons = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry.type === 'MultiPolygon' ? feature.geometry.coordinates : [];
             return polygons.map(rings => `<path d="${rings.map(path).join(' ')}" fill="#fafbf7" stroke="#d5dfd8" stroke-width=".8" fill-rule="evenodd"/>`).join('');
         }).join('') : land.map(c => `<path d="${path(c)}" fill="#fafbf7" stroke="#d5dfd8" stroke-width="1.3"/>`).join('');
-        this.el.innerHTML = `<svg class="geographic-map" viewBox="0 0 ${w} ${h}" aria-label="Географическая карта маршрута" role="img"><defs><pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#dce6e9" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="#e8f0f3"/><rect width="100%" height="100%" fill="url(#map-grid)"/>${mapLand}${seas.map(l => { const p = point(l.lng, l.lat); return `<text class="sea-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${labels.map(l => { const p = point(l.lng, l.lat); return `<text class="country-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${lines}</svg><div class="map-markers">${unique.map((s, i) => `<button class="map-marker ${s.id === this.selectedStop ? 'active' : ''}" style="left:${s.x}px;top:${s.y}px" data-map-stop="${s.id}" aria-label="${escape(s.city)}, подробности остановки"><span class="marker-dot">${i === 0 ? '<span class="home-dot"></span>' : i}</span><span class="marker-label">${escape(s.city)}${s.nights ? `<small>${s.nights} ноч.</small>` : ''}</span></button>`).join('')}</div><div class="map-top-badge">${icon('map')} Маршрут на карте <span>· ${unique.length} города</span></div><div class="map-controls"><button data-map-control="in" aria-label="Приблизить карту">${icon('plus')}</button><button data-map-control="out" aria-label="Отдалить карту">${icon('minus')}</button><button data-map-control="fit" aria-label="Показать весь маршрут">${icon('refresh')}</button></div><div class="map-caption">${countries ? '© Natural Earth · ' : ''}Линии — связи городов, не траектории рейсов</div>`;
+        this.el.innerHTML = `<svg class="geographic-map" viewBox="0 0 ${w} ${h}" aria-label="Географическая карта маршрута" role="img"><defs><pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#dce6e9" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="#e8f0f3"/><rect width="100%" height="100%" fill="url(#map-grid)"/>${mapLand}${seas.map(l => { const p = point(l.lng, l.lat); return `<text class="sea-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${labels.map(l => { const p = point(l.lng, l.lat); return `<text class="country-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${lines}</svg><div class="map-markers">${unique.map((s, i) => `<button class="map-marker ${s.id === this.selectedStop ? 'active' : ''}" style="left:${s.x}px;top:${s.y}px" data-map-stop="${s.id}" aria-label="${escape(s.city)}, подробности остановки"><span class="marker-dot">${i === 0 ? '<span class="home-dot"></span>' : i}</span><span class="marker-label">${escape(s.city)}${s.nights ? `<small>${s.nights} ноч.</small>` : ''}</span></button>`).join('')}</div><div class="map-top-badge">${icon('map')} Маршрут на карте <span>· ${unique.length} города</span></div><div class="map-controls"><button data-map-control="in" aria-label="Приблизить карту">${icon('plus')}</button><button data-map-control="out" aria-label="Отдалить карту">${icon('minus')}</button><button data-map-control="fit" aria-label="Показать весь маршрут">${icon('refresh')}</button></div><div class="map-caption">${countries ? '© Natural Earth · ' : ''}Линии - связи городов, не траектории рейсов</div>`;
         this.el.querySelectorAll('.route-hit').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             this.onSegment(el.dataset.mapSegment);
         } }));
     }
-    destroy() { this.observer.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); }
+    destroy() { this.observer.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); window.removeEventListener('pointercancel', this.up); this.el.removeEventListener('touchstart', this.touchStart); this.el.removeEventListener('touchmove', this.touchMove); this.el.removeEventListener('touchend', this.touchEnd); this.el.removeEventListener('touchcancel', this.touchEnd); }
 }
