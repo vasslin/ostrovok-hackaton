@@ -130,6 +130,10 @@ function sessionPath(sessionId) {
         throw new Error('Сначала создайте сессию.');
     return `/sessions/${encodeURIComponent(sessionId)}`;
 }
+function spokenNote(note) {
+    const text = String(note || '').trim();
+    return Boolean(text) && !text.startsWith('/') && !text.startsWith('Лимит уточнений');
+}
 function dialogText(raw) {
     const summary = String(raw.summary || '').trim();
     if (summary) {
@@ -143,8 +147,8 @@ function dialogText(raw) {
     const ideas = (raw.advice || []).map(idea => [idea.title || idea.city, idea.reason || idea.description].filter(Boolean).join(' — ')).filter(Boolean);
     if (ideas.length)
         return ideas.join('\n');
-    if (raw.ready_for_search) return 'Проверьте параметры поездки и подтвердите поиск.';
-    const notes = [...(raw.warnings || []), ...(raw.missing_fields || [])].filter(Boolean);
+    if (raw.ready_for_search) return 'Можно подтвердить параметры и начать поиск.';
+    const notes = [...(raw.warnings || [])].filter(note => spokenNote(note));
     if (notes.length)
         return notes.join('\n');
     return 'Сообщение принято. Маршрут появится, когда параметры можно искать.';
@@ -162,7 +166,7 @@ function chatFromDialog(raw) {
         value: idea.id,
         ideaId: idea.id
     }));
-    return { message: dialogText(raw), questions, actions, readyForSearch: Boolean(raw.ready_for_search), tripConfig: raw.config?.request || null, warnings: raw.warnings || [] };
+    return { message: dialogText(raw), questions, actions, readyForSearch: Boolean(raw.ready_for_search), tripConfig: raw.config?.request || null, warnings: (raw.warnings || []).filter(spokenNote) };
 }
 function frontendTrip(trip, sessionId) {
     if (!trip || !Array.isArray(trip.stops) || !Array.isArray(trip.segments))

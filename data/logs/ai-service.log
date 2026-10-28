@@ -1,11 +1,5 @@
-2026/10/28 19:51:40 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
-2026/10/28 19:52:01 listen tcp :50055: bind: address already in use
-exit status 1
-2026/10/28 19:52:40 listen tcp :50055: bind: address already in use
-exit status 1
-2026/10/28 19:59:07 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
-2026/10/28 20:00:38 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
-2026/10/28 20:01:24 listen tcp :50055: bind: address already in use
-exit status 1
-2026/10/28 20:01:54 listen tcp :50055: bind: address already in use
-exit status 1
+2026/10/28 23:43:43 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
+2026/10/28 23:44:34 model usage: prompt=1355 completion=229 total=1584
+2026/10/28 23:45:41 model usage: prompt=1937 completion=386 total=2323
+2026/10/28 23:46:40 model usage: prompt=2414 completion=349 total=2763
+2026/10/28 23:47:21 model usage: prompt=2741 completion=218 total=2959

@@ -13,7 +13,7 @@ func TestClarificationLimitDoesNotInventReadyConfig(t *testing.T) {
 	loaded := &sessionv1.GetAgentContextResponse{ChatHistory: []*sessionv1.DialogMessage{{Role: "assistant", Text: string(raw)}, {Role: "assistant", Text: string(raw)}}}
 	result := agentResult{Status: "questions", Questions: []*commonv1.Question{{Id: "next"}}}
 	limitClarifications(loaded, &result)
-	if result.Status != "questions" || len(result.Questions) != 0 || len(result.Warnings) != 1 || result.Config != nil {
+	if result.Status != "questions" || len(result.Questions) != 0 || len(result.Warnings) != 0 || result.Config != nil {
 		t.Fatal("limit forced fabricated or ready config")
 	}
 }

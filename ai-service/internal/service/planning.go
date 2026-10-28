@@ -122,7 +122,11 @@ func (s *Service) Analyze(ctx context.Context, in PlanningInput) (*PlanningOutpu
 		}
 	}
 
-	out := &PlanningOutput{Config: &config, Status: "questions", Advice: []TravelIdea{}, Questions: []PlanningQuestion{}, MissingFields: []string{}, Assumptions: assumptions, Summary: planningSummary(in), Warnings: []string{}}
+	summary := strings.TrimSpace(completion.Summary)
+	if summary == "" || notesMemory(summary) {
+		summary = planningSummary(in)
+	}
+	out := &PlanningOutput{Config: &config, Status: "questions", Advice: []TravelIdea{}, Questions: []PlanningQuestion{}, MissingFields: []string{}, Assumptions: assumptions, Summary: summary, Warnings: []string{}}
 	if out.Assumptions == nil {
 		out.Assumptions = []PlanningAssumption{}
 	}

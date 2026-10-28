@@ -119,7 +119,7 @@ function renderPlanner() {
                     fields: m.questions.map(question => view('render-planner-question', {
                         text: esc(question.text),
                         questionId: esc(question.questionId),
- inputType: ["date","number"].includes(question.inputType) ? question.inputType : "text",
+                        inputType: 'text',
                         value: esc(state.answerDraft[question.questionId] || ''),
                         required: question.required ? 'required' : ''
                     })).join('')

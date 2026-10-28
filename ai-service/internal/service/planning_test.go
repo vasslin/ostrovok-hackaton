@@ -195,6 +195,30 @@ func TestUngroundedDefaultsNeverEnterConfig(t *testing.T) {
 		t.Fatal("supported city facts lost")
 	}
 }
+func TestColloquialOriginAndStartDate(t *testing.T) {
+	patch := PlanningConfig{Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, DateRange: &PlanningDates{StartDate: ptr("2026-11-01")}}}
+	completion := planningCompletion{Status: "questions", Config: &patch, Evidence: []PlanningEvidence{{Field: "trip.origin.city", Quote: "питер"}, {Field: "trip.date_range.start_date", Quote: "1 ноября"}}}
+	svc, _ := planningService(t, completion, nil)
+	out, err := svc.Analyze(context.Background(), PlanningInput{Text: "город отправления - питер\nдата начала - 1 ноября", CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Config == nil || out.Config.Trip == nil || out.Config.Trip.Origin == nil || out.Config.Trip.Origin.City != "Санкт-Петербург" || out.Config.Trip.DateRange == nil || out.Config.Trip.DateRange.StartDate == nil || *out.Config.Trip.DateRange.StartDate != "2026-11-01" {
+		t.Fatalf("colloquial answer was dropped: %+v", out.Config)
+	}
+}
+func TestParaphrasedOriginUpdatesConfig(t *testing.T) {
+	patch := PlanningConfig{Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, DateRange: &PlanningDates{StartDate: ptr("2026-11-04")}}}
+	completion := planningCompletion{Status: "questions", Config: &patch, Evidence: []PlanningEvidence{{Field: "trip.origin.city", Quote: "северной столицы"}, {Field: "trip.date_range.start_date", Quote: "через неделю"}}}
+	svc, _ := planningService(t, completion, nil)
+	out, err := svc.Analyze(context.Background(), PlanningInput{Text: "Выезжаю из северной столицы через неделю", CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Config == nil || out.Config.Trip == nil || out.Config.Trip.Origin == nil || out.Config.Trip.Origin.City != "Санкт-Петербург" || out.Config.Trip.DateRange == nil || out.Config.Trip.DateRange.StartDate == nil || *out.Config.Trip.DateRange.StartDate != "2026-11-04" {
+		t.Fatalf("free wording was dropped: %+v", out.Config)
+	}
+}
 func TestInventedQuoteIsNotEvidence(t *testing.T) {
 	patch := PlanningConfig{Trip: &PlanningTrip{Travelers: &PlanningTravelers{Adults: ptr(2)}}}
 	svc, _ := planningService(t, planningCompletion{Status: "generate", Config: &patch, Evidence: []PlanningEvidence{{Field: "trip.travelers.adults", Quote: "двое взрослых"}}}, nil)

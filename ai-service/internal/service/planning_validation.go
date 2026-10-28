@@ -33,21 +33,21 @@ func planningIssues(c PlanningConfig, today time.Time) []PlanningQuestion {
 	}
 	start, end := time.Time{}, time.Time{}
 	if dates.StartDate == nil || *dates.StartDate == "" {
-		add("trip.date_range.start_date", "Когда хотите отправиться? Укажите дату начала поездки.", true, "date")
+		add("trip.date_range.start_date", "Когда хотите отправиться?", true, "text")
 	} else {
 		var err error
 		start, err = time.Parse("2006-01-02", *dates.StartDate)
 		if err != nil || start.Before(today) {
-			add("trip.date_range.start_date", "Уточните дату отправления: нужна корректная дата не раньше текущей.", true, "date")
+			add("trip.date_range.start_date", "Когда хотите отправиться? Назовите день, который ещё не прошёл.", true, "text")
 		}
 	}
 	if dates.EndDate == nil || *dates.EndDate == "" {
-		add("trip.date_range.end_date", "Когда планируете вернуться?", true, "date")
+		add("trip.date_range.end_date", "Когда планируете вернуться?", true, "text")
 	} else {
 		var err error
 		end, err = time.Parse("2006-01-02", *dates.EndDate)
 		if err != nil || end.Before(today) || (!start.IsZero() && !end.After(start)) {
-			add("trip.date_range.end_date", "Уточните дату возвращения: она должна быть позже отправления.", true, "date")
+			add("trip.date_range.end_date", "Когда планируете вернуться? Это должно быть позже выезда.", true, "text")
 		}
 	}
 	travelers := trip.Travelers
@@ -55,7 +55,7 @@ func planningIssues(c PlanningConfig, today time.Time) []PlanningQuestion {
 		travelers = &PlanningTravelers{}
 	}
 	if travelers.Adults == nil || *travelers.Adults < 1 || *travelers.Adults > 9 {
-		add("trip.travelers.adults", "Сколько взрослых поедет? Допустимо от 1 до 9.", true, "number")
+		add("trip.travelers.adults", "Сколько взрослых поедет?", true, "text")
 	}
 	badChildren := len(travelers.ChildrenAges) > 8
 	for _, age := range travelers.ChildrenAges {
@@ -175,9 +175,7 @@ func planningQuestions(issues, proposed []PlanningQuestion) []PlanningQuestion {
 		}
 		q.ID = strings.ReplaceAll(q.Field, ".", "_")
 		q.Required = required
-		if !containsString([]string{"text", "date", "number"}, q.InputType) {
-			q.InputType = "text"
-		}
+		q.InputType = "text"
 		out = append(out, q)
 	}
 	for _, issue := range issues {
