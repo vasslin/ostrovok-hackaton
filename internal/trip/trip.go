@@ -12,19 +12,20 @@ import (
 const SchemaVersion = "1.0"
 
 type TripRequest struct {
-	SchemaVersion string        `json:"schema_version" validate:"required,eq=1.0" jsonschema:"required,enum=1.0"`
-	Locale        string        `json:"locale" validate:"required,oneof=ru en" jsonschema:"required,enum=ru,enum=en,default=ru"`
-	Currency      string        `json:"currency" validate:"required,len=3,uppercase" jsonschema:"required,pattern=^[A-Z]{3}$,default=RUB" jsonschema_description:"ISO 4217 code for all money fields."`
-	Origin        Place         `json:"origin" jsonschema:"required"`
-	Destination   *Destination  `json:"destination,omitempty" jsonschema_description:"Omit (or null) when the traveler doesn't know where to go: inspiration mode."`
-	Dates         Dates         `json:"dates" jsonschema:"required"`
-	Travelers     Travelers     `json:"travelers" jsonschema:"required"`
-	Transport     *Transport    `json:"transport,omitempty"`
-	Hotel         *Hotel        `json:"hotel,omitempty"`
-	Leisure       *Leisure      `json:"leisure,omitempty"`
-	Budget        *Budget       `json:"budget,omitempty"`
-	AIContext     *AIContext    `json:"ai_context,omitempty"`
-	Completeness  *Completeness `json:"completeness,omitempty" jsonschema_description:"Filled by the backend after validation, never by the AI."`
+	SchemaVersion string          `json:"schema_version" validate:"required,eq=1.0" jsonschema:"required,enum=1.0"`
+	Locale        string          `json:"locale" validate:"required,oneof=ru en" jsonschema:"required,enum=ru,enum=en,default=ru"`
+	Currency      string          `json:"currency" validate:"required,len=3,uppercase" jsonschema:"required,pattern=^[A-Z]{3}$,default=RUB" jsonschema_description:"ISO 4217 code for all money fields."`
+	Origin        Place           `json:"origin" jsonschema:"required"`
+	Destination   *Destination    `json:"destination,omitempty" jsonschema_description:"Omit (or null) when the traveler doesn't know where to go: inspiration mode."`
+	Stops         []ItineraryStop `json:"stops,omitempty" validate:"omitempty,max=5,dive" jsonschema:"maxItems=5"`
+	Dates         Dates           `json:"dates" jsonschema:"required"`
+	Travelers     Travelers       `json:"travelers" jsonschema:"required"`
+	Transport     *Transport      `json:"transport,omitempty"`
+	Hotel         *Hotel          `json:"hotel,omitempty"`
+	Leisure       *Leisure        `json:"leisure,omitempty"`
+	Budget        *Budget         `json:"budget,omitempty"`
+	AIContext     *AIContext      `json:"ai_context,omitempty"`
+	Completeness  *Completeness   `json:"completeness,omitempty" jsonschema_description:"Filled by the backend after validation, never by the AI."`
 }
 
 type Place struct {
@@ -36,6 +37,12 @@ type Destination struct {
 	City        string   `json:"city,omitempty" validate:"omitempty,min=1,max=100" jsonschema:"minLength=1,maxLength=100"`
 	CountryCode string   `json:"country_code,omitempty" validate:"omitempty,len=2,uppercase" jsonschema:"pattern=^[A-Z]{2}$"`
 	Candidates  []string `json:"candidates,omitempty" validate:"omitempty,max=5,dive,min=1,max=100" jsonschema:"maxItems=5" jsonschema_description:"Cities the AI suggests when the destination is vague."`
+}
+
+type ItineraryStop struct {
+	City     string `json:"city" validate:"required,min=1,max=100" jsonschema:"required"`
+	CheckIn  string `json:"check_in" validate:"required,datetime=2006-01-02" jsonschema:"required,format=date"`
+	CheckOut string `json:"check_out" validate:"required,datetime=2006-01-02" jsonschema:"required,format=date"`
 }
 
 type Dates struct {
@@ -74,13 +81,15 @@ type Pet struct {
 }
 
 type Transport struct {
-	Modes             []string `json:"modes,omitempty" validate:"omitempty,min=1,dive,oneof=plane train suburban bus water helicopter" jsonschema:"minItems=1,uniqueItems=true"`
-	RoundTrip         *bool    `json:"round_trip,omitempty" jsonschema:"default=true"`
-	DirectOnly        bool     `json:"direct_only,omitempty" jsonschema:"default=false"`
-	MaxTransfers      *int     `json:"max_transfers,omitempty" validate:"omitempty,min=0,max=3" jsonschema:"minimum=0,maximum=3"`
-	MaxDurationHours  float64  `json:"max_duration_hours,omitempty" validate:"omitempty,min=0.5,max=48" jsonschema:"minimum=0.5,maximum=48"`
-	DepartureTimeFrom string   `json:"departure_time_from,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$" jsonschema_description:"HH:MM, local time."`
-	DepartureTimeTo   string   `json:"departure_time_to,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$"`
+	Modes              []string `json:"modes,omitempty" validate:"omitempty,min=1,dive,oneof=plane train suburban bus water helicopter" jsonschema:"minItems=1,uniqueItems=true"`
+	RoundTrip          *bool    `json:"round_trip,omitempty" jsonschema:"default=true"`
+	DirectOnly         bool     `json:"direct_only,omitempty" jsonschema:"default=false"`
+	MaxTransfers       *int     `json:"max_transfers,omitempty" validate:"omitempty,min=0,max=3" jsonschema:"minimum=0,maximum=3"`
+	MaxDurationHours   float64  `json:"max_duration_hours,omitempty" validate:"omitempty,min=0.5,max=48" jsonschema:"minimum=0.5,maximum=48"`
+	DepartureTimeFrom  string   `json:"departure_time_from,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$" jsonschema_description:"HH:MM, local time."`
+	DepartureTimeTo    string   `json:"departure_time_to,omitempty" validate:"omitempty,datetime=15:04" jsonschema:"pattern=^([01][0-9]|2[0-3]):[0-5][0-9]$"`
+	MinTransferMinutes int      `json:"min_transfer_minutes,omitempty" validate:"omitempty,min=30,max=720" jsonschema:"minimum=30,maximum=720"`
+	MaxWaitHours       int      `json:"max_wait_hours,omitempty" validate:"omitempty,min=1,max=48" jsonschema:"minimum=1,maximum=48"`
 }
 
 // JSONSchemaExtend sets the allowed values for each item of modes.

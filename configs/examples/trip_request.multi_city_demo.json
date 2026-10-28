@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "locale": "ru",
+  "currency": "RUB",
+  "origin": {"city": "Москва", "country_code": "RU"},
+  "destination": {"city": "Самара", "country_code": "RU"},
+  "dates": {"departure_date": "2026-11-27", "return_date": "2026-11-29", "nights": 2},
+  "stops": [
+    {"city": "Казань", "check_in": "2026-11-27", "check_out": "2026-11-28"},
+    {"city": "Самара", "check_in": "2026-11-28", "check_out": "2026-11-29"}
+  ],
+  "travelers": {"adults": 2, "residency": "ru"},
+  "transport": {"modes": ["plane", "train"], "round_trip": true, "max_transfers": 1, "min_transfer_minutes": 90, "max_wait_hours": 12},
+  "hotel": {"needed": true, "rooms": 1},
+  "completeness": {"missing_required": []}
+}

@@ -7,9 +7,10 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
-	"fmt"
+	"encoding/json"
 	"github.com/ostrovok-hackathon-2026/godnota/internal/devtool"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,6 +29,35 @@ func call(t *testing.T, a *devtool.API, method, path, token string, body any, co
 }
 func credential() map[string]string {
 	return map[string]string{"email": strings.ToLower(rand.Text()) + "@example.com", "password": rand.Text()}
+}
+
+func demoOrder(t *testing.T, base, token, key string, body map[string]any, expected int) map[string]any {
+	t.Helper()
+	raw, err := json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequest("POST", base+"/api/orders", bytes.NewReader(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Idempotency-Key", key)
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	var result map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != expected {
+		t.Fatalf("demo order HTTP %d, expected %d", resp.StatusCode, expected)
+	}
+	return result
 }
 func start(t *testing.T, root, bin, mode string) *devtool.Cluster {
 	t.Helper()
@@ -112,12 +142,46 @@ func TestStage2EndToEnd(t *testing.T) {
 		if hotel["source"] != "synthetic" || hotel["price"].(map[string]any)["amount_minor"] != "1000000" {
 			t.Fatal("price/provenance contract broken")
 		}
-		limitations := fmt.Sprint(parts["limitations"])
-		if !strings.Contains(limitations, "Unimplemented") {
-			t.Fatal("stage-3 stub must be reported, not silently succeed")
+		candidates, ok := result["candidates"].([]any)
+		if !ok || len(candidates) == 0 {
+			t.Fatal("stage-3 candidates missing")
 		}
-		call(t, api, "GET", path+"/routes", token, nil, 200)
+		t.Logf("synthetic backend route candidates: %d", len(candidates))
+		first := candidates[0].(map[string]any)
+		if first["bookable"] != false || first["price_status"] != "unknown" || first["ranking"] != "deterministic" {
+			t.Fatal("route provenance or price status lost")
+		}
+		cached := call(t, api, "GET", path+"/routes", token, nil, 200)
+		if len(cached["candidates"].([]any)) != len(candidates) {
+			t.Fatal("cached candidates lost")
+		}
+		orderBody := map[string]any{"session_id": id, "route_id": first["id"]}
+		order := demoOrder(t, cluster.URL, token, "e2e-order-1", orderBody, 200)
+		repeated := demoOrder(t, cluster.URL, token, "e2e-order-1", orderBody, 200)
+		if order["order_id"] == "" || repeated["order_id"] != order["order_id"] || order["mode"] != "demo" || order["status"] != "demo_booked" {
+			t.Fatal("demo order idempotency or mode lost")
+		}
+		demoOrder(t, cluster.URL, token, "", orderBody, 400)
+		demoOrder(t, cluster.URL, token, "other-key", map[string]any{"session_id": id, "route_id": "nonexistent"}, 404)
+		demoOrder(t, cluster.URL, token, "other-key", map[string]any{"session_id": id, "route_id": first["id"], "route_snapshot": map[string]any{"id": first["id"]}}, 400)
+		if len(candidates) > 1 {
+			second := candidates[1].(map[string]any)
+			demoOrder(t, cluster.URL, token, "e2e-order-1", map[string]any{"session_id": id, "route_id": second["id"]}, 409)
+		}
+		orderPath := "/api/orders/" + order["order_id"].(string)
+		stored := call(t, api, "GET", orderPath, token, nil, 200)
+		if stored["route_snapshot"].(map[string]any)["id"] != first["id"] {
+			t.Fatal("route snapshot missing")
+		}
+		if call(t, api, "POST", orderPath+"/pay", token, map[string]any{}, 200)["status"] != "demo_paid" {
+			t.Fatal("demo payment failed")
+		}
+		if call(t, api, "POST", orderPath+"/cancel", token, map[string]any{}, 200)["status"] != "demo_cancelled" {
+			t.Fatal("demo cancellation failed")
+		}
 		stranger := call(t, api, "POST", "/api/auth/register", "", credential(), 201)["access_token"].(string)
+		call(t, api, "GET", orderPath, stranger, nil, 404)
+		call(t, api, "POST", orderPath+"/pay", stranger, map[string]any{}, 404)
 		for _, endpoint := range []string{path, path + "/config", path + "/routes"} {
 			call(t, api, "GET", endpoint, stranger, nil, 404)
 		}
@@ -142,7 +206,28 @@ func TestStage2EndToEnd(t *testing.T) {
 		}
 		call(t, api, "PATCH", path+"/config", token, body, 200)
 		call(t, api, "GET", path+"/routes", token, nil, 404)
+		stored = call(t, api, "GET", orderPath, token, nil, 200)
+		if stored["route_snapshot"].(map[string]any)["id"] != first["id"] {
+			t.Fatal("order snapshot changed after config edit")
+		}
 		call(t, api, "POST", path+"/search", token, map[string]any{}, 409)
+		now := time.Now()
+		d1, d2, d3 := now.AddDate(0, 0, 7).Format(time.DateOnly), now.AddDate(0, 0, 8).Format(time.DateOnly), now.AddDate(0, 0, 9).Format(time.DateOnly)
+		multi := devtool.ExampleTrip(now)
+		multi["destination"] = map[string]any{"city": "Самара", "country_code": "RU"}
+		multi["stops"] = []any{map[string]any{"city": "Казань", "check_in": d1, "check_out": d2}, map[string]any{"city": "Самара", "check_in": d2, "check_out": d3}}
+		call(t, api, "PATCH", path+"/config", token, map[string]any{"config": map[string]any{"version": "1.0", "request": multi}}, 200)
+		call(t, api, "POST", path+"/confirm", token, map[string]any{}, 200)
+		multiResult := call(t, api, "POST", path+"/search", token, map[string]any{}, 200)
+		multiRoutes, ok := multiResult["candidates"].([]any)
+		if !ok || len(multiRoutes) == 0 {
+			t.Fatal("multi-city routes missing")
+		}
+		m := multiRoutes[0].(map[string]any)
+		if len(m["transport"].([]any)) != 3 || len(m["hotels"].([]any)) != 2 {
+			t.Fatal("multi-city legs or stays missing")
+		}
+		t.Logf("synthetic multi-city routes: %d; demo order lifecycle passed", len(multiRoutes))
 		call(t, api, "POST", "/api/auth/logout", token, nil, 204)
 		call(t, api, "GET", "/api/auth/me", token, nil, 401)
 	})

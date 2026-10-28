@@ -173,6 +173,38 @@ func authorize(ctx context.Context, backend Backend, user auth.User, spec route,
 		if err := check("/v1/session/get", "session_id", sid, "session"); err != nil {
 			return nil, err
 		}
+		if spec.operation == "/v1/order/create" {
+			if _, exists := fields["route_snapshot"]; exists {
+				return nil, &Error{Code: invalidArgument, Message: "route snapshot is supplied by the server"}
+			}
+			id := get("route_id")
+			if id == "" {
+				return nil, &Error{Code: invalidArgument, Message: "route_id required"}
+			}
+			body, _ := json.Marshal(map[string]string{"session_id": sid})
+			response, err := backend.Call(ctx, "/v1/travel/routes", body)
+			if err != nil {
+				return nil, err
+			}
+			var routes struct {
+				Candidates []json.RawMessage `json:"candidates"`
+			}
+			if json.Unmarshal(response, &routes) != nil {
+				return nil, &Error{Code: internalCode, Message: "invalid route response"}
+			}
+			for _, raw := range routes.Candidates {
+				var candidate struct {
+					ID string `json:"id"`
+				}
+				if json.Unmarshal(raw, &candidate) == nil && candidate.ID == id {
+					fields["route_snapshot"] = raw
+					break
+				}
+			}
+			if _, ok := fields["route_snapshot"]; !ok {
+				return nil, &Error{Code: notFound, Message: "route not found in current search"}
+			}
+		}
 	} else if strings.HasPrefix(spec.operation, "/v1/travel/") || spec.operation == "/v1/order/create" {
 		return nil, &Error{Code: invalidArgument, Message: "session_id required"}
 	}

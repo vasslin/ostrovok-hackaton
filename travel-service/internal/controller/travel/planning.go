@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
 	"sync"
 	"time"
 )
@@ -27,8 +28,19 @@ type PlanningController struct {
 	cache     map[string]cachedParts
 }
 type cachedParts struct {
-	config *commonv1.TripConfig
-	parts  *providerv1.SearchPartsResponse
+	config     *commonv1.TripConfig
+	parts      *providerv1.SearchPartsResponse
+	candidates []*structpb.Struct
+}
+
+func cloneCandidates(items []*structpb.Struct) []*structpb.Struct {
+	result := make([]*structpb.Struct, 0, len(items))
+	for _, item := range items {
+		if item != nil {
+			result = append(result, proto.Clone(item).(*structpb.Struct))
+		}
+	}
+	return result
 }
 
 func (c *Controller) WithPlanning(s sessionv1.SessionServiceClient, p providerv1.ProviderServiceClient, routeClients ...routev1.RouteServiceClient) *PlanningController {
@@ -138,25 +150,34 @@ func (c *PlanningController) SearchRoutes(ctx context.Context, r *pb.SearchRoute
 	if parts == nil {
 		return nil, status.Error(codes.DataLoss, "provider returned no response")
 	}
+	var candidates []*structpb.Struct
 	if len(parts.GetTransportParts()) > 0 || len(parts.GetHotelParts()) > 0 {
 		if c.routes == nil {
 			parts.Limitations = append(parts.Limitations, "route-service: handoff not configured")
 		} else {
 			handoff, cancel := context.WithTimeout(ctx, 750*time.Millisecond)
-			_, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
+			assembled, handoffErr := c.routes.BuildRoutes(handoff, &routev1.BuildRoutesRequest{SessionId: r.GetSessionId(), Config: canonical, Parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)})
 			cancel()
+			if handoffErr == nil && assembled == nil {
+				handoffErr = status.Error(codes.DataLoss, "empty route response")
+			}
 			if handoffErr != nil {
 				if ctx.Err() != nil {
 					return nil, status.FromContextError(ctx.Err()).Err()
 				}
 				parts.Limitations = append(parts.Limitations, "route-service: "+status.Code(handoffErr).String()+"; stage-2 parts preserved")
+			} else {
+				candidates = cloneCandidates(assembled.GetCandidates())
+				if len(candidates) == 0 {
+					parts.Limitations = append(parts.Limitations, "route-service: no compatible complete routes; stage-2 parts preserved")
+				}
 			}
 		}
 	}
 	c.mu.Lock()
-	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(s.GetTripConfig()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse)}
+	c.cache[r.GetSessionId()] = cachedParts{config: proto.Clone(s.GetTripConfig()).(*commonv1.TripConfig), parts: proto.Clone(parts).(*providerv1.SearchPartsResponse), candidates: cloneCandidates(candidates)}
 	c.mu.Unlock()
-	return &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts}, nil
+	return &pb.SearchRoutesResponse{SessionId: r.GetSessionId(), Parts: parts, Candidates: candidates}, nil
 }
 func (c *PlanningController) GetRoutes(ctx context.Context, r *pb.GetRoutesRequest) (*pb.GetRoutesResponse, error) {
 	unlock := c.lock(r.GetSessionId())
@@ -171,5 +192,5 @@ func (c *PlanningController) GetRoutes(ctx context.Context, r *pb.GetRoutesReque
 	if !ok || s.GetStatus() != "confirmed" || !proto.Equal(cached.config, s.GetTripConfig()) {
 		return nil, status.Error(codes.NotFound, "no search results for current config")
 	}
-	return &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse)}, nil
+	return &pb.GetRoutesResponse{SessionId: r.GetSessionId(), Parts: proto.Clone(cached.parts).(*providerv1.SearchPartsResponse), Candidates: cloneCandidates(cached.candidates)}, nil
 }

@@ -1,0 +1,14 @@
+{
+  "observed_at": "2026-10-28T17:19:26+03:00",
+  "mode": "live provider-service gRPC; hotels disabled",
+  "transport_parts": 39,
+  "providers": {
+    "aviasales": 2,
+    "yandex_rasp": 37
+  },
+  "errors": {
+    "yandex_rasp:unavailable": 1
+  },
+  "candidates": "not assessed in this component check",
+  "booking_performed": false
+}

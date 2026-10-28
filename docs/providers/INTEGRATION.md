@@ -1,6 +1,6 @@
 # Provider integration
 
-The provider branch was merged into `main` at `0fcf00f`. The root module is in `go.work`; `.env` is ignored and no longer tracked, while `.env.example` lists the configuration names. The stage-two integration merge is in progress.
+The provider branch was merged into `main` at `0fcf00f` and stage-two integration at `91c8ca8`. The root module is in `go.work`; `.env` is ignored and no longer tracked, while `.env.example` lists the configuration names.
 
 ## Service contract
 
@@ -27,13 +27,13 @@ The service reads `PROVIDERS_CONFIG` (or `PROVIDER_CONFIG_FILE`, default `config
 
 Transport uses Aviasales and Yandex schedules; Wikipedia and the local OSM index provide attractions. External responses are bounded, redirects are not followed, requests are rate-limited per provider, and successful GET responses are cached in process. City discovery requests are returned for a caller to resolve; the service does not select an ambiguous city automatically.
 
-Hotelbeds is enabled only with `HOTELBEDS_MODE=evaluation`, `HOTELBEDS_API_KEY` and `HOTELBEDS_SECRET`. RateHawk requires `RATEHAWK_MODE=sandbox` or `production`, `RATEHAWK_KEY_ID` and `RATEHAWK_API_KEY`. Hotel searches currently support one explicitly specified room. Neither path books a hotel. Sandbox/evaluation offers are labeled and must not be presented as live production inventory. Hotelbeds evaluation returned offers in an Aveiro test; wider destination coverage and RateHawk access remain unverified. These adapters are exposed by `SearchHotels`; the stage-two `SearchParts` path does not yet use them. See the [run report](../evidence/2026-10-28/RUN_REPORT.ru.md).
+Hotelbeds is enabled only with `HOTELBEDS_MODE=evaluation`, `HOTELBEDS_API_KEY` and `HOTELBEDS_SECRET`. RateHawk requires `RATEHAWK_MODE=sandbox` or `production`, `RATEHAWK_KEY_ID` and `RATEHAWK_API_KEY`. Hotel searches currently support one explicitly specified room. Neither path books a hotel. Sandbox/evaluation offers are labeled and must not be presented as live production inventory. Hotelbeds evaluation returned offers in an Aveiro test; wider destination coverage and RateHawk access remain unverified. In live mode, stage-two `SearchParts` includes configured hotel providers when the input includes confirmed hotel dates, destination coordinates and the explicit source market. Missing data and provider failures are returned as hotel errors; unverified filters and cancellation conditions are warnings. Demo mode remains synthetic. See the [run report](../evidence/2026-10-28/RUN_REPORT.ru.md).
 
 The supplied OSM index is a partial Kazan snapshot: 17 museums captured on 2026-10-25 and one named theatre and cinema checked on 2026-10-28. It is not a complete venue directory. Import a licensed Overpass extract using `python3 scripts/import_osm_pois.py INPUT OUTPUT --coverage DESCRIPTION`; public Nominatim must not be used to download POI lists. OSM locations do not establish opening hours, ticket prices or feasibility during a layover.
 
 ## Remaining team integration
 
 1. AI and frontend owners should convert their input into the documented contract, resolve missing fields with the traveler, and retain unsupported preferences. Their branches are still separate.
-2. The route/gateway owners must call the provider service, resolve the returned discovery candidates, define route/price contracts and normalize results. The current route and gateway code do not complete that path.
+2. The gateway and travel service call `SearchParts` and `BuildRoutes`; assembly supports dated stops and bounded same-station connections. Connect `candidates` to frontend and resolve discovery candidates. AI ranking and cross-station transfer calculations remain unimplemented. Multi-city live searches require a verified `resolved.stops` entry per stop; end-to-end live coverage remains unverified. See [route assembly](../route/README.md).
 3. Enforce hard traveler constraints, time-zone-aware connections, price scope, actual hotel details and prebook before recommending a complete trip. Cached Aviasales prices are not confirmed seats; Yandex schedules often lack fares.
 4. Run the manual scenario matrix against the integrated app and record evidence. Provider-level probes and the separate synthetic frontend demo do not by themselves establish an end-to-end pass.

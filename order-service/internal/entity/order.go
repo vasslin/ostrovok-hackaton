@@ -1,17 +1,19 @@
 package entity
 
-// Status values follow the MVP order lifecycle.
+import "google.golang.org/protobuf/types/known/structpb"
+
 const (
-	StatusBooked    = "booked"
-	StatusPaid      = "paid"
-	StatusCancelled = "cancelled"
+	StatusBooked    = "demo_booked"
+	StatusPaid      = "demo_paid"
+	StatusCancelled = "demo_cancelled"
 )
 
-// Order is a saved route selected by the traveller.
 type Order struct {
-	ID        string
-	UserID    string
-	SessionID string
-	RouteID   string
-	Status    string
+	ID             string
+	UserID         string
+	SessionID      string
+	RouteID        string
+	IdempotencyKey string
+	Snapshot       *structpb.Struct
+	Status         string
 }

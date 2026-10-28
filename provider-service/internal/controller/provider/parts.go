@@ -26,6 +26,16 @@ func (c *Controller) SearchParts(ctx context.Context, req *pb.SearchPartsRequest
 		}
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	if c.searcher.Mode == "live" && c.searcher.Hotels == nil && c.service != nil && hotelProviderEnabled() && (input.Hotel == nil || input.Hotel.Needed == nil || *input.Hotel.Needed) {
+		if len(input.Stops) > 0 {
+			parts = c.addItineraryHotels(ctx, input, resolved, parts)
+		} else {
+			parts = c.addHotelParts(ctx, input, resolved, parts)
+		}
+		if ctx.Err() != nil {
+			return nil, status.FromContextError(ctx.Err()).Err()
+		}
+	}
 	raw, err := json.Marshal(parts)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "encode parts")

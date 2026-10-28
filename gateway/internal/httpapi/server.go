@@ -92,7 +92,11 @@ func HandlerWithAuth(backend Backend, store *auth.Store) http.Handler {
 				return
 			}
 			slog.Info("gateway request", "method", r.Method, "operation", spec.operation)
-			ctx, cancel := context.WithTimeout(r.Context(), backendTimeout)
+			timeout := backendTimeout
+			if spec.operation == "/v1/travel/search" {
+				timeout = 30 * time.Second
+			}
+			ctx, cancel := context.WithTimeout(r.Context(), timeout)
 			defer cancel()
 			raw, err = authorize(ctx, backend, user, spec, raw)
 			if err != nil {
@@ -178,6 +182,16 @@ func requestDTO(w http.ResponseWriter, r *http.Request, spec route) (json.RawMes
 			return invalid("path identifiers must not be repeated in the body")
 		}
 		fields[key], _ = json.Marshal(r.PathValue(key))
+	}
+	if spec.operation == "/v1/order/create" {
+		key := strings.TrimSpace(r.Header.Get("Idempotency-Key"))
+		if key == "" || len(key) > 128 {
+			return invalid("Idempotency-Key header is required (maximum 128 characters)")
+		}
+		if _, exists := fields["idempotency_key"]; exists {
+			return invalid("use the Idempotency-Key header")
+		}
+		fields["idempotency_key"], _ = json.Marshal(key)
 	}
 	for _, alias := range []string{"userId", "sessionId", "orderId"} {
 		if _, exists := fields[alias]; exists {

@@ -30,7 +30,7 @@ func readObject(path string) (*structpb.Struct, error) {
 
 func run() error {
 	address := flag.String("address", "127.0.0.1:50058", "provider gRPC address")
-	kind := flag.String("kind", "transport", "transport, hotel or activity")
+	kind := flag.String("kind", "transport", "transport, hotel, activity or parts")
 	format := flag.String("format", "trip_request", "trip_request, ai_config or frontend_criteria")
 	tripPath := flag.String("trip", "configs/examples/trip_request.kazan_weekend.json", "input JSON path")
 	resolvedPath := flag.String("resolved", "", "resolved JSON path")
@@ -57,6 +57,11 @@ func run() error {
 	search := &pb.SearchInput{TripRequest: input, Resolved: resolved, InputFormat: *format}
 	var result proto.Message
 	switch *kind {
+	case "parts":
+		if *format != "trip_request" {
+			return fmt.Errorf("parts requires trip_request input")
+		}
+		result, err = client.SearchParts(ctx, &pb.SearchPartsRequest{Config: input, Resolved: resolved})
 	case "transport":
 		result, err = client.SearchTransport(ctx, &pb.SearchTransportRequest{Input: search})
 	case "hotel":

@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-var Services = []string{"session-service", "map-service", "provider-service", "route-service", "travel-service", "gateway"}
+var Services = []string{"session-service", "map-service", "provider-service", "route-service", "travel-service", "order-service", "gateway"}
 var defaultPorts = map[string]int{"gateway": 8080, "travel-service": 50051, "session-service": 50052, "user-service": 50053, "order-service": 50054, "ai-service": 50055, "map-service": 50056, "route-service": 50057, "provider-service": 50058}
 
 type Options struct {
@@ -206,10 +206,10 @@ func Start(ctx context.Context, opt Options) (cluster *Cluster, err error) {
 		reserved[name] = l
 		ports[name] = l.Addr().(*net.TCPAddr).Port
 	}
-	for _, entry := range []struct{ key, name string }{{"SESSION_GRPC_ADDR", "session-service"}, {"TRAVEL_GRPC_ADDR", "travel-service"}, {"MAP_GRPC_ADDR", "map-service"}, {"ROUTE_GRPC_ADDR", "route-service"}, {"PROVIDER_GRPC_ADDR", "provider-service"}} {
+	for _, entry := range []struct{ key, name string }{{"SESSION_GRPC_ADDR", "session-service"}, {"TRAVEL_GRPC_ADDR", "travel-service"}, {"MAP_GRPC_ADDR", "map-service"}, {"ROUTE_GRPC_ADDR", "route-service"}, {"PROVIDER_GRPC_ADDR", "provider-service"}, {"ORDER_GRPC_ADDR", "order-service"}} {
 		configured[entry.key] = net.JoinHostPort("127.0.0.1", strconv.Itoa(ports[entry.name]))
 	}
-	for key, value := range map[string]string{"USER_GRPC_ADDR": "127.0.0.1:50053", "ORDER_GRPC_ADDR": "127.0.0.1:50054", "AI_GRPC_ADDR": "127.0.0.1:50055"} {
+	for key, value := range map[string]string{"USER_GRPC_ADDR": "127.0.0.1:50053", "AI_GRPC_ADDR": "127.0.0.1:50055"} {
 		configured[key] = value
 	}
 	childCtx, cancel := context.WithCancel(ctx)

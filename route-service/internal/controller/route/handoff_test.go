@@ -20,7 +20,7 @@ func TestStage3BoundaryIsExplicit(t *testing.T) {
 		t.Fatal(err)
 	}
 	config, _ := structpb.NewStruct(map[string]any{"schema_version": "1.0"})
-	if _, err := client.BuildRoutes(ctx, &pb.BuildRoutesRequest{SessionId: "s", Config: config, Parts: &providerv1.SearchPartsResponse{}}); status.Code(err) != codes.Unimplemented {
-		t.Fatal("stage-3 stub pretended to assemble a route", err)
+	if _, err := client.BuildRoutes(ctx, &pb.BuildRoutesRequest{SessionId: "s", Config: config, Parts: &providerv1.SearchPartsResponse{}}); status.Code(err) != codes.InvalidArgument {
+		t.Fatal("invalid trip config accepted", err)
 	}
 }

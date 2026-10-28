@@ -66,6 +66,32 @@
       "type": "object",
       "description": "Omit (or null) when the traveler doesn't know where to go: inspiration mode."
     },
+    "stops": {
+      "items": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "check_in": {
+            "type": "string",
+            "format": "date"
+          },
+          "check_out": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "city",
+          "check_in",
+          "check_out"
+        ]
+      },
+      "type": "array",
+      "maxItems": 5
+    },
     "dates": {
       "anyOf": [
         {
@@ -207,6 +233,16 @@
         "departure_time_to": {
           "type": "string",
           "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "min_transfer_minutes": {
+          "type": "integer",
+          "maximum": 720,
+          "minimum": 30
+        },
+        "max_wait_hours": {
+          "type": "integer",
+          "maximum": 48,
+          "minimum": 1
         }
       },
       "additionalProperties": false,
