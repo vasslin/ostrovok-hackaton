@@ -3,7 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { dirname, resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), 'dist');
-const port = Number(process.env.PORT || 4173);
+const port = Number(process.env.PORT || 5173);
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml' };
 const server = http.createServer(async (req, res) => {
     try {

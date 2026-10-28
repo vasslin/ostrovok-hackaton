@@ -91,21 +91,7 @@ func normalize(job Request, data []byte, now time.Time) ([]TransportPart, error)
 		}
 	} else if job.Provider == "yandex_rasp" {
 		var response struct {
-			Segments []struct {
-				Departure    string `json:"departure"`
-				Arrival      string `json:"arrival"`
-				HasTransfers bool   `json:"has_transfers"`
-				From         struct {
-					Code string `json:"code"`
-				} `json:"from"`
-				To struct {
-					Code string `json:"code"`
-				} `json:"to"`
-				Thread struct {
-					UID           string `json:"uid"`
-					TransportType string `json:"transport_type"`
-				} `json:"thread"`
-			} `json:"segments"`
+			Segments []yandexSegment `json:"segments"`
 		}
 		if err := json.Unmarshal(data, &response); err != nil {
 			return nil, err
@@ -115,8 +101,14 @@ func normalize(job Request, data []byte, now time.Time) ([]TransportPart, error)
 		}
 		q := job.Params.(*providers.RaspSearch)
 		for _, item := range response.Segments {
-			// Transfer envelopes need individual legs; never invent their timestamps.
 			if item.HasTransfers {
+				if !q.Transfers {
+					continue
+				}
+				part, ok := normalizeYandexTransfer(item, q.TransportTypes, q.Date, now)
+				if ok {
+					result = append(result, part)
+				}
 				continue
 			}
 			dep, e1 := time.Parse(time.RFC3339, item.Departure)

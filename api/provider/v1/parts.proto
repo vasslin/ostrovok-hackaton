@@ -44,6 +44,15 @@ message TransportPart {
   string destination_city = 16;
   int32 transfers = 17;
   int32 return_transfers = 18;
+  repeated TransferLeg legs = 19;
+}
+message TransferLeg {
+  string origin_station = 1;
+  string destination_station = 2;
+  string departure_at = 3;
+  string arrival_at = 4;
+  string mode = 5;
+  string service_id = 6;
 }
 message HotelPart {
   string id = 1;

@@ -139,24 +139,33 @@ type Money struct {
 	Scope       string `json:"scope"`
 }
 type TransportPart struct {
-	ID                string   `json:"id"`
-	Provider          string   `json:"provider"`
-	Source            string   `json:"source"`
-	FetchedAt         string   `json:"fetched_at"`
-	Mode              string   `json:"mode"`
-	Origin            string   `json:"origin"`
-	Destination       string   `json:"destination"`
-	DepartureAt       string   `json:"departure_at"`
-	ArrivalAt         string   `json:"arrival_at"`
-	Price             *Money   `json:"price,omitempty"`
-	BookingURL        string   `json:"booking_url,omitempty"`
-	Warnings          []string `json:"warnings,omitempty"`
-	ReturnDepartureAt string   `json:"return_departure_at,omitempty"`
-	ReturnArrivalAt   string   `json:"return_arrival_at,omitempty"`
-	OriginCity        string   `json:"origin_city,omitempty"`
-	DestinationCity   string   `json:"destination_city,omitempty"`
-	Transfers         int      `json:"transfers"`
-	ReturnTransfers   int      `json:"return_transfers"`
+	ID                string        `json:"id"`
+	Provider          string        `json:"provider"`
+	Source            string        `json:"source"`
+	FetchedAt         string        `json:"fetched_at"`
+	Mode              string        `json:"mode"`
+	Origin            string        `json:"origin"`
+	Destination       string        `json:"destination"`
+	DepartureAt       string        `json:"departure_at"`
+	ArrivalAt         string        `json:"arrival_at"`
+	Price             *Money        `json:"price,omitempty"`
+	BookingURL        string        `json:"booking_url,omitempty"`
+	Warnings          []string      `json:"warnings,omitempty"`
+	ReturnDepartureAt string        `json:"return_departure_at,omitempty"`
+	ReturnArrivalAt   string        `json:"return_arrival_at,omitempty"`
+	OriginCity        string        `json:"origin_city,omitempty"`
+	DestinationCity   string        `json:"destination_city,omitempty"`
+	Transfers         int           `json:"transfers"`
+	ReturnTransfers   int           `json:"return_transfers"`
+	Legs              []TransferLeg `json:"legs,omitempty"`
+}
+type TransferLeg struct {
+	OriginStation      string `json:"origin_station"`
+	DestinationStation string `json:"destination_station"`
+	DepartureAt        string `json:"departure_at"`
+	ArrivalAt          string `json:"arrival_at"`
+	Mode               string `json:"mode"`
+	ServiceID          string `json:"service_id"`
 }
 type HotelPart struct {
 	ID               string   `json:"id"`
@@ -222,6 +231,12 @@ func (s *Searcher) SearchParts(ctx context.Context, input TripRequest, resolved 
 	mapping, err := MapConfig(input, resolved, now)
 	if err != nil {
 		return result, err
+	}
+	if len(input.Stops) > 0 {
+		if s.Mode == "demo" {
+			return demoItinerary(ctx, input, now), nil
+		}
+		return s.searchItinerary(ctx, input, resolved)
 	}
 	if s.Mode == "demo" {
 		return demoParts(ctx, input, now), nil

@@ -1,0 +1,6 @@
+time=2026-10-28T20:00:46.618+03:00 level=INFO msg="gateway listening" port=8080
+time=2026-10-28T20:04:14.015+03:00 level=INFO msg="gateway request" method=POST operation=/v1/session/create
+time=2026-10-28T20:04:14.025+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
+time=2026-10-28T20:04:16.990+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
+time=2026-10-28T20:04:17.724+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan
+time=2026-10-28T20:04:18.574+03:00 level=INFO msg="gateway request" method=POST operation=/v1/travel/plan

@@ -1,0 +1,11 @@
+2026/10/28 19:51:40 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
+2026/10/28 19:52:01 listen tcp :50055: bind: address already in use
+exit status 1
+2026/10/28 19:52:40 listen tcp :50055: bind: address already in use
+exit status 1
+2026/10/28 19:59:07 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
+2026/10/28 20:00:38 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
+2026/10/28 20:01:24 listen tcp :50055: bind: address already in use
+exit status 1
+2026/10/28 20:01:54 listen tcp :50055: bind: address already in use
+exit status 1
