@@ -90,7 +90,7 @@
 <template id="render-app-shell">
 <div class="app-shell">
   <aside class="rail" aria-label="Основная навигация">
-    <a class="brand-mark" href="#planner" aria-label="О!дин запрос — главная">О!</a>
+    <a class="brand-mark" href="#planner" aria-label="О!дин запрос - главная">О!</a>
     <div class="rail-links">
       {{plannerButton}}{{historyButton}}{{profileButton}}
     </div>
@@ -107,7 +107,7 @@
     </header>
     {{conditional2}}
     <footer class="footer">
-      <span>Одна идея — целое путешествие.</span><span>{{conditional3}}</span>
+      <span>Одна идея - целое путешествие.</span><span>{{conditional3}}</span>
     </footer>
     <nav class="mobile-bottom-nav" aria-label="Навигация на телефоне">
       {{plannerButton2}}{{historyButton2}}{{profileButton4}}
@@ -153,7 +153,7 @@
 <template id="render-drawer-eyebrow-2">
 <span class="eyebrow">ВЫБОР ПЕРЕЛЁТА · {{date}}</span>
 <p class="muted">
-  Цена на всех гостей. Время отправления и прибытия — местное.
+  Цена на всех гостей. Время отправления и прибытия - местное.
 </p>
 <div class="drawer-tickets">
   {{sOptions}}
@@ -464,7 +464,7 @@
     Начнём с вашей идеи
   </h1>
   <p>
-    Опишите поездку в чате — здесь появится маршрут.
+    Опишите поездку в чате - здесь появится маршрут.
   </p>
   {{mobileChatButton}}
 </div>
@@ -509,7 +509,7 @@
   <div class="mobile-switch" role="group" aria-label="Вид планировщика">
     {{mobileChatButton}}{{mobileRouteButton}}
   </div>
-  <section class="chat-panel" aria-label="Чат планирования">
+  <section class="chat-panel" id="chat-panel" aria-label="Чат планирования">
     <div class="chat-heading">
       <div class="assistant-avatar">
         {{sparkIcon}}
@@ -543,7 +543,7 @@
       </p>
     </div>
   </section>
-  <section class="trip-panel" aria-label="План поездки">
+  <section class="trip-panel" id="trip-panel" aria-label="План поездки">
     {{conditional8}}
   </section>
 </main>
@@ -557,7 +557,7 @@
       Личный кабинет
     </h1>
     <p>
-      Немного о вас — для следующих путешествий.
+      Немного о вас - для следующих путешествий.
     </p>
   </div>
   <div class="profile-grid">
@@ -588,7 +588,7 @@
         Воспоминания начинаются с планов.
       </h2>
       <p>
-        Сохранённые поездки и тестовые бронирования — в одном месте.
+        Сохранённые поездки и тестовые бронирования - в одном месте.
       </p>
       {{historyButton}}
     </aside>
@@ -646,7 +646,7 @@
       Ваша поездка сложилась.
     </h1>
     <p>
-      Проверьте детали. До нового приключения — одно подтверждение.
+      Проверьте детали. До нового приключения - одно подтверждение.
     </p>
   </div>
   <div class="summary-grid">
@@ -724,7 +724,7 @@
       {{sFrom}} → {{sTo}}
     </h3>
     <p>
-      {{date}}, {{localTime}} — {{localTime2}} · {{carrier}}
+      {{date}}, {{localTime}} - {{localTime2}} · {{carrier}}
     </p>
   </div>
   <strong>{{price}}</strong>
@@ -820,10 +820,10 @@
   </div>
 </div>
 <p class="demo-caption">
-  {{infoIcon}} Все предложения — примеры, а не действующие тарифы. Стоимость указана на всю группу.
+  {{infoIcon}} Все предложения - примеры, а не действующие тарифы. Стоимость указана на всю группу.
 </p>
 </template>
 
 <template id="ticket-offer-ticket-offer">
-<button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>—</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
+<button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>-</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
 </template>
