@@ -8,3 +8,5 @@ ai-service/server
 /data/
 /reports/
 /integration-tests/out/
+
+.idea/
