@@ -5,6 +5,7 @@
 bin/
 *.exe
 *.test
+integration-tests/out/
 ai-service/server
 data/
 reports/

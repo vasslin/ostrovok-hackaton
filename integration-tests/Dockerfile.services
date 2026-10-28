@@ -1,0 +1,16 @@
+FROM alpine:3.20 AS provider
+RUN apk add --no-cache ca-certificates netcat-openbsd
+WORKDIR /app
+COPY configs /app/configs
+COPY integration-tests/out/provider /app/service
+ENV PROVIDER_CONFIG_FILE=/app/configs/providers.json
+USER 10001:10001
+EXPOSE 50058
+ENTRYPOINT ["/app/service"]
+
+FROM alpine:3.20 AS route
+RUN apk add --no-cache ca-certificates netcat-openbsd
+COPY integration-tests/out/route /app/service
+USER 10001:10001
+EXPOSE 50057
+ENTRYPOINT ["/app/service"]
