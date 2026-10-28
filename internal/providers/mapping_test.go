@@ -22,7 +22,7 @@ func TestBuildTripPlanKazan(t *testing.T) {
 	if len(plan.Missing) != 0 || len(plan.Search["aviasales"]) != 1 || len(plan.Search["yandex_rasp"]) != 4 || len(plan.Search["wikipedia"]) != 1 {
 		t.Fatalf("unexpected plan: %+v", plan)
 	}
-	if !strings.Contains(strings.Join(plan.Limitations, " "), "поиск отелей пропущен") {
+	if !strings.Contains(strings.Join(plan.Limitations, " "), "поиск отелей выполняется отдельно") {
 		t.Fatalf("hotel omission is not reported: %+v", plan.Limitations)
 	}
 	for _, requests := range plan.Search {
@@ -53,7 +53,7 @@ func TestBuildTripPlanDoesNotInventHotelResults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(strings.Join(plan.Limitations, " "), "нет подключённого поставщика") {
+	if !strings.Contains(strings.Join(plan.Limitations, " "), "партнёрского доступа") {
 		t.Fatalf("hotel search should be omitted and reported: %+v", plan)
 	}
 }

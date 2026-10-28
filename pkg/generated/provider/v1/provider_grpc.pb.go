@@ -28,9 +28,6 @@ const (
 // ProviderServiceClient is the client API for ProviderService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// ProviderService - адаптеры внешних API транспорта, отелей и досуга.
-// Сообщения намеренно пустые: поля контракта будут добавлены позже.
 type ProviderServiceClient interface {
 	SearchParts(ctx context.Context, in *SearchPartsRequest, opts ...grpc.CallOption) (*SearchPartsResponse, error)
 	SearchTransport(ctx context.Context, in *SearchTransportRequest, opts ...grpc.CallOption) (*SearchTransportResponse, error)
@@ -89,9 +86,6 @@ func (c *providerServiceClient) SearchActivities(ctx context.Context, in *Search
 // ProviderServiceServer is the server API for ProviderService service.
 // All implementations should embed UnimplementedProviderServiceServer
 // for forward compatibility.
-//
-// ProviderService - адаптеры внешних API транспорта, отелей и досуга.
-// Сообщения намеренно пустые: поля контракта будут добавлены позже.
 type ProviderServiceServer interface {
 	SearchParts(context.Context, *SearchPartsRequest) (*SearchPartsResponse, error)
 	SearchTransport(context.Context, *SearchTransportRequest) (*SearchTransportResponse, error)
@@ -107,16 +101,16 @@ type ProviderServiceServer interface {
 type UnimplementedProviderServiceServer struct{}
 
 func (UnimplementedProviderServiceServer) SearchParts(context.Context, *SearchPartsRequest) (*SearchPartsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SearchParts not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method SearchParts not implemented")
 }
 func (UnimplementedProviderServiceServer) SearchTransport(context.Context, *SearchTransportRequest) (*SearchTransportResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SearchTransport not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method SearchTransport not implemented")
 }
 func (UnimplementedProviderServiceServer) SearchHotels(context.Context, *SearchHotelsRequest) (*SearchHotelsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SearchHotels not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method SearchHotels not implemented")
 }
 func (UnimplementedProviderServiceServer) SearchActivities(context.Context, *SearchActivitiesRequest) (*SearchActivitiesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SearchActivities not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method SearchActivities not implemented")
 }
 func (UnimplementedProviderServiceServer) testEmbeddedByValue() {}
 
@@ -128,7 +122,7 @@ type UnsafeProviderServiceServer interface {
 }
 
 func RegisterProviderServiceServer(s grpc.ServiceRegistrar, srv ProviderServiceServer) {
-	// If the following call panics, it indicates UnimplementedProviderServiceServer was
+	// If the following call pancis, it indicates UnimplementedProviderServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.

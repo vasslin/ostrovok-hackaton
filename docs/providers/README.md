@@ -13,7 +13,8 @@ go run ./cmd/smoke
 | [aviasales.md](aviasales.md) | цены на авиабилеты (кэш Aviasales) | `TRAVELPAYOUTS_TOKEN` |
 | [travelpayouts_places.md](travelpayouts_places.md) | город → IATA-код, координаты, падежи | не нужен |
 | [yandex_rasp.md](yandex_rasp.md) | расписания поездов, самолётов, автобусов, водного транспорта; код города Яндекса | `YANDEX_RASP_API_KEY` |
-| [hotels.md](hotels.md) | отели: ETG / RateHawk API, доступ только по договору; адаптер в репозитории отсутствует | договор и ключи |
+| [hotels.md](hotels.md) | отели: Hotelbeds evaluation и ETG / RateHawk; адаптеры ещё не проверены с учётными данными | ключи и доступ |
+| [alternatives.md](alternatives.md) | сравнительный обзор других гостиничных, транспортных и event API | зависит от провайдера |
 | [wikipedia.md](wikipedia.md) | досуг: достопримечательности рядом с точкой, с описанием и фото | не нужен |
 | [nominatim.md](nominatim.md) | точечный геокодинг; структурный поиск `amenity` описан для справки и не используется для сбора списков мест | не нужен |
 | [osrm.md](osrm.md) | время и расстояние на машине (трансферы) | не нужен |

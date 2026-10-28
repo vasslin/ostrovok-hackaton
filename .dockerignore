@@ -2,7 +2,7 @@
 .env
 .env.*
 !.env.example
-bin
+**/bin
 data
 reports
 *.zip

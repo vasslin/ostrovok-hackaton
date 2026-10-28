@@ -73,6 +73,10 @@ func validateAgainstSchema(t *testing.T, schemaPath, examplePath string) {
 	}
 }
 
+func TestHotelbedsExampleSchema(t *testing.T) {
+	validateAgainstSchema(t, "../../configs/hotelbeds/availability.schema.json", "../../configs/hotelbeds/availability.example.json")
+}
+
 func TestRegistryMatchesCatalog(t *testing.T) {
 	reg := loadRegistry(t)
 	var inRegistry, inCatalog []string

@@ -5,7 +5,9 @@ go 1.26.0
 require (
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/godnota/pkg v0.0.0
+	github.com/ostrovok-hackathon-2026/godnota v0.0.0
 	google.golang.org/grpc v1.84.0
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
@@ -28,10 +30,5 @@ require (
 )
 
 replace github.com/godnota/pkg => ../pkg
-
-require (
-	github.com/ostrovok-hackathon-2026/godnota v0.0.0
-	google.golang.org/protobuf v1.36.12
-)
 
 replace github.com/ostrovok-hackathon-2026/godnota => ..

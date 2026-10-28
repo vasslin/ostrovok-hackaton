@@ -1,8 +1,11 @@
 package app
 
 import (
+	"fmt"
+	"log/slog"
+	"net"
+
 	"github.com/godnota/pkg/generated/provider/v1"
-	"github.com/godnota/pkg/grpcapp"
 	"github.com/godnota/provider-service/internal/config"
 	providerctrl "github.com/godnota/provider-service/internal/controller/provider"
 	providerrepo "github.com/godnota/provider-service/internal/repository/provider"
@@ -11,21 +14,43 @@ import (
 	"google.golang.org/grpc"
 )
 
-func New(cfg *config.Config) (*grpcapp.App, error) {
-	var registry providerkit.Registry
-	var err error
-	if cfg.Mode == "live" {
-		registry, err = providerkit.LoadRegistry(cfg.RegistryFile)
-		if err != nil {
-			return nil, err
-		}
+type App struct {
+	server *grpc.Server
+	host   string
+	port   string
+}
+
+func New(cfg *config.Config) (*App, error) {
+	registryPath := cfg.RegistryPath
+	if registryPath == "" {
+		registryPath = cfg.RegistryFile
 	}
+	registry, err := providerkit.LoadRegistry(registryPath)
+	if err != nil {
+		return nil, err
+	}
+	repo, err := providerrepo.New(registry, cfg.POIPath)
+	if err != nil {
+		return nil, err
+	}
+	controller := providerctrl.New(provideruc.New(repo))
 	searcher, err := providerkit.NewSearcher(registry, cfg.Mode)
 	if err != nil {
 		return nil, err
 	}
-	controller := providerctrl.New(provideruc.New(providerrepo.New())).WithSearcher(searcher)
-	return grpcapp.New(cfg.GRPC.Port, nil, func(server *grpc.Server) {
-		providerv1.RegisterProviderServiceServer(server, controller)
-	}), nil
+	controller.WithSearcher(searcher)
+	server := grpc.NewServer()
+	providerv1.RegisterProviderServiceServer(server, controller)
+	return &App{server: server, host: cfg.GRPC.Host, port: cfg.GRPC.Port}, nil
 }
+
+func (a *App) Run() error {
+	listener, err := net.Listen("tcp", net.JoinHostPort(a.host, a.port))
+	if err != nil {
+		return fmt.Errorf("listen grpc: %w", err)
+	}
+	slog.Info("provider grpc server started", "port", a.port)
+	return a.server.Serve(listener)
+}
+
+func (a *App) Shutdown() { a.server.GracefulStop() }
