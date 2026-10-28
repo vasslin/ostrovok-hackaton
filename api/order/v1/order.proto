@@ -4,6 +4,8 @@ package godnota.order.v1;
 
 option go_package = "github.com/godnota/pkg/generated/order/v1;orderv1";
 
+import "google/protobuf/struct.proto";
+
 // OrderService ведёт жизненный цикл заказа: бронь, оплата, отмена.
 service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
@@ -16,11 +18,14 @@ message CreateOrderRequest {
   string user_id = 1;
   string session_id = 2;
   string route_id = 3;
+  string idempotency_key = 4;
+  google.protobuf.Struct route_snapshot = 5;
 }
 
 message CreateOrderResponse {
   string order_id = 1;
   string status = 2;
+  string mode = 3;
 }
 
 message GetOrderRequest {
@@ -33,6 +38,8 @@ message GetOrderResponse {
   string session_id = 3;
   string route_id = 4;
   string status = 5;
+  string mode = 6;
+  google.protobuf.Struct route_snapshot = 7;
 }
 
 message PayOrderRequest {
@@ -42,6 +49,7 @@ message PayOrderRequest {
 message PayOrderResponse {
   string order_id = 1;
   string status = 2;
+  string mode = 3;
 }
 
 message CancelOrderRequest {
@@ -51,4 +59,5 @@ message CancelOrderRequest {
 message CancelOrderResponse {
   string order_id = 1;
   string status = 2;
+  string mode = 3;
 }

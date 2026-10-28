@@ -18,11 +18,12 @@ type ResolvedPlace struct {
 }
 
 type ResolvedTrip struct {
-	Origin                ResolvedPlace `json:"origin"`
-	Destination           ResolvedPlace `json:"destination"`
-	HotelCheckin          string        `json:"hotel_checkin,omitempty"`
-	HotelCheckout         string        `json:"hotel_checkout,omitempty"`
-	HotelbedsSourceMarket string        `json:"hotelbeds_source_market,omitempty"`
+	Origin                ResolvedPlace   `json:"origin"`
+	Destination           ResolvedPlace   `json:"destination"`
+	Stops                 []ResolvedPlace `json:"stops,omitempty"`
+	HotelCheckin          string          `json:"hotel_checkin,omitempty"`
+	HotelCheckout         string          `json:"hotel_checkout,omitempty"`
+	HotelbedsSourceMarket string          `json:"hotelbeds_source_market,omitempty"`
 }
 
 type TripPlan struct {

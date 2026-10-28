@@ -383,6 +383,23 @@
 </form>
 </template>
 
+<template id="render-modal-login">
+<span class="eyebrow">ВХОД</span>
+<h2 id="modal-title">
+  {{title}}
+</h2>
+<p class="muted">
+  {{hint}}
+</p>
+<form id="login-form">
+  <label>Почта<input type="email" name="email" value="{{email}}" required autocomplete="username"></label>
+  <label>Пароль<input type="password" name="password" required minlength="12" autocomplete="current-password"></label>
+  <p id="login-error" role="alert">{{loginError}}</p>
+  <button class="primary full" type="submit" {{disabled}}>{{submitLabel}}</button>
+  <button class="text-button" type="button" data-action="auth-mode" {{disabled}}>{{switchLabel}}</button>
+</form>
+</template>
+
 <template id="render-modal-eyebrow-2">
 <span class="eyebrow">С ЧИСТОГО ЛИСТА</span>
 <h2 id="modal-title">
@@ -492,6 +509,17 @@
 <div class="message-actions">
   {{mActions}}
 </div>
+</template>
+
+<template id="render-planner-questions">
+<form class="message-actions" id="answers-form" data-message="{{index}}">
+  {{fields}}
+  <button class="primary" type="submit" {{disabled}}>Ответить</button>
+</form>
+</template>
+
+<template id="render-planner-question">
+<label>{{text}}<input name="{{questionId}}" value="{{value}}" {{required}} maxlength="500"></label>
 </template>
 
 <template id="render-planner-message-avatar">

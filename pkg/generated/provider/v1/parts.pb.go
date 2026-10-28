@@ -284,6 +284,7 @@ type TransportPart struct {
 	DestinationCity   string                 `protobuf:"bytes,16,opt,name=destination_city,json=destinationCity,proto3" json:"destination_city,omitempty"`
 	Transfers         int32                  `protobuf:"varint,17,opt,name=transfers,proto3" json:"transfers,omitempty"`
 	ReturnTransfers   int32                  `protobuf:"varint,18,opt,name=return_transfers,json=returnTransfers,proto3" json:"return_transfers,omitempty"`
+	Legs              []*TransferLeg         `protobuf:"bytes,19,rep,name=legs,proto3" json:"legs,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -444,6 +445,97 @@ func (x *TransportPart) GetReturnTransfers() int32 {
 	return 0
 }
 
+func (x *TransportPart) GetLegs() []*TransferLeg {
+	if x != nil {
+		return x.Legs
+	}
+	return nil
+}
+
+type TransferLeg struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	OriginStation      string                 `protobuf:"bytes,1,opt,name=origin_station,json=originStation,proto3" json:"origin_station,omitempty"`
+	DestinationStation string                 `protobuf:"bytes,2,opt,name=destination_station,json=destinationStation,proto3" json:"destination_station,omitempty"`
+	DepartureAt        string                 `protobuf:"bytes,3,opt,name=departure_at,json=departureAt,proto3" json:"departure_at,omitempty"`
+	ArrivalAt          string                 `protobuf:"bytes,4,opt,name=arrival_at,json=arrivalAt,proto3" json:"arrival_at,omitempty"`
+	Mode               string                 `protobuf:"bytes,5,opt,name=mode,proto3" json:"mode,omitempty"`
+	ServiceId          string                 `protobuf:"bytes,6,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *TransferLeg) Reset() {
+	*x = TransferLeg{}
+	mi := &file_api_provider_v1_parts_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferLeg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferLeg) ProtoMessage() {}
+
+func (x *TransferLeg) ProtoReflect() protoreflect.Message {
+	mi := &file_api_provider_v1_parts_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferLeg.ProtoReflect.Descriptor instead.
+func (*TransferLeg) Descriptor() ([]byte, []int) {
+	return file_api_provider_v1_parts_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *TransferLeg) GetOriginStation() string {
+	if x != nil {
+		return x.OriginStation
+	}
+	return ""
+}
+
+func (x *TransferLeg) GetDestinationStation() string {
+	if x != nil {
+		return x.DestinationStation
+	}
+	return ""
+}
+
+func (x *TransferLeg) GetDepartureAt() string {
+	if x != nil {
+		return x.DepartureAt
+	}
+	return ""
+}
+
+func (x *TransferLeg) GetArrivalAt() string {
+	if x != nil {
+		return x.ArrivalAt
+	}
+	return ""
+}
+
+func (x *TransferLeg) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *TransferLeg) GetServiceId() string {
+	if x != nil {
+		return x.ServiceId
+	}
+	return ""
+}
+
 type HotelPart struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -464,7 +556,7 @@ type HotelPart struct {
 
 func (x *HotelPart) Reset() {
 	*x = HotelPart{}
-	mi := &file_api_provider_v1_parts_proto_msgTypes[5]
+	mi := &file_api_provider_v1_parts_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -476,7 +568,7 @@ func (x *HotelPart) String() string {
 func (*HotelPart) ProtoMessage() {}
 
 func (x *HotelPart) ProtoReflect() protoreflect.Message {
-	mi := &file_api_provider_v1_parts_proto_msgTypes[5]
+	mi := &file_api_provider_v1_parts_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -489,7 +581,7 @@ func (x *HotelPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HotelPart.ProtoReflect.Descriptor instead.
 func (*HotelPart) Descriptor() ([]byte, []int) {
-	return file_api_provider_v1_parts_proto_rawDescGZIP(), []int{5}
+	return file_api_provider_v1_parts_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *HotelPart) GetId() string {
@@ -589,7 +681,7 @@ type ProviderError struct {
 
 func (x *ProviderError) Reset() {
 	*x = ProviderError{}
-	mi := &file_api_provider_v1_parts_proto_msgTypes[6]
+	mi := &file_api_provider_v1_parts_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -601,7 +693,7 @@ func (x *ProviderError) String() string {
 func (*ProviderError) ProtoMessage() {}
 
 func (x *ProviderError) ProtoReflect() protoreflect.Message {
-	mi := &file_api_provider_v1_parts_proto_msgTypes[6]
+	mi := &file_api_provider_v1_parts_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -614,7 +706,7 @@ func (x *ProviderError) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderError.ProtoReflect.Descriptor instead.
 func (*ProviderError) Descriptor() ([]byte, []int) {
-	return file_api_provider_v1_parts_proto_rawDescGZIP(), []int{6}
+	return file_api_provider_v1_parts_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ProviderError) GetProvider() string {
@@ -673,7 +765,7 @@ const file_api_provider_v1_parts_proto_rawDesc = "" +
 	"\x05Money\x12!\n" +
 	"\famount_minor\x18\x01 \x01(\x03R\vamountMinor\x12\x1a\n" +
 	"\bcurrency\x18\x02 \x01(\tR\bcurrency\x12\x14\n" +
-	"\x05scope\x18\x03 \x01(\tR\x05scope\"\xe2\x04\n" +
+	"\x05scope\x18\x03 \x01(\tR\x05scope\"\x98\x05\n" +
 	"\rTransportPart\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x16\n" +
@@ -697,7 +789,17 @@ const file_api_provider_v1_parts_proto_rawDesc = "" +
 	"originCity\x12)\n" +
 	"\x10destination_city\x18\x10 \x01(\tR\x0fdestinationCity\x12\x1c\n" +
 	"\ttransfers\x18\x11 \x01(\x05R\ttransfers\x12)\n" +
-	"\x10return_transfers\x18\x12 \x01(\x05R\x0freturnTransfers\"\xdf\x02\n" +
+	"\x10return_transfers\x18\x12 \x01(\x05R\x0freturnTransfers\x124\n" +
+	"\x04legs\x18\x13 \x03(\v2 .godnota.provider.v1.TransferLegR\x04legs\"\xda\x01\n" +
+	"\vTransferLeg\x12%\n" +
+	"\x0eorigin_station\x18\x01 \x01(\tR\roriginStation\x12/\n" +
+	"\x13destination_station\x18\x02 \x01(\tR\x12destinationStation\x12!\n" +
+	"\fdeparture_at\x18\x03 \x01(\tR\vdepartureAt\x12\x1d\n" +
+	"\n" +
+	"arrival_at\x18\x04 \x01(\tR\tarrivalAt\x12\x12\n" +
+	"\x04mode\x18\x05 \x01(\tR\x04mode\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x06 \x01(\tR\tserviceId\"\xdf\x02\n" +
 	"\tHotelPart\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x16\n" +
@@ -732,31 +834,33 @@ func file_api_provider_v1_parts_proto_rawDescGZIP() []byte {
 	return file_api_provider_v1_parts_proto_rawDescData
 }
 
-var file_api_provider_v1_parts_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_api_provider_v1_parts_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_api_provider_v1_parts_proto_goTypes = []any{
 	(*SearchPartsRequest)(nil),  // 0: godnota.provider.v1.SearchPartsRequest
 	(*ProviderConfig)(nil),      // 1: godnota.provider.v1.ProviderConfig
 	(*SearchPartsResponse)(nil), // 2: godnota.provider.v1.SearchPartsResponse
 	(*Money)(nil),               // 3: godnota.provider.v1.Money
 	(*TransportPart)(nil),       // 4: godnota.provider.v1.TransportPart
-	(*HotelPart)(nil),           // 5: godnota.provider.v1.HotelPart
-	(*ProviderError)(nil),       // 6: godnota.provider.v1.ProviderError
-	(*structpb.Struct)(nil),     // 7: google.protobuf.Struct
+	(*TransferLeg)(nil),         // 5: godnota.provider.v1.TransferLeg
+	(*HotelPart)(nil),           // 6: godnota.provider.v1.HotelPart
+	(*ProviderError)(nil),       // 7: godnota.provider.v1.ProviderError
+	(*structpb.Struct)(nil),     // 8: google.protobuf.Struct
 }
 var file_api_provider_v1_parts_proto_depIdxs = []int32{
-	7, // 0: godnota.provider.v1.SearchPartsRequest.config:type_name -> google.protobuf.Struct
-	7, // 1: godnota.provider.v1.SearchPartsRequest.resolved:type_name -> google.protobuf.Struct
-	7, // 2: godnota.provider.v1.ProviderConfig.params:type_name -> google.protobuf.Struct
+	8, // 0: godnota.provider.v1.SearchPartsRequest.config:type_name -> google.protobuf.Struct
+	8, // 1: godnota.provider.v1.SearchPartsRequest.resolved:type_name -> google.protobuf.Struct
+	8, // 2: godnota.provider.v1.ProviderConfig.params:type_name -> google.protobuf.Struct
 	4, // 3: godnota.provider.v1.SearchPartsResponse.transport_parts:type_name -> godnota.provider.v1.TransportPart
-	5, // 4: godnota.provider.v1.SearchPartsResponse.hotel_parts:type_name -> godnota.provider.v1.HotelPart
-	6, // 5: godnota.provider.v1.SearchPartsResponse.errors:type_name -> godnota.provider.v1.ProviderError
+	6, // 4: godnota.provider.v1.SearchPartsResponse.hotel_parts:type_name -> godnota.provider.v1.HotelPart
+	7, // 5: godnota.provider.v1.SearchPartsResponse.errors:type_name -> godnota.provider.v1.ProviderError
 	3, // 6: godnota.provider.v1.TransportPart.price:type_name -> godnota.provider.v1.Money
-	3, // 7: godnota.provider.v1.HotelPart.price:type_name -> godnota.provider.v1.Money
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	5, // 7: godnota.provider.v1.TransportPart.legs:type_name -> godnota.provider.v1.TransferLeg
+	3, // 8: godnota.provider.v1.HotelPart.price:type_name -> godnota.provider.v1.Money
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_api_provider_v1_parts_proto_init() }
@@ -770,7 +874,7 @@ func file_api_provider_v1_parts_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_provider_v1_parts_proto_rawDesc), len(file_api_provider_v1_parts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

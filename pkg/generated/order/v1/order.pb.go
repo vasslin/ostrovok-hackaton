@@ -9,6 +9,7 @@ package orderv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -22,12 +23,14 @@ const (
 )
 
 type CreateOrderRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	RouteId       string                 `protobuf:"bytes,3,opt,name=route_id,json=routeId,proto3" json:"route_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	UserId         string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	SessionId      string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RouteId        string                 `protobuf:"bytes,3,opt,name=route_id,json=routeId,proto3" json:"route_id,omitempty"`
+	IdempotencyKey string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	RouteSnapshot  *structpb.Struct       `protobuf:"bytes,5,opt,name=route_snapshot,json=routeSnapshot,proto3" json:"route_snapshot,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CreateOrderRequest) Reset() {
@@ -81,10 +84,25 @@ func (x *CreateOrderRequest) GetRouteId() string {
 	return ""
 }
 
+func (x *CreateOrderRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+func (x *CreateOrderRequest) GetRouteSnapshot() *structpb.Struct {
+	if x != nil {
+		return x.RouteSnapshot
+	}
+	return nil
+}
+
 type CreateOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Mode          string                 `protobuf:"bytes,3,opt,name=mode,proto3" json:"mode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -129,6 +147,13 @@ func (x *CreateOrderResponse) GetOrderId() string {
 func (x *CreateOrderResponse) GetStatus() string {
 	if x != nil {
 		return x.Status
+	}
+	return ""
+}
+
+func (x *CreateOrderResponse) GetMode() string {
+	if x != nil {
+		return x.Mode
 	}
 	return ""
 }
@@ -184,6 +209,8 @@ type GetOrderResponse struct {
 	SessionId     string                 `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	RouteId       string                 `protobuf:"bytes,4,opt,name=route_id,json=routeId,proto3" json:"route_id,omitempty"`
 	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	Mode          string                 `protobuf:"bytes,6,opt,name=mode,proto3" json:"mode,omitempty"`
+	RouteSnapshot *structpb.Struct       `protobuf:"bytes,7,opt,name=route_snapshot,json=routeSnapshot,proto3" json:"route_snapshot,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -253,6 +280,20 @@ func (x *GetOrderResponse) GetStatus() string {
 	return ""
 }
 
+func (x *GetOrderResponse) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *GetOrderResponse) GetRouteSnapshot() *structpb.Struct {
+	if x != nil {
+		return x.RouteSnapshot
+	}
+	return nil
+}
+
 type PayOrderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
@@ -301,6 +342,7 @@ type PayOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Mode          string                 `protobuf:"bytes,3,opt,name=mode,proto3" json:"mode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -345,6 +387,13 @@ func (x *PayOrderResponse) GetOrderId() string {
 func (x *PayOrderResponse) GetStatus() string {
 	if x != nil {
 		return x.Status
+	}
+	return ""
+}
+
+func (x *PayOrderResponse) GetMode() string {
+	if x != nil {
+		return x.Mode
 	}
 	return ""
 }
@@ -397,6 +446,7 @@ type CancelOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Mode          string                 `protobuf:"bytes,3,opt,name=mode,proto3" json:"mode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -445,38 +495,52 @@ func (x *CancelOrderResponse) GetStatus() string {
 	return ""
 }
 
+func (x *CancelOrderResponse) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
 var File_api_order_v1_order_proto protoreflect.FileDescriptor
 
 const file_api_order_v1_order_proto_rawDesc = "" +
 	"\n" +
-	"\x18api/order/v1/order.proto\x12\x10godnota.order.v1\"g\n" +
+	"\x18api/order/v1/order.proto\x12\x10godnota.order.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xd0\x01\n" +
 	"\x12CreateOrderRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x19\n" +
-	"\broute_id\x18\x03 \x01(\tR\arouteId\"H\n" +
+	"\broute_id\x18\x03 \x01(\tR\arouteId\x12'\n" +
+	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\x12>\n" +
+	"\x0eroute_snapshot\x18\x05 \x01(\v2\x17.google.protobuf.StructR\rrouteSnapshot\"\\\n" +
 	"\x13CreateOrderResponse\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\",\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x12\n" +
+	"\x04mode\x18\x03 \x01(\tR\x04mode\",\n" +
 	"\x0fGetOrderRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\"\x98\x01\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"\xec\x01\n" +
 	"\x10GetOrderResponse\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x03 \x01(\tR\tsessionId\x12\x19\n" +
 	"\broute_id\x18\x04 \x01(\tR\arouteId\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\",\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12\x12\n" +
+	"\x04mode\x18\x06 \x01(\tR\x04mode\x12>\n" +
+	"\x0eroute_snapshot\x18\a \x01(\v2\x17.google.protobuf.StructR\rrouteSnapshot\",\n" +
 	"\x0fPayOrderRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\"E\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"Y\n" +
 	"\x10PayOrderResponse\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"/\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x12\n" +
+	"\x04mode\x18\x03 \x01(\tR\x04mode\"/\n" +
 	"\x12CancelOrderRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\"H\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"\\\n" +
 	"\x13CancelOrderResponse\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status2\xec\x02\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x12\n" +
+	"\x04mode\x18\x03 \x01(\tR\x04mode2\xec\x02\n" +
 	"\fOrderService\x12Z\n" +
 	"\vCreateOrder\x12$.godnota.order.v1.CreateOrderRequest\x1a%.godnota.order.v1.CreateOrderResponse\x12Q\n" +
 	"\bGetOrder\x12!.godnota.order.v1.GetOrderRequest\x1a\".godnota.order.v1.GetOrderResponse\x12Q\n" +
@@ -505,21 +569,24 @@ var file_api_order_v1_order_proto_goTypes = []any{
 	(*PayOrderResponse)(nil),    // 5: godnota.order.v1.PayOrderResponse
 	(*CancelOrderRequest)(nil),  // 6: godnota.order.v1.CancelOrderRequest
 	(*CancelOrderResponse)(nil), // 7: godnota.order.v1.CancelOrderResponse
+	(*structpb.Struct)(nil),     // 8: google.protobuf.Struct
 }
 var file_api_order_v1_order_proto_depIdxs = []int32{
-	0, // 0: godnota.order.v1.OrderService.CreateOrder:input_type -> godnota.order.v1.CreateOrderRequest
-	2, // 1: godnota.order.v1.OrderService.GetOrder:input_type -> godnota.order.v1.GetOrderRequest
-	4, // 2: godnota.order.v1.OrderService.PayOrder:input_type -> godnota.order.v1.PayOrderRequest
-	6, // 3: godnota.order.v1.OrderService.CancelOrder:input_type -> godnota.order.v1.CancelOrderRequest
-	1, // 4: godnota.order.v1.OrderService.CreateOrder:output_type -> godnota.order.v1.CreateOrderResponse
-	3, // 5: godnota.order.v1.OrderService.GetOrder:output_type -> godnota.order.v1.GetOrderResponse
-	5, // 6: godnota.order.v1.OrderService.PayOrder:output_type -> godnota.order.v1.PayOrderResponse
-	7, // 7: godnota.order.v1.OrderService.CancelOrder:output_type -> godnota.order.v1.CancelOrderResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	8, // 0: godnota.order.v1.CreateOrderRequest.route_snapshot:type_name -> google.protobuf.Struct
+	8, // 1: godnota.order.v1.GetOrderResponse.route_snapshot:type_name -> google.protobuf.Struct
+	0, // 2: godnota.order.v1.OrderService.CreateOrder:input_type -> godnota.order.v1.CreateOrderRequest
+	2, // 3: godnota.order.v1.OrderService.GetOrder:input_type -> godnota.order.v1.GetOrderRequest
+	4, // 4: godnota.order.v1.OrderService.PayOrder:input_type -> godnota.order.v1.PayOrderRequest
+	6, // 5: godnota.order.v1.OrderService.CancelOrder:input_type -> godnota.order.v1.CancelOrderRequest
+	1, // 6: godnota.order.v1.OrderService.CreateOrder:output_type -> godnota.order.v1.CreateOrderResponse
+	3, // 7: godnota.order.v1.OrderService.GetOrder:output_type -> godnota.order.v1.GetOrderResponse
+	5, // 8: godnota.order.v1.OrderService.PayOrder:output_type -> godnota.order.v1.PayOrderResponse
+	7, // 9: godnota.order.v1.OrderService.CancelOrder:output_type -> godnota.order.v1.CancelOrderResponse
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_api_order_v1_order_proto_init() }
