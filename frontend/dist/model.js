@@ -13,7 +13,7 @@ export const cities = {
     'Санкт-Петербург': { lat: 59.9343, lng: 30.3351, timezone: '+03:00', country: 'Россия' }
 };
 const destinationInfo = {
-    'Анталья': { country: 'Турция', title: 'Два города. Одно маленькое приключение.', subtitle: 'Улицы Стамбула, а потом — море и спокойные дни в Анталье.', tags: ['Море и город', 'Для семьи', '7 ночей'], cover: 'sea', hotel: ['Lara Garden Residence', 'Old Town Family Hotel', 'Azure Coast Resort'], activity: ['Прогулка по старому городу', 'Семейный день у моря'], daily: 7900, flight: 12900 },
+    'Анталья': { country: 'Турция', title: 'Два города. Одно маленькое приключение.', subtitle: 'Улицы Стамбула, а потом - море и спокойные дни в Анталье.', tags: ['Море и город', 'Для семьи', '7 ночей'], cover: 'sea', hotel: ['Lara Garden Residence', 'Old Town Family Hotel', 'Azure Coast Resort'], activity: ['Прогулка по старому городу', 'Семейный день у моря'], daily: 7900, flight: 12900 },
     'Сочи': { country: 'Россия', title: 'К морю, ближе к горам.', subtitle: 'Неспешные прогулки по набережной и день среди горных вершин.', tags: ['Без пересадок', 'Море и горы', 'Для семьи'], cover: 'mountain', hotel: ['Зелёный мыс', 'Морской квартал', 'Гранд Парк Сочи'], activity: ['Прогулка по дендрарию', 'День в горах'], daily: 5200, flight: 8200 },
     'Тбилиси': { country: 'Грузия', title: 'Город, который умеет встречать.', subtitle: 'Старые улочки, уютные дворики и новые любимые места.', tags: ['Городские прогулки', 'Гастрономия', 'Культура'], cover: 'city', hotel: ['Courtyard Stories', 'Old Tbilisi Rooms', 'Terrace Boutique'], activity: ['Прогулка по старому Тбилиси', 'Музей и канатная дорога'], daily: 5600, flight: 11900 },
     'Калининград': { country: 'Россия', title: 'Балтика. Дюны. Время для себя.', subtitle: 'Прогулки у воды и короткие поездки к песчаным берегам.', tags: ['Короткий перелёт', 'Балтийское море', 'Прогулки'], cover: 'sea', hotel: ['Балтийские истории', 'Дом у реки', 'Amber Residence'], activity: ['Прогулка по острову Канта', 'День на Балтийском побережье'], daily: 4600, flight: 6900 }
@@ -40,7 +40,7 @@ export function validateCriteria(c) {
     if (!Number.isInteger(c.adults) || c.adults < 1 || c.adults > 6)
         throw new Error('Выберите от 1 до 6 взрослых.');
     if (!Array.isArray(c.childrenAges) || c.childrenAges.length > 4 || c.childrenAges.some(a => !Number.isInteger(a) || a < 0 || a > 17))
-        throw new Error('Укажите до 4 детей, возраст — от 0 до 17 лет.');
+        throw new Error('Укажите до 4 детей, возраст - от 0 до 17 лет.');
     if (!Number.isFinite(c.budgetMinor) || c.budgetMinor <= 0)
         throw new Error('Бюджет должен быть больше нуля.');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(c.startDate) || !Number.isFinite(Date.parse(c.startDate)) || new Date(`${c.startDate}T12:00:00Z`).toISOString().slice(0, 10) !== c.startDate)

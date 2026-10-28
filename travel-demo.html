@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#7254e8">
-  <meta name="description" content="О!дин запрос — демонстрационный планировщик путешествий. Чат, маршрут на карте, отели и тестовое бронирование.">
-  <title>О!дин запрос — поездка начинается с идеи</title>
+  <meta name="description" content="О!дин запрос - демонстрационный планировщик путешествий. Чат, маршрут на карте, отели и тестовое бронирование.">
+  <title>О!дин запрос - поездка начинается с идеи</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='20' fill='%237254e8'/%3E%3Ctext x='11' y='46' font-size='44' font-family='Arial' font-weight='bold' fill='white'%3EО!%3C/text%3E%3C/svg%3E">
   <style>
 :root {
@@ -3057,7 +3057,7 @@ select {
 
 }
 
-@media(max-width:760px) {
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
   .rail {
     width: 58px;
     height: 62px;
@@ -3959,7 +3959,7 @@ select {
   text-align: left
 }
 
-@media(max-width:760px) {
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
   .app-main {
     padding-bottom: 66px
   }
@@ -4031,8 +4031,187 @@ select {
 .review-grid .review-check { display: flex; align-items: center; gap: 8px; }
 .review-wide { grid-column: 1 / -1; }
 .review-grid fieldset { border: 1px solid #b9c8c5; border-radius: 10px; display: flex; flex-wrap: wrap; gap: 14px; padding: 14px; }
+.review-grid fieldset, .config-review { min-width: 0 }
 .review-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 @media (max-width: 640px) { .review-grid { grid-template-columns: 1fr; } .config-review { padding: 18px; max-height: none; } }
+
+/* Phone layouts use the visible viewport, including keyboard and safe areas. */
+body.overlay-open {
+  overflow: hidden;
+  overscroll-behavior: none
+}
+
+@media(max-width:760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse) {
+  :root {
+    --mobile-header-height: calc(64px + env(safe-area-inset-top, 0px));
+    --mobile-nav-height: calc(64px + env(safe-area-inset-bottom, 0px))
+  }
+
+  .app-main {
+    padding-bottom: var(--mobile-nav-height)
+  }
+
+  .header {
+    height: var(--mobile-header-height);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: 70px
+  }
+
+  .rail { top: calc(10px + env(safe-area-inset-top, 0px)) }
+  .brand-mark, .profile-link { width: 44px; height: 44px }
+  .wordmark { font-size: 18px }
+  .wordmark span { font-size: 10px }
+  .mobile-bottom-nav {
+    top: calc(var(--viewport-top, 0px) + var(--app-height, 100dvh) - var(--mobile-nav-height));
+    bottom: auto;
+    right: auto;
+    width: 100vw;
+    max-width: 100%;
+    height: var(--mobile-nav-height);
+    min-height: var(--mobile-nav-height);
+    padding: 7px 15px calc(7px + env(safe-area-inset-bottom, 0px))
+  }
+  .mobile-bottom-nav button { font-size: 11px; min-height: 48px }
+
+  .workspace { padding-top: 0; min-height: 0 }
+  .mobile-switch {
+    position: sticky;
+    top: 0;
+    left: auto;
+    right: auto;
+    height: 60px;
+    padding: 8px 16px;
+    border-radius: 0;
+    gap: 4px;
+    background: var(--paper);
+    z-index: 8
+  }
+  .mobile-switch button { min-height: 44px; font-size: 14px; background: #ece7f3 }
+  .mobile-switch button.active { background: #fff }
+  .mobile-switch .icon { width: 18px; height: 18px }
+  .workspace.mobile-chat {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 60px minmax(0, 1fr);
+    height: calc(var(--app-height, 100dvh) - var(--mobile-header-height) - var(--mobile-nav-height));
+    min-height: 0;
+    overflow: hidden
+  }
+  .chat-panel { min-height: 0; height: 100%; overflow: hidden }
+  .workspace.mobile-chat .chat-panel { height: 100%; min-height: 0 }
+  .chat-heading { flex-shrink: 0; padding: 12px 16px }
+  .chat-heading h2 { font-size: 15px }
+  .chat-heading p { font-size: 12px }
+  .messages { min-height: 0; padding: 16px; -webkit-overflow-scrolling: touch }
+  .bubble { font-size: 14px; line-height: 1.65 }
+  .message-byline { font-size: 11px }
+  .chat-bottom { flex-shrink: 0; padding: 10px 16px 12px }
+  .quick-chips { overflow-x: auto; padding-bottom: 2px; scrollbar-width: none }
+  .quick-chips .suggestion { flex-shrink: 0; font-size: 12px }
+  .chat-note { font-size: 10px; margin-top: 8px }
+  .suggestion { min-height: 44px; font-size: 13px }
+  #chat-input { font-size: 16px; min-height: 48px; padding-right: 46px }
+  #chat-form { padding: 10px }
+  .send-button { width: 44px; height: 44px; right: 8px; bottom: 8px }
+  #app[data-page="planner"][data-mobile-view="chat"] .footer { display: none }
+  .keyboard-open .mobile-bottom-nav { display: none }
+  .keyboard-open .app-main { padding-bottom: 0 }
+  .keyboard-open .workspace.mobile-chat { height: calc(var(--app-height, 100dvh) - var(--mobile-header-height)) }
+  .keyboard-open .chat-heading, .keyboard-open .quick-label,
+  .keyboard-open .quick-chips, .keyboard-open .chat-note { display: none }
+
+  .trip-panel { padding: 20px 16px }
+  .trip-intro h1 { font-size: 27px; line-height: 1.22; letter-spacing: -.8px }
+  .trip-intro p { font-size: 13px; line-height: 1.6 }
+  .eyebrow { font-size: 10px }
+  .button-light.new-trip { width: 44px; height: 44px; min-width: 44px; min-height: 44px; font-size: 0; padding: 0!important }
+  .new-trip .icon { width: 18px; height: 18px }
+  .criteria-chip, .criteria-edit { min-height: 44px; font-size: 12px }
+  .route-steps { flex-wrap: wrap; font-size: 11px; gap: 8px }
+  .route-steps i { width: 12px }
+  .route-steps span { white-space: normal }
+  #route-map { height: 260px }
+  .map-controls button { width: 44px; height: 44px }
+  .map-controls .icon { width: 18px; height: 18px }
+  .map-marker { min-width: 44px; min-height: 44px; justify-content: center }
+  .marker-label { font-size: 12px; top: 39px }
+  .marker-label small { font-size: 10px }
+  .map-caption { font-size: 9px; max-width: calc(100% - 16px); text-align: right }
+  .map-legend { flex-wrap: wrap; gap: 10px; font-size: 11px }
+  .legend-action { display: none }
+  .tabs { gap: 16px }
+  .tabs button { min-height: 44px; font-size: 14px; padding-bottom: 10px }
+  .tabs button span { font-size: 11px }
+  .route-toolbar > .small-muted { display: none }
+  .stop-heading h3 { font-size: 16px }
+  .stop-heading h3 span, .stop-heading p { font-size: 12px }
+  .stop-main { padding: 14px 12px }
+  .icon-link { font-size: 12px; min-height: 44px; white-space: normal }
+  .hotel-mini { flex-wrap: wrap; gap: 10px }
+  .hotel-mini > div:nth-child(2) { min-width: 0; flex: 1 }
+  .hotel-mini h4 { font-size: 14px; overflow-wrap: anywhere }
+  .hotel-mini p, .hotel-mini-price strong { font-size: 12px }
+  .hotel-mini-price { margin-left: auto }
+  .hotel-mini-price span { font-size: 11px }
+  .hotel-kicker { font-size: 10px }
+  .activity-row, .transport-line { font-size: 12px; line-height: 1.5 }
+  .transport-line { min-height: 44px; flex-wrap: wrap }
+  .hotel-offer h4, .ticket-carrier strong { font-size: 15px; overflow-wrap: anywhere }
+  .hotel-offer p, .hotel-offer small, .ticket-offer small { font-size: 12px }
+  .hotel-offer-footer { gap: 8px; flex-wrap: wrap }
+  .hotel-offer-footer button, .primary, .button-light, .text-button { min-height: 44px; font-size: 14px }
+  .flight-times strong { font-size: 16px }
+  .offer-price strong { font-size: 17px }
+  .trip-total .small-muted, .total-detail, .demo-caption { font-size: 12px }
+  .trip-total strong { font-size: 26px }
+  .summary-route p, .summary-item p, .checkout-note { font-size: 12px }
+  .summary-item h3, .summary-item > strong { font-size: 14px }
+  .profile-card-head p, .history-body p, .draft-banner p { font-size: 13px }
+  .profile-card, .history-body, .summary-item { min-width: 0; overflow-wrap: anywhere }
+  .profile-card input { min-width: 0; font-size: 16px; min-height: 48px }
+
+  body.overlay-open { position: fixed; top: var(--overlay-scroll-top, 0); width: 100% }
+  .overlay { top: var(--viewport-top, 0); height: var(--app-height, 100dvh); bottom: auto; overflow: hidden }
+  .drawer { height: 100%; width: 100% }
+  .drawer-head { flex-shrink: 0; padding: max(12px, env(safe-area-inset-top, 0px)) 16px 12px }
+  .drawer-head h2 { font-size: 20px }
+  .drawer-body { min-height: 0; padding: 20px 16px max(20px, env(safe-area-inset-bottom, 0px)); overscroll-behavior: contain }
+  .drawer-body > .small-muted, .activity-detail p { font-size: 13px }
+  .drawer-body p { overflow-wrap: anywhere }
+  .icon-button { width: 44px; height: 44px }
+  .modal-overlay { padding: 0; align-items: flex-end }
+  .modal { width: 100%; max-width: 600px; max-height: calc(var(--app-height, 100dvh) - 12px); padding: 24px 20px max(24px, env(safe-area-inset-bottom, 0px)); border-radius: 22px 22px 0 0; overscroll-behavior: contain }
+  .modal-close { position: sticky; top: 0; float: right; margin: -8px -4px 4px 12px; z-index: 4; background: #fff }
+  .modal h2 { font-size: 25px; margin-right: 36px }
+  .modal label, .modal .muted { font-size: 14px }
+  .modal input, .modal select { min-width: 0; min-height: 48px; font-size: 16px }
+  .checkbox-label { min-height: 44px }
+  .checkbox-label input { min-height: 24px; min-width: 24px }
+  .modal-actions button { font-size: 14px; min-height: 44px }
+  .review-grid input:not([type=checkbox]), .review-grid select { min-height: 48px; font-size: 16px }
+  .review-grid .review-check { min-height: 44px }
+  .review-check input { width: 24px; height: 24px; flex-shrink: 0 }
+  #toast { bottom: calc(var(--mobile-nav-height) + 10px); font-size: 13px }
+  .keyboard-open #toast { bottom: 10px }
+}
+
+@media(max-width:480px) {
+  .form-grid { grid-template-columns: minmax(0, 1fr) }
+  .hotel-offer { grid-template-columns: minmax(0, 1fr) }
+  .hotel-offer > .hotel-art { min-height: 160px; height: 160px }
+  .hotel-offer-body { padding: 16px }
+}
+
+@media(max-width:760px) and (max-height:540px) {
+  .chat-heading, .chat-note, .quick-label { display: none }
+  .chat-bottom { padding-top: 6px; padding-bottom: 6px }
+  .quick-chips { margin-bottom: 6px }
+  #route-map { height: 220px }
+}
+
+@media(pointer:coarse) {
+  input, select, textarea { font-size: 16px }
+}
 
 </style>
 </head>
@@ -4131,7 +4310,7 @@ select {
 <template id="render-app-shell">
 <div class="app-shell">
   <aside class="rail" aria-label="Основная навигация">
-    <a class="brand-mark" href="#planner" aria-label="О!дин запрос — главная">О!</a>
+    <a class="brand-mark" href="#planner" aria-label="О!дин запрос - главная">О!</a>
     <div class="rail-links">
       {{plannerButton}}{{historyButton}}{{profileButton}}
     </div>
@@ -4148,7 +4327,7 @@ select {
     </header>
     {{conditional2}}
     <footer class="footer">
-      <span>Одна идея — целое путешествие.</span><span>{{conditional3}}</span>
+      <span>Одна идея - целое путешествие.</span><span>{{conditional3}}</span>
     </footer>
     <nav class="mobile-bottom-nav" aria-label="Навигация на телефоне">
       {{plannerButton2}}{{historyButton2}}{{profileButton4}}
@@ -4194,7 +4373,7 @@ select {
 <template id="render-drawer-eyebrow-2">
 <span class="eyebrow">ВЫБОР ПЕРЕЛЁТА · {{date}}</span>
 <p class="muted">
-  Цена на всех гостей. Время отправления и прибытия — местное.
+  Цена на всех гостей. Время отправления и прибытия - местное.
 </p>
 <div class="drawer-tickets">
   {{sOptions}}
@@ -4522,7 +4701,7 @@ select {
     Начнём с вашей идеи
   </h1>
   <p>
-    Опишите поездку в чате — здесь появится маршрут.
+    Опишите поездку в чате - здесь появится маршрут.
   </p>
   {{mobileChatButton}}
 </div>
@@ -4578,7 +4757,7 @@ select {
   <div class="mobile-switch" role="group" aria-label="Вид планировщика">
     {{mobileChatButton}}{{mobileRouteButton}}
   </div>
-  <section class="chat-panel" aria-label="Чат планирования">
+  <section class="chat-panel" id="chat-panel" aria-label="Чат планирования">
     <div class="chat-heading">
       <div class="assistant-avatar">
         {{sparkIcon}}
@@ -4612,7 +4791,7 @@ select {
       </p>
     </div>
   </section>
-  <section class="trip-panel" aria-label="План поездки">
+  <section class="trip-panel" id="trip-panel" aria-label="План поездки">
     {{conditional8}}
   </section>
 </main>
@@ -4626,7 +4805,7 @@ select {
       Личный кабинет
     </h1>
     <p>
-      Немного о вас — для следующих путешествий.
+      Немного о вас - для следующих путешествий.
     </p>
   </div>
   <div class="profile-grid">
@@ -4657,7 +4836,7 @@ select {
         Воспоминания начинаются с планов.
       </h2>
       <p>
-        Сохранённые поездки и тестовые бронирования — в одном месте.
+        Сохранённые поездки и тестовые бронирования - в одном месте.
       </p>
       {{historyButton}}
     </aside>
@@ -4715,7 +4894,7 @@ select {
       Ваша поездка сложилась.
     </h1>
     <p>
-      Проверьте детали. До нового приключения — одно подтверждение.
+      Проверьте детали. До нового приключения - одно подтверждение.
     </p>
   </div>
   <div class="summary-grid">
@@ -4793,7 +4972,7 @@ select {
       {{sFrom}} → {{sTo}}
     </h3>
     <p>
-      {{date}}, {{localTime}} — {{localTime2}} · {{carrier}}
+      {{date}}, {{localTime}} - {{localTime2}} · {{carrier}}
     </p>
   </div>
   <strong>{{price}}</strong>
@@ -4889,18 +5068,16 @@ select {
   </div>
 </div>
 <p class="demo-caption">
-  {{infoIcon}} Все предложения — примеры, а не действующие тарифы. Стоимость указана на всю группу.
+  {{infoIcon}} Все предложения - примеры, а не действующие тарифы. Стоимость указана на всю группу.
 </p>
 </template>
 
 <template id="ticket-offer-ticket-offer">
-<button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>—</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
+<button class="ticket-offer {{conditional}}" data-action="select-ticket" data-item="{{sId}}" data-offer="{{oId}}" {{conditional2}} aria-pressed="{{selected}}"><span class="airline-symbol">{{planeIcon}}</span><span class="ticket-carrier"><strong>{{oCarrier}}</strong><small>{{oNumber}} · {{conditional3}}</small></span><span class="flight-times"><strong>{{localTime}} <span>-</span> {{localTime2}}</strong><small>{{duration}} · без пересадок</small></span><span class="offer-price"><strong>{{price}}</strong><small>на всех гостей</small></span><span class="selection-circle">{{conditional4}}</span></button>
 </template>
 
 <template id="render-review">
 <section class="config-review" aria-label="Параметры поездки">
-  <p class="eyebrow">Перед поиском</p><h2>Проверьте параметры поездки</h2>
-  <p>Здесь показаны и параметры из предыдущего диалога. Исправьте их, если пожелания изменились. Поиск начнётся после подтверждения.</p>
   <p class="notice" role="status">{{capabilities}}</p>
   <form id="review-form" class="review-grid">
     <label>Откуда<input name="origin" value="{{origin}}" required maxlength="100"></label>
@@ -5026,7 +5203,7 @@ const cities = {
     'Санкт-Петербург': { lat: 59.9343, lng: 30.3351, timezone: '+03:00', country: 'Россия' }
 };
 const destinationInfo = {
-    'Анталья': { country: 'Турция', title: 'Два города. Одно маленькое приключение.', subtitle: 'Улицы Стамбула, а потом — море и спокойные дни в Анталье.', tags: ['Море и город', 'Для семьи', '7 ночей'], cover: 'sea', hotel: ['Lara Garden Residence', 'Old Town Family Hotel', 'Azure Coast Resort'], activity: ['Прогулка по старому городу', 'Семейный день у моря'], daily: 7900, flight: 12900 },
+    'Анталья': { country: 'Турция', title: 'Два города. Одно маленькое приключение.', subtitle: 'Улицы Стамбула, а потом - море и спокойные дни в Анталье.', tags: ['Море и город', 'Для семьи', '7 ночей'], cover: 'sea', hotel: ['Lara Garden Residence', 'Old Town Family Hotel', 'Azure Coast Resort'], activity: ['Прогулка по старому городу', 'Семейный день у моря'], daily: 7900, flight: 12900 },
     'Сочи': { country: 'Россия', title: 'К морю, ближе к горам.', subtitle: 'Неспешные прогулки по набережной и день среди горных вершин.', tags: ['Без пересадок', 'Море и горы', 'Для семьи'], cover: 'mountain', hotel: ['Зелёный мыс', 'Морской квартал', 'Гранд Парк Сочи'], activity: ['Прогулка по дендрарию', 'День в горах'], daily: 5200, flight: 8200 },
     'Тбилиси': { country: 'Грузия', title: 'Город, который умеет встречать.', subtitle: 'Старые улочки, уютные дворики и новые любимые места.', tags: ['Городские прогулки', 'Гастрономия', 'Культура'], cover: 'city', hotel: ['Courtyard Stories', 'Old Tbilisi Rooms', 'Terrace Boutique'], activity: ['Прогулка по старому Тбилиси', 'Музей и канатная дорога'], daily: 5600, flight: 11900 },
     'Калининград': { country: 'Россия', title: 'Балтика. Дюны. Время для себя.', subtitle: 'Прогулки у воды и короткие поездки к песчаным берегам.', tags: ['Короткий перелёт', 'Балтийское море', 'Прогулки'], cover: 'sea', hotel: ['Балтийские истории', 'Дом у реки', 'Amber Residence'], activity: ['Прогулка по острову Канта', 'День на Балтийском побережье'], daily: 4600, flight: 6900 }
@@ -5053,7 +5230,7 @@ function validateCriteria(c) {
     if (!Number.isInteger(c.adults) || c.adults < 1 || c.adults > 6)
         throw new Error('Выберите от 1 до 6 взрослых.');
     if (!Array.isArray(c.childrenAges) || c.childrenAges.length > 4 || c.childrenAges.some(a => !Number.isInteger(a) || a < 0 || a > 17))
-        throw new Error('Укажите до 4 детей, возраст — от 0 до 17 лет.');
+        throw new Error('Укажите до 4 детей, возраст - от 0 до 17 лет.');
     if (!Number.isFinite(c.budgetMinor) || c.budgetMinor <= 0)
         throw new Error('Бюджет должен быть больше нуля.');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(c.startDate) || !Number.isFinite(Date.parse(c.startDate)) || new Date(`${c.startDate}T12:00:00Z`).toISOString().slice(0, 10) !== c.startDate)
@@ -5347,6 +5524,10 @@ function sessionPath(sessionId) {
         throw new Error('Сначала создайте сессию.');
     return `/sessions/${encodeURIComponent(sessionId)}`;
 }
+function spokenNote(note) {
+    const text = String(note || '').trim();
+    return Boolean(text) && !text.startsWith('/') && !text.startsWith('Лимит уточнений');
+}
 function dialogText(raw) {
     const summary = String(raw.summary || '').trim();
     if (summary) {
@@ -5360,8 +5541,8 @@ function dialogText(raw) {
     const ideas = (raw.advice || []).map(idea => [idea.title || idea.city, idea.reason || idea.description].filter(Boolean).join(' — ')).filter(Boolean);
     if (ideas.length)
         return ideas.join('\n');
-    if (raw.ready_for_search) return 'Проверьте параметры поездки и подтвердите поиск.';
-    const notes = [...(raw.warnings || []), ...(raw.missing_fields || [])].filter(Boolean);
+    if (raw.ready_for_search) return 'Можно подтвердить параметры и начать поиск.';
+    const notes = [...(raw.warnings || [])].filter(note => spokenNote(note));
     if (notes.length)
         return notes.join('\n');
     return 'Сообщение принято. Маршрут появится, когда параметры можно искать.';
@@ -5379,7 +5560,7 @@ function chatFromDialog(raw) {
         value: idea.id,
         ideaId: idea.id
     }));
-    return { message: dialogText(raw), questions, actions, readyForSearch: Boolean(raw.ready_for_search), tripConfig: raw.config?.request || null, warnings: raw.warnings || [] };
+    return { message: dialogText(raw), questions, actions, readyForSearch: Boolean(raw.ready_for_search), tripConfig: raw.config?.request || null, warnings: (raw.warnings || []).filter(spokenNote) };
 }
 function frontendTrip(trip, sessionId) {
     if (!trip || !Array.isArray(trip.stops) || !Array.isArray(trip.segments))
@@ -5570,7 +5751,7 @@ function searchResult(search, sessionId, config) {
     }
     return { trip, message: notes.join('\n') || (trip ? 'Результаты поиска готовы.' : 'Подходящих вариантов не найдено. Измените даты или требования.'), actions: [], questions: [], tripConfig: config, searched: true, providerIssues: search.parts?.errors || [] };
 }
-function addDays(iso, nights) {
+function returnDateAfterNights(iso, nights) {
     const [year, month, day] = String(iso).split('-').map(Number);
     const date = new Date(year, month - 1, day);
     date.setDate(date.getDate() + Number(nights));
@@ -5580,7 +5761,7 @@ function applyCriteria(request, criteria) {
     const next = { ...(request || {}), schema_version: '1.0', locale: request?.locale || 'ru', currency: 'RUB' };
     next.origin = { ...(request?.origin || {}), city: criteria.origin };
     next.destination = { ...(request?.destination || {}), city: criteria.destination };
-    next.dates = { ...(request?.dates || {}), departure_date: criteria.startDate, nights: criteria.nights, return_date: addDays(criteria.startDate, criteria.nights) };
+    next.dates = { ...(request?.dates || {}), departure_date: criteria.startDate, nights: criteria.nights, return_date: returnDateAfterNights(criteria.startDate, criteria.nights) };
     const ages = (criteria.childrenAges || []).filter(age => Number.isInteger(age) && age >= 0);
     next.travelers = { ...(request?.travelers || {}), adults: criteria.adults, children_ages: ages };
     if (criteria.pets)
@@ -5640,7 +5821,7 @@ const api = {
         const tradeoffs = [next.segments.some(s => !s.ticket.baggage) ? 'Часть билетов включает только ручную кладь.' : '', next.stops.some(s => s.hotel?.cancellation === 'Без возврата') ? 'У части отелей выбран невозвратный тариф.' : ''].filter(Boolean).join(' ');
         return {
             trip: next,
-            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} — ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
+            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} - ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
             actions: [{ label: 'На 2 дня позже', value: 'На два дня позже' }, { label: 'Найти дешевле', value: 'Хочу дешевле' }]
         };
     },
@@ -5878,6 +6059,8 @@ class RouteMap {
             }
         });
         this.el.addEventListener('pointerdown', e => {
+            // One finger scrolls the page; two fingers explicitly manipulate the map.
+            if (e.pointerType === 'touch') return;
             if (e.target.closest('button,a'))
                 return;
             this.start = { x: e.clientX, y: e.clientY, ox: this.offset.x, oy: this.offset.y };
@@ -5894,6 +6077,35 @@ class RouteMap {
         this.up = () => { this.dragging = false; };
         window.addEventListener('pointermove', this.move);
         window.addEventListener('pointerup', this.up);
+        window.addEventListener('pointercancel', this.up);
+        this.touchStart = e => {
+            if (e.touches.length !== 2) return;
+            e.preventDefault();
+            const [a, b] = e.touches;
+            const rect = this.el.getBoundingClientRect();
+            this.gesture = { distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), zoom: this.zoom, offset: { ...this.offset }, x: (a.clientX + b.clientX) / 2 - rect.left - rect.width / 2, y: (a.clientY + b.clientY) / 2 - rect.top - rect.height / 2 };
+            this.autoFit = false;
+            this.moved = true;
+        };
+        this.touchMove = e => {
+            if (!this.gesture || e.touches.length !== 2) return;
+            e.preventDefault();
+            const [a, b] = e.touches, start = this.gesture;
+            const rect = this.el.getBoundingClientRect();
+            const scale = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / Math.max(1, start.distance);
+            this.zoom = Math.max(2, Math.min(9, start.zoom + Math.log2(Math.max(.1, scale))));
+            const factor = 2 ** (this.zoom - start.zoom);
+            this.offset = { x: (start.offset.x - start.x) * factor + (a.clientX + b.clientX) / 2 - rect.left - rect.width / 2, y: (start.offset.y - start.y) * factor + (a.clientY + b.clientY) / 2 - rect.top - rect.height / 2 };
+            this.draw();
+        };
+        this.touchEnd = e => {
+            if (e.touches.length < 2) this.gesture = null;
+            if (!e.touches.length) this.moved = false;
+        };
+        this.el.addEventListener('touchstart', this.touchStart, { passive: false });
+        this.el.addEventListener('touchmove', this.touchMove, { passive: false });
+        this.el.addEventListener('touchend', this.touchEnd);
+        this.el.addEventListener('touchcancel', this.touchEnd);
         this.observer = new ResizeObserver(() => this.draw());
         this.observer.observe(element);
         geographyReady.then(() => this.draw());
@@ -5933,25 +6145,56 @@ class RouteMap {
         const dots = points.map(s => ({ ...s, ...point(s.lng, s.lat) }));
         const unique = dots.filter((s, i) => dots.findIndex(a => a.city === s.city) === i);
         const lines = this.trip.segments.map((s, i) => { const a = dots.find(d => d.id === s.fromStopId), b = dots.find(d => d.id === s.toStopId); if (!a || !b)
-            return ''; const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} — ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
+            return ''; const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1; const bend = Math.min(80, len * .22) * (i % 2 ? -1 : 1); const cx = (a.x + b.x) / 2 - dy / len * bend, cy = (a.y + b.y) / 2 + dx / len * bend; const mx = .25 * a.x + .5 * cx + .25 * b.x, my = .25 * a.y + .5 * cy + .25 * b.y; return `<path class="route-halo" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path class="route-line" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><path tabindex="0" role="button" aria-label="Переезд ${escape(s.from)} - ${escape(s.to)}" class="route-hit" data-map-segment="${s.id}" d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}"/><g class="plane-dot" transform="translate(${mx},${my})" aria-hidden="true"><circle r="13"/><path d="m-6 1 12-5-4 11-2-5Z"/></g>`; }).join('');
         const mapLand = countries ? countries.map(feature => {
             const polygons = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry.type === 'MultiPolygon' ? feature.geometry.coordinates : [];
             return polygons.map(rings => `<path d="${rings.map(path).join(' ')}" fill="#fafbf7" stroke="#d5dfd8" stroke-width=".8" fill-rule="evenodd"/>`).join('');
         }).join('') : land.map(c => `<path d="${path(c)}" fill="#fafbf7" stroke="#d5dfd8" stroke-width="1.3"/>`).join('');
-        this.el.innerHTML = `<svg class="geographic-map" viewBox="0 0 ${w} ${h}" aria-label="Географическая карта маршрута" role="img"><defs><pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#dce6e9" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="#e8f0f3"/><rect width="100%" height="100%" fill="url(#map-grid)"/>${mapLand}${seas.map(l => { const p = point(l.lng, l.lat); return `<text class="sea-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${labels.map(l => { const p = point(l.lng, l.lat); return `<text class="country-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${lines}</svg><div class="map-markers">${unique.map((s, i) => `<button class="map-marker ${s.id === this.selectedStop ? 'active' : ''}" style="left:${s.x}px;top:${s.y}px" data-map-stop="${s.id}" aria-label="${escape(s.city)}, подробности остановки"><span class="marker-dot">${i === 0 ? '<span class="home-dot"></span>' : i}</span><span class="marker-label">${escape(s.city)}${s.nights ? `<small>${s.nights} ноч.</small>` : ''}</span></button>`).join('')}</div><div class="map-top-badge">${icon('map')} Маршрут на карте <span>· ${unique.length} города</span></div><div class="map-controls"><button data-map-control="in" aria-label="Приблизить карту">${icon('plus')}</button><button data-map-control="out" aria-label="Отдалить карту">${icon('minus')}</button><button data-map-control="fit" aria-label="Показать весь маршрут">${icon('refresh')}</button></div><div class="map-caption">${countries ? '© Natural Earth · ' : ''}Линии — связи городов, не траектории рейсов</div>`;
+        this.el.innerHTML = `<svg class="geographic-map" viewBox="0 0 ${w} ${h}" aria-label="Географическая карта маршрута" role="img"><defs><pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#dce6e9" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="#e8f0f3"/><rect width="100%" height="100%" fill="url(#map-grid)"/>${mapLand}${seas.map(l => { const p = point(l.lng, l.lat); return `<text class="sea-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${labels.map(l => { const p = point(l.lng, l.lat); return `<text class="country-label" x="${p.x}" y="${p.y}">${l.name}</text>`; }).join('')}${lines}</svg><div class="map-markers">${unique.map((s, i) => `<button class="map-marker ${s.id === this.selectedStop ? 'active' : ''}" style="left:${s.x}px;top:${s.y}px" data-map-stop="${s.id}" aria-label="${escape(s.city)}, подробности остановки"><span class="marker-dot">${i === 0 ? '<span class="home-dot"></span>' : i}</span><span class="marker-label">${escape(s.city)}${s.nights ? `<small>${s.nights} ноч.</small>` : ''}</span></button>`).join('')}</div><div class="map-top-badge">${icon('map')} Маршрут на карте <span>· ${unique.length} города</span></div><div class="map-controls"><button data-map-control="in" aria-label="Приблизить карту">${icon('plus')}</button><button data-map-control="out" aria-label="Отдалить карту">${icon('minus')}</button><button data-map-control="fit" aria-label="Показать весь маршрут">${icon('refresh')}</button></div><div class="map-caption">${countries ? '© Natural Earth · ' : ''}Линии - связи городов, не траектории рейсов</div>`;
         this.el.querySelectorAll('.route-hit').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             this.onSegment(el.dataset.mapSegment);
         } }));
     }
-    destroy() { this.observer.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); }
+    destroy() { this.observer.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); window.removeEventListener('pointercancel', this.up); this.el.removeEventListener('touchstart', this.touchStart); this.el.removeEventListener('touchmove', this.touchMove); this.el.removeEventListener('touchend', this.touchEnd); this.el.removeEventListener('touchcancel', this.touchEnd); }
 }
 
 
+// Keep chat and sheets inside the visible viewport when a mobile keyboard opens.
+function setupMobileViewport() {
+    const root = document.documentElement;
+    const viewport = window.visualViewport;
+    let width = window.innerWidth;
+    let referenceHeight = window.innerHeight;
+    let frame;
+    const update = () => {
+        const height = viewport?.height || window.innerHeight;
+        if (Math.abs(window.innerWidth - width) > 50) {
+            width = window.innerWidth;
+            referenceHeight = window.innerHeight;
+        }
+        referenceHeight = Math.max(referenceHeight, window.innerHeight, height);
+        const editing = document.activeElement?.matches('textarea, input:not([type="checkbox"]):not([type="radio"]), select');
+        const keyboard = window.matchMedia('(max-width: 760px), (max-width:1000px) and (max-height:540px) and (pointer:coarse)').matches && editing && height < referenceHeight * .78;
+        root.style.setProperty('--app-height', `${Math.round(height)}px`);
+        root.style.setProperty('--viewport-top', `${Math.round(viewport?.offsetTop || 0)}px`);
+        root.classList.toggle('keyboard-open', Boolean(keyboard));
+    };
+    const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
+    window.addEventListener('resize', schedule);
+    viewport?.addEventListener('resize', schedule);
+    viewport?.addEventListener('scroll', schedule);
+    document.addEventListener('focusin', schedule);
+    document.addEventListener('focusout', schedule);
+    update();
+}
+
+
+setupMobileViewport();
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const app = $('#app');
-const starterMessage = { role: 'assistant', text: 'Привет! Куда хочется отправиться? Можно начать с идеи: «К морю с ребёнком, до 150 тысяч». Справа — пример: из Москвы, 10 ноября, на 7 ночей, 2 взрослых и ребёнок 7 лет. Все цены и варианты демонстрационные.', actions: [{ label: 'К морю с ребёнком', value: 'К морю с ребёнком до 150 тысяч' }, { label: 'В Сочи до 100 тысяч', value: 'В Сочи до 100 тысяч' }] };
+const starterMessage = { role: 'assistant', text: 'Привет! Куда хочется отправиться? Можно начать с идеи: «К морю с ребёнком, до 150 тысяч». Пример маршрута: из Москвы, 10 ноября, на 7 ночей, 2 взрослых и ребёнок 7 лет. Все цены и варианты демонстрационные.', actions: [{ label: 'К морю с ребёнком', value: 'К морю с ребёнком до 150 тысяч' }, { label: 'В Сочи до 100 тысяч', value: 'В Сочи до 100 тысяч' }] };
 let initialTrip = isDemo ? createTrip(DEFAULT_CRITERIA) : null;
 const persisted = isDemo ? readStorage('session', null) : null;
 if (persisted?.trip && Array.isArray(persisted.trip.stops) && Array.isArray(persisted.trip.segments)) {
@@ -5969,7 +6212,17 @@ const state = {
     loginEmail: '', loginError: '', loginBusy: false, authMode: 'login', pendingSend: null,
     sessionId: isDemo ? '' : getSessionId(), answerDraft: {}, pendingConfig: null, capabilities: null, reviewOpen: false, reviewDraft: null
 };
-let map, lastFocus, toastTimer;
+let map, lastFocus, toastTimer, overlayOpen = false, overlayScroll = 0, overlayPage;
+function rememberFocus(element) {
+    const attribute = ['data-action', 'data-map-stop', 'data-map-segment'].find(name => element?.hasAttribute(name));
+    if (!attribute) { lastFocus = null; return; }
+    const selector = `[${attribute}="${CSS.escape(element.getAttribute(attribute))}"]`;
+    lastFocus = { selector, index: [...document.querySelectorAll(selector)].indexOf(element) };
+}
+function restoreFocus() {
+    if (!lastFocus) return;
+    document.querySelectorAll(lastFocus.selector)[Math.max(0, lastFocus.index)]?.focus({ preventScroll: true });
+}
 const price = amount => Number.isFinite(amount) ? money(amount, state.trip?.totals.currency || 'RUB') : 'цена неизвестна';
 const button = (text, action, cls = '', attrs = '') => view('button-button', {
     cls: cls,
@@ -5994,8 +6247,19 @@ function draftTrip() {
         return { id };
     });
 }
-function formatRange(trip = state.trip) { return trip ? `${dateLabel(trip.startDate)} — ${dateLabel(trip.endDate)}` : 'Даты поездки'; }
+function formatRange(trip = state.trip) { return trip ? `${dateLabel(trip.startDate)} - ${dateLabel(trip.endDate)}` : 'Даты поездки'; }
 function render() {
+    app.dataset.page = state.page;
+    app.dataset.mobileView = state.mobileView;
+    const nextOverlay = Boolean(state.modal || state.drawer);
+    if (nextOverlay && !overlayOpen) {
+        overlayScroll = window.scrollY;
+        overlayPage = state.page;
+        document.body.style.setProperty('--overlay-scroll-top', `-${overlayScroll}px`);
+    }
+    document.body.classList.toggle('overlay-open', nextOverlay);
+    const restoreScroll = overlayOpen && !nextOverlay && overlayPage === state.page;
+    overlayOpen = nextOverlay;
     map?.destroy();
     map = null;
     const planner = state.page === 'planner';
@@ -6023,15 +6287,17 @@ function render() {
         renderedDrawer: renderDrawer(),
         renderedModal: renderModal()
     });
-    const review = document.querySelector("#review-form");
- if (review && state.reviewDraft) {
- for (const input of review.elements) {
- if (!input.name || input.type === "submit") continue;
- if (input.type === "checkbox") input.checked = state.reviewDraft.getAll(input.name).includes(input.value);
- else if (state.reviewDraft.has(input.name)) input.value = state.reviewDraft.get(input.name);
- }
- }
- if (planner && state.trip && !state.reviewOpen) {
+    $('.app-shell').inert = nextOverlay;
+    if (restoreScroll) window.scrollTo({ top: overlayScroll, behavior: 'instant' });
+    const review = document.querySelector('#review-form');
+    if (review && state.reviewDraft) {
+        for (const input of review.elements) {
+            if (!input.name || input.type === 'submit') continue;
+            if (input.type === 'checkbox') input.checked = state.reviewDraft.getAll(input.name).includes(input.value);
+            else if (state.reviewDraft.has(input.name)) input.value = state.reviewDraft.get(input.name);
+        }
+    }
+    if (planner && state.trip && !state.reviewOpen) {
         map = new RouteMap($('#route-map'), { onStop: id => openDrawer('stop', id), onSegment: id => openDrawer('segment', id) });
         map.update(state.trip, state.drawer?.type === 'stop' ? state.drawer.id : null);
     }
@@ -6046,8 +6312,8 @@ function render() {
 function renderPlanner() {
     return view('render-planner-workspace', {
         conditional: state.mobileView === 'chat' ? 'mobile-chat' : '',
-        mobileChatButton: button(`${icon('chat')} Чат`, 'mobile-chat', state.mobileView === 'chat' ? 'active' : ''),
-        mobileRouteButton: button(`${icon('map')} Маршрут`, 'mobile-route', state.mobileView === 'route' ? 'active' : ''),
+        mobileChatButton: button(`${icon('chat')} Чат`, 'mobile-chat', state.mobileView === 'chat' ? 'active' : '', `aria-pressed="${state.mobileView === 'chat'}" aria-controls="chat-panel"`),
+        mobileRouteButton: button(`${icon('map')} Маршрут`, 'mobile-route', state.mobileView === 'route' ? 'active' : '', `aria-pressed="${state.mobileView === 'route'}" aria-controls="trip-panel"`),
         sparkIcon: icon('spark'),
         conditional2: isDemo ? 'Демо-помощник · готов к идеям' : 'Помощник по путешествиям',
         stateMessages: state.messages.map((m, i) => view('render-planner-message', {
@@ -6063,7 +6329,7 @@ function renderPlanner() {
                     fields: m.questions.map(question => view('render-planner-question', {
                         text: esc(question.text),
                         questionId: esc(question.questionId),
- inputType: ["date","number"].includes(question.inputType) ? question.inputType : "text",
+                        inputType: 'text',
                         value: esc(state.answerDraft[question.questionId] || ''),
                         required: question.required ? 'required' : ''
                     })).join('')
@@ -6100,7 +6366,7 @@ function renderTrip() {
     return view('render-trip-trip-intro', {
         tTitle: esc(t.title),
         tSubtitle: esc(t.subtitle),
-        newTripButton: button(icon('plus') + ' Новая поездка', 'new-trip', 'button-light new-trip'),
+        newTripButton: button(icon('plus') + ' Новая поездка', 'new-trip', 'button-light new-trip', 'aria-label="Начать новую поездку" title="Начать новую поездку"'),
         editCriteriaButton: button(`${icon('calendar')} ${formatRange()}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton2: button(`${icon('user')} ${guestsLabel(c)}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton3: button(`${icon('wallet')} ${Number.isFinite(c.budgetMinor) ? `до ${price(c.budgetMinor)}` : 'бюджет не задан'}`, 'edit-criteria', 'criteria-chip'),
@@ -6187,7 +6453,7 @@ function renderItinerary() { const t = state.trip; return view('render-itinerary
         conditional4: i === 0 ? icon('pin') : i === t.stops.length - 1 ? icon('check') : i,
         sCity: esc(s.city),
         sCountry: esc(s.country),
-        conditional5: s.nights ? `${dateLabel(s.arrival)} — ${dateLabel(s.departure)} · ${s.nights} ноч.` : i === 0 ? `Отправление ${dateLabel(s.departure)}, ${localTime(s.departure)}` : `Возвращение ${dateLabel(s.arrival)}, ${localTime(s.arrival)}`,
+        conditional5: s.nights ? `${dateLabel(s.arrival)} - ${dateLabel(s.departure)} · ${s.nights} ноч.` : i === 0 ? `Отправление ${dateLabel(s.departure)}, ${localTime(s.departure)}` : `Возвращение ${dateLabel(s.arrival)}, ${localTime(s.arrival)}`,
         stopButton: button(s.nights ? 'Подробнее ' + icon('chevron') : icon('chevron'), 'stop', 'icon-link', `data-id="${s.id}" aria-label="Подробнее: ${esc(s.city)}"`),
         conditional6: s.hotel ? view('render-itinerary-hotel-mini', {
             cover: s.hotel.cover,
@@ -6367,7 +6633,7 @@ function renderHistory() { const history = state.history; return view('render-hi
         plannerButton: button('Составить поездку', 'planner', 'primary')
     })
 }); }
-function openDrawer(type, id) { lastFocus = document.activeElement; state.drawer = { type, id }; render(); }
+function openDrawer(type, id) { rememberFocus(document.activeElement); state.drawer = { type, id }; render(); }
 function renderDrawer() {
     if (!state.drawer || !state.trip)
         return '';
@@ -6618,7 +6884,7 @@ async function navigate(page) { state.page = page; state.drawer = null; state.mo
     }
 } render(); window.scrollTo({ top: 0, behavior: 'instant' }); }
 function closeOverlay() { if (state.bookingBusy || state.loginBusy)
-    return; state.drawer = null; state.modal = null; render(); lastFocus?.focus?.(); }
+    return; state.drawer = null; state.modal = null; render(); restoreFocus(); }
 function showLogin(error) { if (!(error instanceof UnauthorizedError))
     return; state.loginError = ''; state.modal = 'login'; }
 app.addEventListener('click', async (e) => {
@@ -6652,6 +6918,7 @@ app.addEventListener('click', async (e) => {
     if (action === 'mobile-chat' || action === 'mobile-route') {
         state.mobileView = action === 'mobile-chat' ? 'chat' : 'route';
         render();
+        window.scrollTo({ top: 0, behavior: 'instant' });
     }
     if (action === 'quick') {
         await send(target.dataset.text);
@@ -6690,12 +6957,12 @@ app.addEventListener('click', async (e) => {
  return;
  }
  if (action === 'edit-criteria') {
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'criteria';
         render();
     }
     if (action === 'new-trip') {
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'new-trip';
         render();
     }
@@ -6755,7 +7022,7 @@ app.addEventListener('click', async (e) => {
             notify('Дождитесь обновления поездки.');
             return;
         }
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'booking';
         render();
     }

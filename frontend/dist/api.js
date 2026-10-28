@@ -357,7 +357,7 @@ function searchResult(search, sessionId, config) {
     }
     return { trip, message: notes.join('\n') || (trip ? 'Результаты поиска готовы.' : 'Подходящих вариантов не найдено. Измените даты или требования.'), actions: [], questions: [], tripConfig: config, searched: true, providerIssues: search.parts?.errors || [] };
 }
-function addDays(iso, nights) {
+function returnDateAfterNights(iso, nights) {
     const [year, month, day] = String(iso).split('-').map(Number);
     const date = new Date(year, month - 1, day);
     date.setDate(date.getDate() + Number(nights));
@@ -367,7 +367,7 @@ function applyCriteria(request, criteria) {
     const next = { ...(request || {}), schema_version: '1.0', locale: request?.locale || 'ru', currency: 'RUB' };
     next.origin = { ...(request?.origin || {}), city: criteria.origin };
     next.destination = { ...(request?.destination || {}), city: criteria.destination };
-    next.dates = { ...(request?.dates || {}), departure_date: criteria.startDate, nights: criteria.nights, return_date: addDays(criteria.startDate, criteria.nights) };
+    next.dates = { ...(request?.dates || {}), departure_date: criteria.startDate, nights: criteria.nights, return_date: returnDateAfterNights(criteria.startDate, criteria.nights) };
     const ages = (criteria.childrenAges || []).filter(age => Number.isInteger(age) && age >= 0);
     next.travelers = { ...(request?.travelers || {}), adults: criteria.adults, children_ages: ages };
     if (criteria.pets)
@@ -427,7 +427,7 @@ export const api = {
         const tradeoffs = [next.segments.some(s => !s.ticket.baggage) ? 'Часть билетов включает только ручную кладь.' : '', next.stops.some(s => s.hotel?.cancellation === 'Без возврата') ? 'У части отелей выбран невозвратный тариф.' : ''].filter(Boolean).join(' ');
         return {
             trip: next,
-            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} — ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
+            message: `${changes.length ? changes.join(', ').replace(/^./, c => c.toUpperCase()) : 'Обновил поездку'}. ${next.stops.filter(s => s.nights).map(s => `${s.city} - ${s.nights} ночей`).join(', ')}. Полная стоимость: ${money(next.totals.totalMinor)} на всех гостей, включая трансферы.${overBudget ? ' Вариант выше бюджета: попробуйте сократить поездку или выбрать другое направление.' : ' Можно сравнить билеты и отели в карточках справа.'}${tradeoffs ? ` ${tradeoffs}` : ''}${next.criteria.pets ? ' Доплата за перевозку питомца требует уточнения и пока не включена.' : ''}`,
             actions: [{ label: 'На 2 дня позже', value: 'На два дня позже' }, { label: 'Найти дешевле', value: 'Хочу дешевле' }]
         };
     },

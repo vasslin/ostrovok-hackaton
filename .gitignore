@@ -23,3 +23,4 @@ Thumbs.db
 !.env.example
 tmp/
 *.tmp
+/travel-demo.html

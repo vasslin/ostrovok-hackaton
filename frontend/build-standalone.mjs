@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const read = name => readFile(resolve(root, 'dist', name), 'utf8');
-const files = ['planning.js', 'icons.js', 'model.js', 'api.js', 'templates.js', 'map.js', 'app.js'];
+const files = ['planning.js', 'icons.js', 'model.js', 'api.js', 'templates.js', 'map.js', 'mobile.js', 'app.js'];
 const geography = JSON.parse(await read('assets/countries.geojson'));
 
 const modules = [];

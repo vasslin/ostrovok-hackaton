@@ -4,10 +4,12 @@ import { icon } from './icons.js';
 import { DEFAULT_CRITERIA, cities, createTrip, money, dateLabel, localTime, guestsLabel } from './model.js';
 import { api, isDemo, readStorage, writeStorage, saveDemoBooking, UnauthorizedError, getAccessToken, getSessionId } from './api.js';
 import { RouteMap } from './map.js';
+import { setupMobileViewport } from './mobile.js';
+setupMobileViewport();
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const app = $('#app');
-const starterMessage = { role: 'assistant', text: 'Привет! Куда хочется отправиться? Можно начать с идеи: «К морю с ребёнком, до 150 тысяч». Справа — пример: из Москвы, 10 ноября, на 7 ночей, 2 взрослых и ребёнок 7 лет. Все цены и варианты демонстрационные.', actions: [{ label: 'К морю с ребёнком', value: 'К морю с ребёнком до 150 тысяч' }, { label: 'В Сочи до 100 тысяч', value: 'В Сочи до 100 тысяч' }] };
+const starterMessage = { role: 'assistant', text: 'Привет! Куда хочется отправиться? Можно начать с идеи: «К морю с ребёнком, до 150 тысяч». Пример маршрута: из Москвы, 10 ноября, на 7 ночей, 2 взрослых и ребёнок 7 лет. Все цены и варианты демонстрационные.', actions: [{ label: 'К морю с ребёнком', value: 'К морю с ребёнком до 150 тысяч' }, { label: 'В Сочи до 100 тысяч', value: 'В Сочи до 100 тысяч' }] };
 let initialTrip = isDemo ? createTrip(DEFAULT_CRITERIA) : null;
 const persisted = isDemo ? readStorage('session', null) : null;
 if (persisted?.trip && Array.isArray(persisted.trip.stops) && Array.isArray(persisted.trip.segments)) {
@@ -25,7 +27,17 @@ const state = {
     loginEmail: '', loginError: '', loginBusy: false, authMode: 'login', pendingSend: null,
     sessionId: isDemo ? '' : getSessionId(), answerDraft: {}, pendingConfig: null, capabilities: null, reviewOpen: false, reviewDraft: null
 };
-let map, lastFocus, toastTimer;
+let map, lastFocus, toastTimer, overlayOpen = false, overlayScroll = 0, overlayPage;
+function rememberFocus(element) {
+    const attribute = ['data-action', 'data-map-stop', 'data-map-segment'].find(name => element?.hasAttribute(name));
+    if (!attribute) { lastFocus = null; return; }
+    const selector = `[${attribute}="${CSS.escape(element.getAttribute(attribute))}"]`;
+    lastFocus = { selector, index: [...document.querySelectorAll(selector)].indexOf(element) };
+}
+function restoreFocus() {
+    if (!lastFocus) return;
+    document.querySelectorAll(lastFocus.selector)[Math.max(0, lastFocus.index)]?.focus({ preventScroll: true });
+}
 const price = amount => Number.isFinite(amount) ? money(amount, state.trip?.totals.currency || 'RUB') : 'цена неизвестна';
 const button = (text, action, cls = '', attrs = '') => view('button-button', {
     cls: cls,
@@ -50,8 +62,19 @@ function draftTrip() {
         return { id };
     });
 }
-function formatRange(trip = state.trip) { return trip ? `${dateLabel(trip.startDate)} — ${dateLabel(trip.endDate)}` : 'Даты поездки'; }
+function formatRange(trip = state.trip) { return trip ? `${dateLabel(trip.startDate)} - ${dateLabel(trip.endDate)}` : 'Даты поездки'; }
 function render() {
+    app.dataset.page = state.page;
+    app.dataset.mobileView = state.mobileView;
+    const nextOverlay = Boolean(state.modal || state.drawer);
+    if (nextOverlay && !overlayOpen) {
+        overlayScroll = window.scrollY;
+        overlayPage = state.page;
+        document.body.style.setProperty('--overlay-scroll-top', `-${overlayScroll}px`);
+    }
+    document.body.classList.toggle('overlay-open', nextOverlay);
+    const restoreScroll = overlayOpen && !nextOverlay && overlayPage === state.page;
+    overlayOpen = nextOverlay;
     map?.destroy();
     map = null;
     const planner = state.page === 'planner';
@@ -79,15 +102,17 @@ function render() {
         renderedDrawer: renderDrawer(),
         renderedModal: renderModal()
     });
-    const review = document.querySelector("#review-form");
- if (review && state.reviewDraft) {
- for (const input of review.elements) {
- if (!input.name || input.type === "submit") continue;
- if (input.type === "checkbox") input.checked = state.reviewDraft.getAll(input.name).includes(input.value);
- else if (state.reviewDraft.has(input.name)) input.value = state.reviewDraft.get(input.name);
- }
- }
- if (planner && state.trip && !state.reviewOpen) {
+    $('.app-shell').inert = nextOverlay;
+    if (restoreScroll) window.scrollTo({ top: overlayScroll, behavior: 'instant' });
+    const review = document.querySelector('#review-form');
+    if (review && state.reviewDraft) {
+        for (const input of review.elements) {
+            if (!input.name || input.type === 'submit') continue;
+            if (input.type === 'checkbox') input.checked = state.reviewDraft.getAll(input.name).includes(input.value);
+            else if (state.reviewDraft.has(input.name)) input.value = state.reviewDraft.get(input.name);
+        }
+    }
+    if (planner && state.trip && !state.reviewOpen) {
         map = new RouteMap($('#route-map'), { onStop: id => openDrawer('stop', id), onSegment: id => openDrawer('segment', id) });
         map.update(state.trip, state.drawer?.type === 'stop' ? state.drawer.id : null);
     }
@@ -102,8 +127,8 @@ function render() {
 function renderPlanner() {
     return view('render-planner-workspace', {
         conditional: state.mobileView === 'chat' ? 'mobile-chat' : '',
-        mobileChatButton: button(`${icon('chat')} Чат`, 'mobile-chat', state.mobileView === 'chat' ? 'active' : ''),
-        mobileRouteButton: button(`${icon('map')} Маршрут`, 'mobile-route', state.mobileView === 'route' ? 'active' : ''),
+        mobileChatButton: button(`${icon('chat')} Чат`, 'mobile-chat', state.mobileView === 'chat' ? 'active' : '', `aria-pressed="${state.mobileView === 'chat'}" aria-controls="chat-panel"`),
+        mobileRouteButton: button(`${icon('map')} Маршрут`, 'mobile-route', state.mobileView === 'route' ? 'active' : '', `aria-pressed="${state.mobileView === 'route'}" aria-controls="trip-panel"`),
         sparkIcon: icon('spark'),
         conditional2: isDemo ? 'Демо-помощник · готов к идеям' : 'Помощник по путешествиям',
         stateMessages: state.messages.map((m, i) => view('render-planner-message', {
@@ -156,7 +181,7 @@ function renderTrip() {
     return view('render-trip-trip-intro', {
         tTitle: esc(t.title),
         tSubtitle: esc(t.subtitle),
-        newTripButton: button(icon('plus') + ' Новая поездка', 'new-trip', 'button-light new-trip'),
+        newTripButton: button(icon('plus') + ' Новая поездка', 'new-trip', 'button-light new-trip', 'aria-label="Начать новую поездку" title="Начать новую поездку"'),
         editCriteriaButton: button(`${icon('calendar')} ${formatRange()}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton2: button(`${icon('user')} ${guestsLabel(c)}`, 'edit-criteria', 'criteria-chip'),
         editCriteriaButton3: button(`${icon('wallet')} ${Number.isFinite(c.budgetMinor) ? `до ${price(c.budgetMinor)}` : 'бюджет не задан'}`, 'edit-criteria', 'criteria-chip'),
@@ -243,7 +268,7 @@ function renderItinerary() { const t = state.trip; return view('render-itinerary
         conditional4: i === 0 ? icon('pin') : i === t.stops.length - 1 ? icon('check') : i,
         sCity: esc(s.city),
         sCountry: esc(s.country),
-        conditional5: s.nights ? `${dateLabel(s.arrival)} — ${dateLabel(s.departure)} · ${s.nights} ноч.` : i === 0 ? `Отправление ${dateLabel(s.departure)}, ${localTime(s.departure)}` : `Возвращение ${dateLabel(s.arrival)}, ${localTime(s.arrival)}`,
+        conditional5: s.nights ? `${dateLabel(s.arrival)} - ${dateLabel(s.departure)} · ${s.nights} ноч.` : i === 0 ? `Отправление ${dateLabel(s.departure)}, ${localTime(s.departure)}` : `Возвращение ${dateLabel(s.arrival)}, ${localTime(s.arrival)}`,
         stopButton: button(s.nights ? 'Подробнее ' + icon('chevron') : icon('chevron'), 'stop', 'icon-link', `data-id="${s.id}" aria-label="Подробнее: ${esc(s.city)}"`),
         conditional6: s.hotel ? view('render-itinerary-hotel-mini', {
             cover: s.hotel.cover,
@@ -423,7 +448,7 @@ function renderHistory() { const history = state.history; return view('render-hi
         plannerButton: button('Составить поездку', 'planner', 'primary')
     })
 }); }
-function openDrawer(type, id) { lastFocus = document.activeElement; state.drawer = { type, id }; render(); }
+function openDrawer(type, id) { rememberFocus(document.activeElement); state.drawer = { type, id }; render(); }
 function renderDrawer() {
     if (!state.drawer || !state.trip)
         return '';
@@ -674,7 +699,7 @@ async function navigate(page) { state.page = page; state.drawer = null; state.mo
     }
 } render(); window.scrollTo({ top: 0, behavior: 'instant' }); }
 function closeOverlay() { if (state.bookingBusy || state.loginBusy)
-    return; state.drawer = null; state.modal = null; render(); lastFocus?.focus?.(); }
+    return; state.drawer = null; state.modal = null; render(); restoreFocus(); }
 function showLogin(error) { if (!(error instanceof UnauthorizedError))
     return; state.loginError = ''; state.modal = 'login'; }
 app.addEventListener('click', async (e) => {
@@ -708,6 +733,7 @@ app.addEventListener('click', async (e) => {
     if (action === 'mobile-chat' || action === 'mobile-route') {
         state.mobileView = action === 'mobile-chat' ? 'chat' : 'route';
         render();
+        window.scrollTo({ top: 0, behavior: 'instant' });
     }
     if (action === 'quick') {
         await send(target.dataset.text);
@@ -746,12 +772,12 @@ app.addEventListener('click', async (e) => {
  return;
  }
  if (action === 'edit-criteria') {
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'criteria';
         render();
     }
     if (action === 'new-trip') {
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'new-trip';
         render();
     }
@@ -811,7 +837,7 @@ app.addEventListener('click', async (e) => {
             notify('Дождитесь обновления поездки.');
             return;
         }
-        lastFocus = target;
+        rememberFocus(target);
         state.modal = 'booking';
         render();
     }
