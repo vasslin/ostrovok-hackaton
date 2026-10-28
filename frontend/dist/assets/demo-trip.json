@@ -1,0 +1,447 @@
+{
+  "id": "trip-demo",
+  "revision": 1,
+  "status": "draft",
+  "demo": true,
+  "title": "Два города. Одно маленькое приключение.",
+  "subtitle": "Улицы Стамбула, а потом — море и спокойные дни в Анталье.",
+  "criteria": {
+    "origin": "Москва",
+    "destination": "Анталья",
+    "startDate": "2026-11-10",
+    "nights": 7,
+    "adults": 2,
+    "childrenAges": [
+      7
+    ],
+    "budgetMinor": 15000000,
+    "currency": "RUB",
+    "pets": false
+  },
+  "startDate": "2026-11-10",
+  "endDate": "2026-11-17",
+  "stops": [
+    {
+      "id": "stop-0",
+      "city": "Москва",
+      "country": "Россия",
+      "lat": 55.7558,
+      "lng": 37.6173,
+      "arrival": "2026-11-10T07:00:00+03:00",
+      "departure": "2026-11-10T08:00:00+03:00",
+      "nights": 0,
+      "hotelOptions": [],
+      "hotel": null,
+      "activities": []
+    },
+    {
+      "id": "stop-1",
+      "city": "Стамбул",
+      "country": "Турция",
+      "lat": 41.0082,
+      "lng": 28.9784,
+      "arrival": "2026-11-10T12:30:00+03:00",
+      "departure": "2026-11-12T08:00:00+03:00",
+      "nights": 2,
+      "hotelOptions": [
+        {
+          "id": "hotel-Стамбул-0",
+          "name": "Pera Family House",
+          "city": "Стамбул",
+          "rating": 9.2,
+          "stars": 4,
+          "priceMinor": 1180000,
+          "nightlyMinor": 590000,
+          "nights": 2,
+          "rooms": 1,
+          "petsAllowed": false,
+          "cancellation": "Бесплатная отмена за 7 дней",
+          "meals": "Завтрак включён",
+          "distance": "1,2 км от центра",
+          "cover": "city",
+          "demo": true
+        },
+        {
+          "id": "hotel-Стамбул-1",
+          "name": "Golden Horn Rooms",
+          "city": "Стамбул",
+          "rating": 8.7,
+          "stars": 3,
+          "priceMinor": 849600,
+          "nightlyMinor": 424800,
+          "nights": 2,
+          "rooms": 1,
+          "petsAllowed": true,
+          "cancellation": "Без возврата",
+          "meals": "Завтрак включён",
+          "distance": "В центре",
+          "cover": "city",
+          "demo": true
+        },
+        {
+          "id": "hotel-Стамбул-2",
+          "name": "Bosphorus Garden",
+          "city": "Стамбул",
+          "rating": 9.6,
+          "stars": 5,
+          "priceMinor": 1652000,
+          "nightlyMinor": 826000,
+          "nights": 2,
+          "rooms": 1,
+          "petsAllowed": true,
+          "cancellation": "Бесплатная отмена за 7 дней",
+          "meals": "Завтрак и ужин",
+          "distance": "У набережной",
+          "cover": "city",
+          "demo": true
+        }
+      ],
+      "hotel": {
+        "id": "hotel-Стамбул-0",
+        "name": "Pera Family House",
+        "city": "Стамбул",
+        "rating": 9.2,
+        "stars": 4,
+        "priceMinor": 1180000,
+        "nightlyMinor": 590000,
+        "nights": 2,
+        "rooms": 1,
+        "petsAllowed": false,
+        "cancellation": "Бесплатная отмена за 7 дней",
+        "meals": "Завтрак включён",
+        "distance": "1,2 км от центра",
+        "cover": "city",
+        "demo": true
+      },
+      "activities": [
+        {
+          "id": "act-stop-1-0",
+          "name": "Прогулка по Султанахмету",
+          "duration": "1,5 часа",
+          "priceMinor": 0,
+          "note": "Самостоятельная прогулка · без билетов",
+          "demo": true
+        },
+        {
+          "id": "act-stop-1-1",
+          "name": "Прогулка у Босфора",
+          "duration": "2 часа",
+          "priceMinor": 0,
+          "note": "Самостоятельная прогулка · без билетов",
+          "demo": true
+        }
+      ]
+    },
+    {
+      "id": "stop-2",
+      "city": "Анталья",
+      "country": "Турция",
+      "lat": 36.8969,
+      "lng": 30.7133,
+      "arrival": "2026-11-12T12:30:00+03:00",
+      "departure": "2026-11-17T08:00:00+03:00",
+      "nights": 5,
+      "hotelOptions": [
+        {
+          "id": "hotel-Анталья-0",
+          "name": "Lara Garden Residence",
+          "city": "Анталья",
+          "rating": 9.2,
+          "stars": 4,
+          "priceMinor": 3950000,
+          "nightlyMinor": 790000,
+          "nights": 5,
+          "rooms": 1,
+          "petsAllowed": false,
+          "cancellation": "Бесплатная отмена за 7 дней",
+          "meals": "Завтрак включён",
+          "distance": "1,2 км от центра",
+          "cover": "sea",
+          "demo": true
+        },
+        {
+          "id": "hotel-Анталья-1",
+          "name": "Old Town Family Hotel",
+          "city": "Анталья",
+          "rating": 8.7,
+          "stars": 3,
+          "priceMinor": 2844000,
+          "nightlyMinor": 568800,
+          "nights": 5,
+          "rooms": 1,
+          "petsAllowed": true,
+          "cancellation": "Без возврата",
+          "meals": "Завтрак включён",
+          "distance": "В центре",
+          "cover": "sea",
+          "demo": true
+        },
+        {
+          "id": "hotel-Анталья-2",
+          "name": "Azure Coast Resort",
+          "city": "Анталья",
+          "rating": 9.6,
+          "stars": 5,
+          "priceMinor": 5530000,
+          "nightlyMinor": 1106000,
+          "nights": 5,
+          "rooms": 1,
+          "petsAllowed": true,
+          "cancellation": "Бесплатная отмена за 7 дней",
+          "meals": "Завтрак и ужин",
+          "distance": "У набережной",
+          "cover": "sea",
+          "demo": true
+        }
+      ],
+      "hotel": {
+        "id": "hotel-Анталья-0",
+        "name": "Lara Garden Residence",
+        "city": "Анталья",
+        "rating": 9.2,
+        "stars": 4,
+        "priceMinor": 3950000,
+        "nightlyMinor": 790000,
+        "nights": 5,
+        "rooms": 1,
+        "petsAllowed": false,
+        "cancellation": "Бесплатная отмена за 7 дней",
+        "meals": "Завтрак включён",
+        "distance": "1,2 км от центра",
+        "cover": "sea",
+        "demo": true
+      },
+      "activities": [
+        {
+          "id": "act-stop-2-0",
+          "name": "Прогулка по старому городу",
+          "duration": "1,5 часа",
+          "priceMinor": 0,
+          "note": "Самостоятельная прогулка · без билетов",
+          "demo": true
+        },
+        {
+          "id": "act-stop-2-1",
+          "name": "Семейный день у моря",
+          "duration": "2 часа",
+          "priceMinor": 0,
+          "note": "Самостоятельная прогулка · без билетов",
+          "demo": true
+        }
+      ]
+    },
+    {
+      "id": "stop-3",
+      "city": "Москва",
+      "country": "Россия",
+      "lat": 55.7558,
+      "lng": 37.6173,
+      "arrival": "2026-11-17T12:30:00+03:00",
+      "departure": "2026-11-17T15:00:00+03:00",
+      "nights": 0,
+      "hotelOptions": [],
+      "hotel": null,
+      "activities": []
+    }
+  ],
+  "segments": [
+    {
+      "id": "segment-0",
+      "fromStopId": "stop-0",
+      "toStopId": "stop-1",
+      "from": "Москва",
+      "to": "Стамбул",
+      "options": [
+        {
+          "id": "ticket-Москва-Стамбул-0",
+          "carrier": "Demo Air",
+          "number": "DM 1200",
+          "type": "flight",
+          "departure": "2026-11-10T08:00:00+03:00",
+          "arrival": "2026-11-10T12:30:00+03:00",
+          "priceMinor": 2834000,
+          "baggage": true,
+          "refundable": false,
+          "petsAllowed": true,
+          "demo": true
+        },
+        {
+          "id": "ticket-Москва-Стамбул-1",
+          "carrier": "Travel Airlines",
+          "number": "DM 1211",
+          "type": "flight",
+          "departure": "2026-11-10T11:00:00+03:00",
+          "arrival": "2026-11-10T15:30:00+03:00",
+          "priceMinor": 2352220,
+          "baggage": false,
+          "refundable": false,
+          "petsAllowed": false,
+          "demo": true
+        },
+        {
+          "id": "ticket-Москва-Стамбул-2",
+          "carrier": "Sky Routes",
+          "number": "DM 1222",
+          "type": "flight",
+          "departure": "2026-11-10T14:00:00+03:00",
+          "arrival": "2026-11-10T18:30:00+03:00",
+          "priceMinor": 3457480,
+          "baggage": true,
+          "refundable": true,
+          "petsAllowed": true,
+          "demo": true
+        }
+      ],
+      "ticket": {
+        "id": "ticket-Москва-Стамбул-0",
+        "carrier": "Demo Air",
+        "number": "DM 1200",
+        "type": "flight",
+        "departure": "2026-11-10T08:00:00+03:00",
+        "arrival": "2026-11-10T12:30:00+03:00",
+        "priceMinor": 2834000,
+        "baggage": true,
+        "refundable": false,
+        "petsAllowed": true,
+        "demo": true
+      }
+    },
+    {
+      "id": "segment-1",
+      "fromStopId": "stop-1",
+      "toStopId": "stop-2",
+      "from": "Стамбул",
+      "to": "Анталья",
+      "options": [
+        {
+          "id": "ticket-Стамбул-Анталья-0",
+          "carrier": "Demo Air",
+          "number": "DM 1300",
+          "type": "flight",
+          "departure": "2026-11-12T08:00:00+03:00",
+          "arrival": "2026-11-12T12:30:00+03:00",
+          "priceMinor": 884000,
+          "baggage": true,
+          "refundable": false,
+          "petsAllowed": true,
+          "demo": true
+        },
+        {
+          "id": "ticket-Стамбул-Анталья-1",
+          "carrier": "Travel Airlines",
+          "number": "DM 1311",
+          "type": "flight",
+          "departure": "2026-11-12T11:00:00+03:00",
+          "arrival": "2026-11-12T15:30:00+03:00",
+          "priceMinor": 733720,
+          "baggage": false,
+          "refundable": false,
+          "petsAllowed": false,
+          "demo": true
+        },
+        {
+          "id": "ticket-Стамбул-Анталья-2",
+          "carrier": "Sky Routes",
+          "number": "DM 1322",
+          "type": "flight",
+          "departure": "2026-11-12T14:00:00+03:00",
+          "arrival": "2026-11-12T18:30:00+03:00",
+          "priceMinor": 1078480,
+          "baggage": true,
+          "refundable": true,
+          "petsAllowed": true,
+          "demo": true
+        }
+      ],
+      "ticket": {
+        "id": "ticket-Стамбул-Анталья-0",
+        "carrier": "Demo Air",
+        "number": "DM 1300",
+        "type": "flight",
+        "departure": "2026-11-12T08:00:00+03:00",
+        "arrival": "2026-11-12T12:30:00+03:00",
+        "priceMinor": 884000,
+        "baggage": true,
+        "refundable": false,
+        "petsAllowed": true,
+        "demo": true
+      }
+    },
+    {
+      "id": "segment-2",
+      "fromStopId": "stop-2",
+      "toStopId": "stop-3",
+      "from": "Анталья",
+      "to": "Москва",
+      "options": [
+        {
+          "id": "ticket-Анталья-Москва-0",
+          "carrier": "Demo Air",
+          "number": "DM 1400",
+          "type": "flight",
+          "departure": "2026-11-17T08:00:00+03:00",
+          "arrival": "2026-11-17T12:30:00+03:00",
+          "priceMinor": 3354000,
+          "baggage": true,
+          "refundable": false,
+          "petsAllowed": true,
+          "demo": true
+        },
+        {
+          "id": "ticket-Анталья-Москва-1",
+          "carrier": "Travel Airlines",
+          "number": "DM 1411",
+          "type": "flight",
+          "departure": "2026-11-17T11:00:00+03:00",
+          "arrival": "2026-11-17T15:30:00+03:00",
+          "priceMinor": 2783820,
+          "baggage": false,
+          "refundable": false,
+          "petsAllowed": false,
+          "demo": true
+        },
+        {
+          "id": "ticket-Анталья-Москва-2",
+          "carrier": "Sky Routes",
+          "number": "DM 1422",
+          "type": "flight",
+          "departure": "2026-11-17T14:00:00+03:00",
+          "arrival": "2026-11-17T18:30:00+03:00",
+          "priceMinor": 4091880,
+          "baggage": true,
+          "refundable": true,
+          "petsAllowed": true,
+          "demo": true
+        }
+      ],
+      "ticket": {
+        "id": "ticket-Анталья-Москва-0",
+        "carrier": "Demo Air",
+        "number": "DM 1400",
+        "type": "flight",
+        "departure": "2026-11-17T08:00:00+03:00",
+        "arrival": "2026-11-17T12:30:00+03:00",
+        "priceMinor": 3354000,
+        "baggage": true,
+        "refundable": false,
+        "petsAllowed": true,
+        "demo": true
+      }
+    }
+  ],
+  "totals": {
+    "currency": "RUB",
+    "transportMinor": 7072000,
+    "hotelsMinor": 5130000,
+    "transferMinor": 360000,
+    "activitiesMinor": 0,
+    "totalMinor": 12562000
+  },
+  "warnings": [],
+  "tags": [
+    "Море и город",
+    "Для семьи",
+    "7 ночей"
+  ],
+  "cover": "sea"
+}
