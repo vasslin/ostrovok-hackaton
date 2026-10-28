@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -217,6 +218,37 @@ func TestParaphrasedOriginUpdatesConfig(t *testing.T) {
 	}
 	if out.Config == nil || out.Config.Trip == nil || out.Config.Trip.Origin == nil || out.Config.Trip.Origin.City != "Санкт-Петербург" || out.Config.Trip.DateRange == nil || out.Config.Trip.DateRange.StartDate == nil || *out.Config.Trip.DateRange.StartDate != "2026-11-04" {
 		t.Fatalf("free wording was dropped: %+v", out.Config)
+	}
+}
+func TestTypoMonthBecomesNovember(t *testing.T) {
+	paris := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Destinations: []PlanningPlace{{City: "Париж"}}}}
+	wrong := PlanningConfig{Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, DateRange: &PlanningDates{StartDate: ptr("2026-10-29")}, Travelers: &PlanningTravelers{Adults: ptr(2)}}}
+	completion := planningCompletion{Status: "questions", Summary: "Вот описание вашей поездки: вы едете из санкт-петербург в париж с выездом 2026-10-29, 2 взрослых.", Config: &wrong, Evidence: []PlanningEvidence{{Field: "trip.origin.city", Quote: "питер"}, {Field: "trip.date_range.start_date", Quote: "1 нябра"}, {Field: "trip.travelers.adults", Quote: "1 нябра"}}}
+	svc, _ := planningService(t, completion, nil)
+	out, err := svc.AnalyzeCanonical(context.Background(), PlanningInput{Text: "питер, 1 нябра", Config: paris, CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := out.Config.Request
+	if request.Origin.City != "Санкт-Петербург" || request.Dates.DepartureDate != "2026-11-01" || request.Travelers.Adults != 0 || strings.Contains(out.Summary, "2026-10-29") || strings.Contains(out.Summary, "2 взрослых") {
+		t.Fatalf("typo was not corrected: %+v summary=%s", request, out.Summary)
+	}
+}
+func TestBareNicknameFillsMissingOrigin(t *testing.T) {
+	paris := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Destinations: []PlanningPlace{{City: "Париж"}}, DateRange: &PlanningDates{StartDate: ptr("2026-11-03")}}}
+	echo := paris
+	summary := "Вот описание вашей поездки: вы едете в париж с выездом 2026-11-03. Вам ещё нужно назвать: город отправления, дата возвращения, число взрослых."
+	svc, _ := planningService(t, planningCompletion{Status: "questions", Config: &echo, Summary: summary}, nil)
+	out, err := svc.AnalyzeCanonical(context.Background(), PlanningInput{Text: "питер", Config: paris, Context: PlanningContext{Summary: summary}, CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := out.Config.Request
+	if request.Origin.City != "Санкт-Петербург" || request.Destination == nil || request.Destination.City != "Париж" || request.Dates.DepartureDate != "2026-11-03" || request.Dates.ReturnDate != "" || request.Travelers.Adults != 0 {
+		t.Fatalf("nickname was not stored: %+v", request)
+	}
+	if !strings.Contains(out.Summary, "Санкт-Петербург") || !strings.Contains(out.Summary, "2026-11-03") || !strings.Contains(out.Summary, "дата возвращения") || !strings.Contains(out.Summary, "число взрослых") {
+		t.Fatal(out.Summary)
 	}
 }
 func TestInventedQuoteIsNotEvidence(t *testing.T) {

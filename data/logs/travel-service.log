@@ -1,18 +1,47 @@
-time=2026-10-28T23:43:43.435+03:00 level=INFO msg="grpc server started" port=50051
-time=2026-10-28T23:44:03.603+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/PlanTrip
-time=2026-10-28T23:44:34.633+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/PlanTrip status=OK
-time=2026-10-28T23:44:34.657+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
-time=2026-10-28T23:44:34.664+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
-time=2026-10-28T23:44:56.052+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/SubmitAnswers
-time=2026-10-28T23:45:41.765+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/SubmitAnswers status=OK
-time=2026-10-28T23:45:41.778+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
-time=2026-10-28T23:45:41.780+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
-time=2026-10-28T23:45:53.664+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/SubmitAnswers
-time=2026-10-28T23:46:40.119+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/SubmitAnswers status=OK
-time=2026-10-28T23:46:40.131+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
-time=2026-10-28T23:46:40.137+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
-time=2026-10-28T23:46:43.353+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/SubmitAnswers
-time=2026-10-28T23:47:21.834+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/SubmitAnswers status=OK
-time=2026-10-28T23:47:28.039+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
-time=2026-10-28T23:47:28.041+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
-time=2026-10-28T23:47:42.816+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/PlanTrip
+time=2026-10-29T00:32:55.756+03:00 level=INFO msg="grpc server started" port=50051
+time=2026-10-29T00:33:39.607+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/PlanTrip
+time=2026-10-29T00:34:15.856+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/PlanTrip status=OK
+time=2026-10-29T00:34:15.868+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:34:15.871+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:34:30.527+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/SubmitAnswers
+time=2026-10-29T00:34:59.751+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/SubmitAnswers status=OK
+time=2026-10-29T00:34:59.759+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:34:59.760+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:35:07.910+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/SubmitAnswers
+time=2026-10-29T00:35:35.854+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/SubmitAnswers status=OK
+time=2026-10-29T00:35:35.859+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:35:35.860+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:35:41.891+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/SubmitAnswers
+time=2026-10-29T00:36:15.173+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/SubmitAnswers status=OK
+time=2026-10-29T00:36:15.179+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:36:15.180+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:36:29.486+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/PlanTrip
+time=2026-10-29T00:37:04.325+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/PlanTrip status=OK
+time=2026-10-29T00:37:04.332+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:37:04.334+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:37:14.792+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/PlanTrip
+time=2026-10-29T00:37:43.230+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/PlanTrip status=OK
+time=2026-10-29T00:37:43.236+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:37:43.237+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:38:12.157+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:38:12.158+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:38:12.165+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/UpdateConfig
+time=2026-10-29T00:38:12.167+03:00 level=ERROR msg="grpc response" method=/godnota.travel.v1.TravelService/UpdateConfig error="rpc error: code = InvalidArgument desc = /dates/return_date: must be after departure_date"
+time=2026-10-29T00:38:23.041+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:38:23.042+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:38:23.047+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/UpdateConfig
+time=2026-10-29T00:38:23.048+03:00 level=ERROR msg="grpc response" method=/godnota.travel.v1.TravelService/UpdateConfig error="rpc error: code = InvalidArgument desc = /dates/return_date: must be after departure_date"
+time=2026-10-29T00:38:37.839+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:38:37.840+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T00:38:37.847+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/UpdateConfig
+time=2026-10-29T00:38:37.849+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/UpdateConfig status=OK
+time=2026-10-29T00:38:37.853+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/ConfirmConfig
+time=2026-10-29T00:38:37.854+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/ConfirmConfig status=OK
+time=2026-10-29T00:38:37.857+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/SearchRoutes
+time=2026-10-29T00:38:37.865+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/SearchRoutes status=OK
+time=2026-10-29T00:38:37.873+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T00:38:37.874+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK
+time=2026-10-29T01:10:36.085+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/PlanTrip
+time=2026-10-29T01:12:15.290+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/PlanTrip status=OK
+time=2026-10-29T01:12:15.300+03:00 level=INFO msg="grpc request" method=/godnota.travel.v1.TravelService/GetCapabilities
+time=2026-10-29T01:12:15.303+03:00 level=INFO msg="grpc response" method=/godnota.travel.v1.TravelService/GetCapabilities status=OK

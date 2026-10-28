@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"ai-service/internal/canonical"
 )
 
 var literalOrigin = regexp.MustCompile(`(?i)из\s+([а-яёa-z-]+)`)
@@ -169,7 +171,294 @@ func applyLiteralPlanning(base PlanningConfig, in PlanningInput) (PlanningConfig
 			return base, err
 		}
 	}
-	return mergePlanning(base, literalPlanningPatch(in.Text), nil)
+	base, err := mergePlanning(base, literalPlanningPatch(in.Text), nil)
+	if err != nil {
+		return base, err
+	}
+	return mergeTypoDates(base, collectedText(in), in.CurrentDate)
+}
+
+func collectedText(in PlanningInput) string {
+	parts := []string{in.Text}
+	for _, answer := range in.Answers {
+		parts = append(parts, answer.Text)
+	}
+	return strings.Join(parts, "\n")
+}
+
+func mergeTypoDates(base PlanningConfig, text, current string) (PlanningConfig, error) {
+	start, end := typoDates(text, current)
+	if start == "" && end == "" {
+		return base, nil
+	}
+	existingStart, existingEnd := "", ""
+	if base.Trip != nil && base.Trip.DateRange != nil {
+		if base.Trip.DateRange.StartDate != nil {
+			existingStart = *base.Trip.DateRange.StartDate
+		}
+		if base.Trip.DateRange.EndDate != nil {
+			existingEnd = *base.Trip.DateRange.EndDate
+		}
+	}
+	if start != "" && end == "" && existingStart != "" && existingStart != start && existingEnd == "" {
+		end = start
+		start = ""
+	}
+	dates := &PlanningDates{}
+	if start != "" && existingStart == "" {
+		dates.StartDate = &start
+	}
+	if end != "" && existingEnd == "" {
+		dates.EndDate = &end
+	}
+	if dates.StartDate == nil && dates.EndDate == nil {
+		return base, nil
+	}
+	return mergePlanning(base, PlanningConfig{Version: "1.0", Trip: &PlanningTrip{DateRange: dates}}, nil)
+}
+
+func shiftReplyDate(base, literal canonical.TripRequest, text, current string) canonical.TripRequest {
+	start, end := typoDates(text, current)
+	if start != "" && end == "" && base.Dates.DepartureDate != "" && base.Dates.DepartureDate != start && base.Dates.ReturnDate == "" && literal.Dates.ReturnDate == "" {
+		literal.Dates.ReturnDate = start
+		if literal.Dates.DepartureDate == start {
+			literal.Dates.DepartureDate = ""
+		}
+	}
+	return literal
+}
+
+var dayMonthPattern = regexp.MustCompile(`(\d{1,2})\s+([а-яе]{3,})`)
+
+func typoDates(text, current string) (string, string) {
+	found := []string{}
+	for _, match := range dayMonthPattern.FindAllStringSubmatch(norm(text), -1) {
+		day, err := strconv.Atoi(match[1])
+		month, ok := fuzzyMonth(match[2])
+		if err != nil || !ok {
+			continue
+		}
+		iso, ok := isoFromDayMonth(day, month, current)
+		if !ok {
+			continue
+		}
+		found = append(found, iso)
+	}
+	if len(found) == 0 {
+		return "", ""
+	}
+	if len(found) >= 2 {
+		return found[0], found[1]
+	}
+	if hasAny(norm(text), "возвращ", "обратно", "окончан") {
+		return "", found[0]
+	}
+	return found[0], ""
+}
+
+func isoFromDayMonth(day, month int, current string) (string, bool) {
+	if day < 1 || day > 31 || month < 1 || month > 12 {
+		return "", false
+	}
+	today, err := time.Parse("2006-01-02", current)
+	if err != nil {
+		return "", false
+	}
+	candidate := time.Date(today.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)
+	if candidate.Day() != day {
+		return "", false
+	}
+	if candidate.Before(today) {
+		candidate = time.Date(today.Year()+1, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+		if candidate.Day() != day {
+			return "", false
+		}
+	}
+	return candidate.Format("2006-01-02"), true
+}
+
+var replyCityAliases = []struct {
+	phrase string
+	city   string
+}{
+	{"санкт-петербург", "Санкт-Петербург"},
+	{"северная столица", "Санкт-Петербург"},
+	{"ленинград", "Санкт-Петербург"},
+	{"петербург", "Санкт-Петербург"},
+	{"питер", "Санкт-Петербург"},
+	{"спб", "Санкт-Петербург"},
+	{"москва", "Москва"},
+	{"мск", "Москва"},
+}
+
+func replyCities(text string) []string {
+	runes := []rune(" " + norm(text) + " ")
+	used := make([]bool, len(runes))
+	type found struct {
+		pos  int
+		city string
+	}
+	founds := []found{}
+	for _, alias := range replyCityAliases {
+		phrase := []rune(alias.phrase)
+		for i := 1; i+len(phrase) < len(runes); i++ {
+			if !matchPhrase(runes, used, i, phrase) {
+				continue
+			}
+			for j := i; j < i+len(phrase); j++ {
+				used[j] = true
+			}
+			founds = append(founds, found{pos: i, city: alias.city})
+		}
+	}
+	for i := 1; i < len(founds); i++ {
+		for j := i; j > 0 && founds[j].pos < founds[j-1].pos; j-- {
+			founds[j], founds[j-1] = founds[j-1], founds[j]
+		}
+	}
+	cities := []string{}
+	seen := map[string]bool{}
+	for _, item := range founds {
+		if seen[item.city] {
+			continue
+		}
+		seen[item.city] = true
+		cities = append(cities, item.city)
+	}
+	return cities
+}
+
+func matchPhrase(runes []rune, used []bool, start int, phrase []rune) bool {
+	if unicode.IsLetter(runes[start-1]) || unicode.IsLetter(runes[start+len(phrase)]) {
+		return false
+	}
+	for j := 0; j < len(phrase); j++ {
+		if used[start+j] || runes[start+j] != phrase[j] {
+			return false
+		}
+	}
+	return true
+}
+
+func fillMissingFromReply(base canonical.TripRequest, text, current string) canonical.TripRequest {
+	cities := replyCities(text)
+	if strings.TrimSpace(base.Origin.City) == "" && len(cities) > 0 {
+		base.Origin.City = cities[0]
+		cities = cities[1:]
+	}
+	if (base.Destination == nil || strings.TrimSpace(base.Destination.City) == "") && len(cities) > 0 {
+		base.Destination = &canonical.Destination{City: cities[0]}
+	}
+	start, end := typoDates(text, current)
+	if start != "" && end == "" && base.Dates.DepartureDate != "" && base.Dates.DepartureDate != start && base.Dates.ReturnDate == "" {
+		end = start
+		start = ""
+	}
+	if base.Dates.DepartureDate == "" && start != "" {
+		base.Dates.DepartureDate = start
+	}
+	if base.Dates.ReturnDate == "" && end != "" {
+		base.Dates.ReturnDate = end
+	}
+	return base
+}
+
+var monthForms = [][]string{
+	{"январь", "января", "январ"},
+	{"февраль", "февраля", "феврал"},
+	{"март", "марта"},
+	{"апрель", "апреля", "апрел"},
+	{"май", "мая"},
+	{"июнь", "июня", "июн"},
+	{"июль", "июля", "июл"},
+	{"август", "августа"},
+	{"сентябрь", "сентября", "сентябр"},
+	{"октябрь", "октября", "октябр"},
+	{"ноябрь", "ноября", "ноябр"},
+	{"декабрь", "декабря", "декабр"},
+}
+
+func fuzzyMonth(word string) (int, bool) {
+	word = norm(word)
+	length := len([]rune(word))
+	if length < 3 || length > 12 {
+		return 0, false
+	}
+	bestByMonth := make([]int, len(monthForms))
+	for i := range bestByMonth {
+		bestByMonth[i] = 99
+	}
+	for i, forms := range monthForms {
+		for _, form := range forms {
+			if distance := levenshtein(word, form); distance < bestByMonth[i] {
+				bestByMonth[i] = distance
+			}
+		}
+	}
+	best, second, month := 99, 99, 0
+	for i, distance := range bestByMonth {
+		if distance < best {
+			second = best
+			best = distance
+			month = i + 1
+		} else if distance < second {
+			second = distance
+		}
+	}
+	limit := 0
+	if length == 4 {
+		limit = 1
+	}
+	if length >= 5 {
+		limit = 2
+	}
+	if best <= limit && best+1 <= second {
+		return month, true
+	}
+	return 0, false
+}
+
+func levenshtein(left, right string) int {
+	a, b := []rune(left), []rune(right)
+	prev := make([]int, len(b)+1)
+	for j := range prev {
+		prev[j] = j
+	}
+	for i := 1; i <= len(a); i++ {
+		cur := make([]int, len(b)+1)
+		cur[0] = i
+		for j := 1; j <= len(b); j++ {
+			cost := 1
+			if a[i-1] == b[j-1] {
+				cost = 0
+			}
+			del, ins, sub := prev[j]+1, cur[j-1]+1, prev[j-1]+cost
+			cur[j] = del
+			if ins < cur[j] {
+				cur[j] = ins
+			}
+			if sub < cur[j] {
+				cur[j] = sub
+			}
+		}
+		prev = cur
+	}
+	return prev[len(b)]
+}
+
+func quoteMonth(quote string) (int, bool) {
+	best, count := 0, 0
+	for _, match := range regexp.MustCompile(`[а-яе]{3,}`).FindAllString(norm(quote), -1) {
+		month, ok := fuzzyMonth(match)
+		if !ok {
+			continue
+		}
+		if count == 0 {
+			best = month
+		}
+		count++
+	}
+	return best, count == 1
 }
 
 func mentionsChildren(in PlanningInput) bool {

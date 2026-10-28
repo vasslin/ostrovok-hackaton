@@ -201,9 +201,7 @@ func (s *Service) AnalyzeCanonical(ctx context.Context, in PlanningInput) (*Plan
 		resolved = nil
 	}
 	out.Config = &PlanningConfig{Version: "1.0", Request: &base, Resolved: resolved}
-	if text := strings.TrimSpace(out.Summary); text == "" || notesMemory(text) {
-		out.Summary = describeTrip(base)
-	}
+	out.Summary = describeTrip(base)
 	for i := range out.Assumptions {
 		out.Assumptions[i].Field = canonicalPath(out.Assumptions[i].Field)
 	}
