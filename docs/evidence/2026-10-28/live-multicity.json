@@ -1,0 +1,27 @@
+{
+  "observed_at": "2026-10-28T17:18:29+03:00",
+  "mode": "live transport provider calls through local gateway; hotels disabled",
+  "route": [
+    "Москва",
+    "Казань",
+    "Самара",
+    "Москва"
+  ],
+  "dates": [
+    "2026-11-27",
+    "2026-11-28",
+    "2026-11-29"
+  ],
+  "transport_parts": 18,
+  "providers": {
+    "aviasales": 2,
+    "yandex_rasp": 16
+  },
+  "provider_errors": {
+    "yandex_rasp:timeout": 3
+  },
+  "route_candidates": 0,
+  "result": "partial; no complete route assembled",
+  "booking_performed": false,
+  "frontend_included": false
+}

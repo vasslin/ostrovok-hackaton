@@ -1,0 +1,5 @@
+=== RUN   TestEvidenceFrontendChatContract
+    evidence_temp_test.go:22: frontend POST /api/chat/messages: HTTP 404; response {"code":5,"message":"resource not found"}
+--- PASS: TestEvidenceFrontendChatContract (0.00s)
+PASS
+ok  	github.com/godnota/gateway/internal/httpapi	0.274s

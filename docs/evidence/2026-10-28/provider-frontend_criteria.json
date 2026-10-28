@@ -1,0 +1,9 @@
+{
+  "missing": [
+    "/travelers/pets/kind"
+  ],
+  "limitations": [
+    "Frontend criteria omit country, room allocation and guest citizenship; no values were guessed."
+  ],
+  "discovery": {}
+}

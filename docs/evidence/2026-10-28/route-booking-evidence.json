@@ -1,0 +1,31 @@
+{
+  "observed_at": "2026-10-28T17:31:47+03:00",
+  "base_commit": "91c8ca8",
+  "working_tree": "uncommitted changes",
+  "source_sha256": "26285009efb2a4570d9102a1ea621062323821a9a638287411124b5556749560",
+  "scope": "one automated backend demo session and controlled component tests, not human users or production booking",
+  "backend_demo": {
+    "sessions": 1,
+    "single_city_candidates": 4,
+    "two_city_candidates": 8,
+    "demo_order": "create, duplicate retry, mock payment, mock cancellation, ownership and immutable snapshot passed",
+    "log": "backend-e2e.log"
+  },
+  "controlled_tests": {
+    "transfers": "same station and minimum/maximum wait; different station and direct-only rejected",
+    "live_multi_city_mapping": "mock HTTP fixtures; confirmed provider codes required",
+    "price": "unknown child price and mixed currencies preserved; round-trip not double-counted",
+    "concurrent_idempotency": "20 parallel calls yielded one order",
+    "log": "edge-tests.log"
+  },
+  "full_frontend_journey": "not tested",
+  "real_bookings": 0,
+  "survey_responses": 0,
+  "coverage": {
+    "selected_statements_percent": 85.4,
+    "covered": 1579,
+    "total": 1849,
+    "scope": "explicit owned implementation files; see coverage-tests.log",
+    "log": "coverage-tests.log"
+  }
+}

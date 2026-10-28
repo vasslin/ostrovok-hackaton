@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Godnota - REST API</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14/swagger-ui.css">
+    <style>body{margin:0;background:#fafafa}.intro{max-width:1460px;margin:auto;padding:16px 24px;font:16px system-ui}.intro a{color:#1565c0}</style>
+  </head>
+  <body>
+    <div class="intro">
+      <a href="/openapi.json" download="godnota.openapi.json">Скачать OpenAPI JSON</a>
+      <p id="loading">Загрузка REST API…</p>
+    </div>
+    <div id="swagger-ui"></div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+    <script>
+      if (window.SwaggerUIBundle) {
+        document.getElementById('loading').remove();
+        window.ui = SwaggerUIBundle({
+          url: '/openapi.json',
+          dom_id: '#swagger-ui',
+          presets: [SwaggerUIBundle.presets.apis],
+          layout: 'BaseLayout',
+          deepLinking: true,
+          filter: true,
+          displayRequestDuration: true,
+          validatorUrl: null,
+          supportedSubmitMethods: ['get', 'post', 'put', 'patch', 'delete']
+        });
+      }
+    </script>
+  </body>
+</html>
