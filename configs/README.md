@@ -15,16 +15,16 @@ Configs for the travel providers. The full plan is in [docs/providers/PLAN.md](.
 
 Required fields and format limits are defined **once**, in Go struct tags:
 
-- `internal/trip/trip.go` — `TripRequest`
-- `internal/providers/{tickets,places}.go` — one struct per endpoint
+- `internal/trip/trip.go` - `TripRequest`
+- `internal/providers/{tickets,places}.go` - one struct per endpoint
 
 ```go
 Origin string `json:"origin" url:"origin" validate:"required,len=3,alpha,uppercase" jsonschema:"required,pattern=^[A-Z]{3}$"`
 ```
 
-- `validate` — checked in Go at runtime (`providers.Validate`, `TripRequest.ValidateAt`)
-- `jsonschema` — copied into the generated `*.schema.json` (give these to the LLM and the frontend)
-- `url` / `json` — how the field is sent (query string or JSON body); `path:"name"` fills `{name}` in the endpoint path
+- `validate` - checked in Go at runtime (`providers.Validate`, `TripRequest.ValidateAt`)
+- `jsonschema` - copied into the generated `*.schema.json` (give these to the LLM and the frontend)
+- `url` / `json` - how the field is sent (query string or JSON body); `path:"name"` fills `{name}` in the endpoint path
 
 Rules tags can't express (return after departure, not in the past) live in `TripRequest.ValidateAt`.
 

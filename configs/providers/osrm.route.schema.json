@@ -5,7 +5,7 @@
     "coordinates": {
       "type": "string",
       "maxLength": 200,
-      "description": "lon,lat;lon,lat — longitude first."
+      "description": "lon,lat;lon,lat - longitude first."
     },
     "overview": {
       "type": "string",

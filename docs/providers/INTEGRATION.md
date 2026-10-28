@@ -1,10 +1,10 @@
 # Provider integration
 
-The provider branch was merged into `main` at `0fcf00f`. The root module is in `go.work`; `.env` is ignored and no longer tracked, while `.env.example` lists the configuration names. The provider-service changes described here are local uncommitted work until committed by the team.
+The provider branch was merged into `main` at `0fcf00f`. The root module is in `go.work`; `.env` is ignored and no longer tracked, while `.env.example` lists the configuration names. The stage-two integration merge is in progress.
 
 ## Service contract
 
-`api/provider/v1/provider.proto` exposes `SearchTransport`, `SearchHotels` and `SearchActivities`. Each accepts `SearchInput` with:
+`api/provider/v1/provider.proto` exposes the stage-two `SearchParts` method and the separate `SearchTransport`, `SearchHotels` and `SearchActivities` methods. The latter three accept `SearchInput` with:
 
 - `trip_request`: an object in the unified `TripRequest` shape, or the chosen adapter's input shape.
 - `input_format`: `trip_request` (default), `ai_config`, or `frontend_criteria`.
@@ -23,11 +23,11 @@ go run ./provider-service/cmd/app
 go run ./provider-service/cmd/search -kind activity -resolved configs/examples/resolved_trip.kazan_weekend.json
 ```
 
-The service reads `PROVIDERS_CONFIG` (default `configs/providers.json`) and `POI_INDEX_PATH` (default `configs/poi/kazan.json`). Docker Compose passes the ignored local `.env` to the provider service. No key values belong in request configs, logs, fixtures or reports.
+The service reads `PROVIDERS_CONFIG` (or `PROVIDER_CONFIG_FILE`, default `configs/providers.json`) and `POI_INDEX_PATH` (default `configs/poi/kazan.json`). Docker Compose passes the ignored local `.env` to the provider service. No key values belong in request configs, logs, fixtures or reports.
 
 Transport uses Aviasales and Yandex schedules; Wikipedia and the local OSM index provide attractions. External responses are bounded, redirects are not followed, requests are rate-limited per provider, and successful GET responses are cached in process. City discovery requests are returned for a caller to resolve; the service does not select an ambiguous city automatically.
 
-Hotelbeds is enabled only with `HOTELBEDS_MODE=evaluation`, `HOTELBEDS_API_KEY` and `HOTELBEDS_SECRET`. RateHawk requires `RATEHAWK_MODE=sandbox` or `production`, `RATEHAWK_KEY_ID` and `RATEHAWK_API_KEY`. Hotel searches currently support one explicitly specified room. Neither path books a hotel. Sandbox/evaluation offers are labeled and must not be presented as live production inventory. Hotelbeds evaluation returned offers in an Aveiro test; wider destination coverage and RateHawk access remain unverified. See the [run report](../evidence/2026-10-28/RUN_REPORT.ru.md).
+Hotelbeds is enabled only with `HOTELBEDS_MODE=evaluation`, `HOTELBEDS_API_KEY` and `HOTELBEDS_SECRET`. RateHawk requires `RATEHAWK_MODE=sandbox` or `production`, `RATEHAWK_KEY_ID` and `RATEHAWK_API_KEY`. Hotel searches currently support one explicitly specified room. Neither path books a hotel. Sandbox/evaluation offers are labeled and must not be presented as live production inventory. Hotelbeds evaluation returned offers in an Aveiro test; wider destination coverage and RateHawk access remain unverified. These adapters are exposed by `SearchHotels`; the stage-two `SearchParts` path does not yet use them. See the [run report](../evidence/2026-10-28/RUN_REPORT.ru.md).
 
 The supplied OSM index is a partial Kazan snapshot: 17 museums captured on 2026-10-25 and one named theatre and cinema checked on 2026-10-28. It is not a complete venue directory. Import a licensed Overpass extract using `python3 scripts/import_osm_pois.py INPUT OUTPUT --coverage DESCRIPTION`; public Nominatim must not be used to download POI lists. OSM locations do not establish opening hours, ticket prices or feasibility during a layover.
 

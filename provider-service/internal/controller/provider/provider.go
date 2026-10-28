@@ -20,7 +20,8 @@ type providerService interface {
 
 type Controller struct {
 	pb.UnimplementedProviderServiceServer
-	service providerService
+	service  providerService
+	searcher *providerkit.Searcher
 }
 
 func New(service providerService) *Controller { return &Controller{service: service} }

@@ -5,8 +5,10 @@ package godnota.provider.v1;
 option go_package = "github.com/godnota/pkg/generated/provider/v1;providerv1";
 
 import "google/protobuf/struct.proto";
+import "api/provider/v1/parts.proto";
 
 service ProviderService {
+  rpc SearchParts(SearchPartsRequest) returns (SearchPartsResponse);
   rpc SearchTransport(SearchTransportRequest) returns (SearchTransportResponse);
   rpc SearchHotels(SearchHotelsRequest) returns (SearchHotelsResponse);
   rpc SearchActivities(SearchActivitiesRequest) returns (SearchActivitiesResponse);

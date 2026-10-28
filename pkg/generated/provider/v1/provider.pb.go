@@ -686,7 +686,7 @@ var File_api_provider_v1_provider_proto protoreflect.FileDescriptor
 
 const file_api_provider_v1_provider_proto_rawDesc = "" +
 	"\n" +
-	"\x1eapi/provider/v1/provider.proto\x12\x13godnota.provider.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xa1\x01\n" +
+	"\x1eapi/provider/v1/provider.proto\x12\x13godnota.provider.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1bapi/provider/v1/parts.proto\"\xa1\x01\n" +
 	"\vSearchInput\x12:\n" +
 	"\ftrip_request\x18\x01 \x01(\v2\x17.google.protobuf.StructR\vtripRequest\x123\n" +
 	"\bresolved\x18\x02 \x01(\v2\x17.google.protobuf.StructR\bresolved\x12!\n" +
@@ -746,8 +746,9 @@ const file_api_provider_v1_provider_proto_rawDesc = "" +
 	"\x06issues\x18\x02 \x03(\v2\".godnota.provider.v1.ProviderIssueR\x06issues\x12\x18\n" +
 	"\amissing\x18\x03 \x03(\tR\amissing\x12 \n" +
 	"\vlimitations\x18\x04 \x03(\tR\vlimitations\x125\n" +
-	"\tdiscovery\x18\x05 \x01(\v2\x17.google.protobuf.StructR\tdiscovery2\xd5\x02\n" +
-	"\x0fProviderService\x12l\n" +
+	"\tdiscovery\x18\x05 \x01(\v2\x17.google.protobuf.StructR\tdiscovery2\xb7\x03\n" +
+	"\x0fProviderService\x12`\n" +
+	"\vSearchParts\x12'.godnota.provider.v1.SearchPartsRequest\x1a(.godnota.provider.v1.SearchPartsResponse\x12l\n" +
 	"\x0fSearchTransport\x12+.godnota.provider.v1.SearchTransportRequest\x1a,.godnota.provider.v1.SearchTransportResponse\x12c\n" +
 	"\fSearchHotels\x12(.godnota.provider.v1.SearchHotelsRequest\x1a).godnota.provider.v1.SearchHotelsResponse\x12o\n" +
 	"\x10SearchActivities\x12,.godnota.provider.v1.SearchActivitiesRequest\x1a-.godnota.provider.v1.SearchActivitiesResponseB9Z7github.com/godnota/pkg/generated/provider/v1;providerv1b\x06proto3"
@@ -776,6 +777,8 @@ var file_api_provider_v1_provider_proto_goTypes = []any{
 	(*SearchActivitiesRequest)(nil),  // 7: godnota.provider.v1.SearchActivitiesRequest
 	(*SearchActivitiesResponse)(nil), // 8: godnota.provider.v1.SearchActivitiesResponse
 	(*structpb.Struct)(nil),          // 9: google.protobuf.Struct
+	(*SearchPartsRequest)(nil),       // 10: godnota.provider.v1.SearchPartsRequest
+	(*SearchPartsResponse)(nil),      // 11: godnota.provider.v1.SearchPartsResponse
 }
 var file_api_provider_v1_provider_proto_depIdxs = []int32{
 	9,  // 0: godnota.provider.v1.SearchInput.trip_request:type_name -> google.protobuf.Struct
@@ -792,14 +795,16 @@ var file_api_provider_v1_provider_proto_depIdxs = []int32{
 	1,  // 11: godnota.provider.v1.SearchActivitiesResponse.offers:type_name -> godnota.provider.v1.Offer
 	2,  // 12: godnota.provider.v1.SearchActivitiesResponse.issues:type_name -> godnota.provider.v1.ProviderIssue
 	9,  // 13: godnota.provider.v1.SearchActivitiesResponse.discovery:type_name -> google.protobuf.Struct
-	3,  // 14: godnota.provider.v1.ProviderService.SearchTransport:input_type -> godnota.provider.v1.SearchTransportRequest
-	5,  // 15: godnota.provider.v1.ProviderService.SearchHotels:input_type -> godnota.provider.v1.SearchHotelsRequest
-	7,  // 16: godnota.provider.v1.ProviderService.SearchActivities:input_type -> godnota.provider.v1.SearchActivitiesRequest
-	4,  // 17: godnota.provider.v1.ProviderService.SearchTransport:output_type -> godnota.provider.v1.SearchTransportResponse
-	6,  // 18: godnota.provider.v1.ProviderService.SearchHotels:output_type -> godnota.provider.v1.SearchHotelsResponse
-	8,  // 19: godnota.provider.v1.ProviderService.SearchActivities:output_type -> godnota.provider.v1.SearchActivitiesResponse
-	17, // [17:20] is the sub-list for method output_type
-	14, // [14:17] is the sub-list for method input_type
+	10, // 14: godnota.provider.v1.ProviderService.SearchParts:input_type -> godnota.provider.v1.SearchPartsRequest
+	3,  // 15: godnota.provider.v1.ProviderService.SearchTransport:input_type -> godnota.provider.v1.SearchTransportRequest
+	5,  // 16: godnota.provider.v1.ProviderService.SearchHotels:input_type -> godnota.provider.v1.SearchHotelsRequest
+	7,  // 17: godnota.provider.v1.ProviderService.SearchActivities:input_type -> godnota.provider.v1.SearchActivitiesRequest
+	11, // 18: godnota.provider.v1.ProviderService.SearchParts:output_type -> godnota.provider.v1.SearchPartsResponse
+	4,  // 19: godnota.provider.v1.ProviderService.SearchTransport:output_type -> godnota.provider.v1.SearchTransportResponse
+	6,  // 20: godnota.provider.v1.ProviderService.SearchHotels:output_type -> godnota.provider.v1.SearchHotelsResponse
+	8,  // 21: godnota.provider.v1.ProviderService.SearchActivities:output_type -> godnota.provider.v1.SearchActivitiesResponse
+	18, // [18:22] is the sub-list for method output_type
+	14, // [14:18] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name
 	14, // [14:14] is the sub-list for extension extendee
 	0,  // [0:14] is the sub-list for field type_name
@@ -810,6 +815,7 @@ func file_api_provider_v1_provider_proto_init() {
 	if File_api_provider_v1_provider_proto != nil {
 		return
 	}
+	file_api_provider_v1_parts_proto_init()
 	file_api_provider_v1_provider_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

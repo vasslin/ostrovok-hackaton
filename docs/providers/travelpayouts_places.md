@@ -1,4 +1,4 @@
-# travelpayouts_places — город → IATA-код
+# travelpayouts_places - город → IATA-код
 
 **Автокомплит Travelpayouts.** Название города или аэропорта → IATA-код, координаты, страна и русские падежи (готовый текст «в Казань» для интерфейса). Нужен Resolver'у: AI пишет «Казань», а Aviasales нужен `KZN`. [Официальная документация](https://support.travelpayouts.com/hc/en-us/articles/360002322572-Autocomplete-API-for-countries-cities-and-airports-by-Aviasales).
 
@@ -10,7 +10,7 @@
 
 | Параметр | Обязат. | Формат | Пример |
 |---|---|---|---|
-| `term` | да | 1–100 символов, кириллица допустима | `Казань` |
+| `term` | да | 1-100 символов, кириллица допустима | `Казань` |
 | `locale` | да | наша схема допускает `ru` \| `en`; API поддерживает и другие языки | `ru` |
 | `types[]` | да | `city` \| `airport` \| `country`, можно несколько раз | `city` |
 
@@ -21,7 +21,7 @@ curl -s -G "https://autocomplete.travelpayouts.com/places2" \
   --data-urlencode "term=Казань" --data-urlencode "locale=ru" --data-urlencode "types[]=city"
 ```
 
-### Ответ (настоящий, первый элемент; полный — `testdata/travelpayouts_places/places2.json`)
+### Ответ (настоящий, первый элемент; полный - `testdata/travelpayouts_places/places2.json`)
 
 ```json
 [
@@ -38,7 +38,7 @@ curl -s -G "https://autocomplete.travelpayouts.com/places2" \
 ```
 
 - **Выбор результата:** API возвращает `weight`, но официальная документация называет его служебным полем и не гарантирует порядок. Сопоставлять `type`, страну и название; при неоднозначности попросить пользователя выбрать город.
-- **Падежи** `cases`: `su` — именительный, `ro` — родительный, `da` — дательный, `vi` — винительный с предлогом («в Казань»), `tv` — творительный, `pr` — предложный.
+- **Падежи** `cases`: `su` - именительный, `ro` - родительный, `da` - дательный, `vi` - винительный с предлогом («в Казань»), `tv` - творительный, `pr` - предложный.
 
 ## Статический справочник
 
@@ -46,7 +46,7 @@ curl -s -G "https://autocomplete.travelpayouts.com/places2" \
 
 У каждого города:
 - `code`, `name`, `coordinates`;
-- `time_zone` — IANA, нужен для перевода времени;
+- `time_zone` - IANA, нужен для перевода времени;
 - `has_flightable_airport`.
 
 Рядом лежат `airports.json`, `airlines.json`, `countries.json`.

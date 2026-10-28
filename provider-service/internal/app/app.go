@@ -21,7 +21,11 @@ type App struct {
 }
 
 func New(cfg *config.Config) (*App, error) {
-	registry, err := providerkit.LoadRegistry(cfg.RegistryPath)
+	registryPath := cfg.RegistryPath
+	if registryPath == "" {
+		registryPath = cfg.RegistryFile
+	}
+	registry, err := providerkit.LoadRegistry(registryPath)
 	if err != nil {
 		return nil, err
 	}
@@ -30,6 +34,11 @@ func New(cfg *config.Config) (*App, error) {
 		return nil, err
 	}
 	controller := providerctrl.New(provideruc.New(repo))
+	searcher, err := providerkit.NewSearcher(registry, cfg.Mode)
+	if err != nil {
+		return nil, err
+	}
+	controller.WithSearcher(searcher)
 	server := grpc.NewServer()
 	providerv1.RegisterProviderServiceServer(server, controller)
 	return &App{server: server, host: cfg.GRPC.Host, port: cfg.GRPC.Port}, nil

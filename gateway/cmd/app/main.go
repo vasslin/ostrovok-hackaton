@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/godnota/gateway/internal/adapter"
+	"github.com/godnota/gateway/internal/auth"
 	"github.com/godnota/gateway/internal/config"
 	"github.com/godnota/gateway/internal/httpapi"
 )
@@ -29,11 +30,16 @@ func main() {
 		cfg.Clients.SessionAddr,
 		cfg.Clients.UserAddr,
 		cfg.Clients.OrderAddr,
+		cfg.Clients.MapAddr,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer closeBackend()
+	accounts, err := auth.Open(cfg.AuthDataFile)
+	if err != nil {
+		log.Fatalf("open accounts: %v", err)
+	}
 
 	const headerTimeout = 5 * time.Second
 	const readTimeout = 10 * time.Second
@@ -41,7 +47,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.HTTP.Port,
-		Handler:           httpapi.Handler(backend),
+		Handler:           httpapi.HandlerWithAuth(backend, accounts),
 		ReadHeaderTimeout: headerTimeout,
 		ReadTimeout:       readTimeout,
 		WriteTimeout:      writeTimeout,

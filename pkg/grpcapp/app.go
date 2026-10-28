@@ -48,7 +48,7 @@ func (a *App) Shutdown() {
 
 // LoggingInterceptor writes every incoming RPC before the controller runs.
 func LoggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	slog.Info("grpc request", "method", info.FullMethod, "payload", fmt.Sprint(req))
+	slog.Info("grpc request", "method", info.FullMethod)
 	resp, err := handler(ctx, req)
 	if err != nil {
 		slog.Error("grpc response", "method", info.FullMethod, "error", err)

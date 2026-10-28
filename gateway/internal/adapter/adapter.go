@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/godnota/gateway/internal/httpapi"
+	mapv1 "github.com/godnota/pkg/generated/map/v1"
 	orderv1 "github.com/godnota/pkg/generated/order/v1"
 	sessionv1 "github.com/godnota/pkg/generated/session/v1"
 	travelv1 "github.com/godnota/pkg/generated/travel/v1"
@@ -30,11 +31,12 @@ type backend struct {
 	session sessionv1.SessionServiceClient
 	user    userv1.UserServiceClient
 	order   orderv1.OrderServiceClient
+	mapper  mapv1.MapServiceClient
 	conns   []*grpc.ClientConn
 	slots   chan struct{}
 }
 
-func New(travelAddr, sessionAddr, userAddr, orderAddr string) (*backend, func(), error) {
+func New(travelAddr, sessionAddr, userAddr, orderAddr, mapAddr string) (*backend, func(), error) {
 	travelConn, err := dial(travelAddr)
 	if err != nil {
 		return nil, nil, err
@@ -58,12 +60,21 @@ func New(travelAddr, sessionAddr, userAddr, orderAddr string) (*backend, func(),
 		return nil, nil, err
 	}
 
-	conns := []*grpc.ClientConn{travelConn, sessionConn, userConn, orderConn}
+	mapConn, err := dial(mapAddr)
+	if err != nil {
+		_ = travelConn.Close()
+		_ = sessionConn.Close()
+		_ = userConn.Close()
+		_ = orderConn.Close()
+		return nil, nil, err
+	}
+	conns := []*grpc.ClientConn{travelConn, sessionConn, userConn, orderConn, mapConn}
 	b := &backend{
 		travel:  travelv1.NewTravelServiceClient(travelConn),
 		session: sessionv1.NewSessionServiceClient(sessionConn),
 		user:    userv1.NewUserServiceClient(userConn),
 		order:   orderv1.NewOrderServiceClient(orderConn),
+		mapper:  mapv1.NewMapServiceClient(mapConn),
 		conns:   conns,
 		slots:   make(chan struct{}, maxStreams),
 	}
@@ -90,6 +101,8 @@ func (b *backend) Call(ctx context.Context, path string, raw json.RawMessage) (j
 	defer cancel()
 
 	switch path {
+	case "/v1/map/config":
+		return unary(ctx, raw, &mapv1.MapToProviderConfigsRequest{}, b.mapper.MapToProviderConfigs)
 	case "/v1/session/create":
 		return unary(ctx, raw, &sessionv1.CreateSessionRequest{}, b.session.CreateSession)
 	case "/v1/session/get":
@@ -137,7 +150,7 @@ func unary[RES, REQ proto.Message](
 	req REQ,
 	grpcCall func(context.Context, REQ, ...grpc.CallOption) (RES, error),
 ) (json.RawMessage, error) {
-	if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(raw, req); err != nil {
+	if err := (protojson.UnmarshalOptions{DiscardUnknown: false}).Unmarshal(raw, req); err != nil {
 		return nil, callError(status.Error(codes.InvalidArgument, invalidRequest))
 	}
 
