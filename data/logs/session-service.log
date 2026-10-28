@@ -1,187 +1,235 @@
-time=2026-10-29T00:32:52.554+03:00 level=INFO msg="grpc server started" port=50052
-time=2026-10-29T00:33:13.078+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:33:13.078+03:00 level=INFO msg="session-service: get session" session_id=TLDOLCJAUROG7XMR3TUZ7N5REY
-time=2026-10-29T00:33:13.078+03:00 level=ERROR msg="grpc response" method=/godnota.session.v1.SessionService/GetSession error="rpc error: code = NotFound desc = session not found"
-time=2026-10-29T00:33:17.134+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:33:17.134+03:00 level=INFO msg="session-service: get session" session_id=TLDOLCJAUROG7XMR3TUZ7N5REY
-time=2026-10-29T00:33:17.134+03:00 level=ERROR msg="grpc response" method=/godnota.session.v1.SessionService/GetSession error="rpc error: code = NotFound desc = session not found"
-time=2026-10-29T00:33:21.033+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:33:21.034+03:00 level=INFO msg="session-service: get session" session_id=TLDOLCJAUROG7XMR3TUZ7N5REY
-time=2026-10-29T00:33:21.034+03:00 level=ERROR msg="grpc response" method=/godnota.session.v1.SessionService/GetSession error="rpc error: code = NotFound desc = session not found"
-time=2026-10-29T00:33:23.792+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:33:23.792+03:00 level=INFO msg="session-service: get session" session_id=TLDOLCJAUROG7XMR3TUZ7N5REY
-time=2026-10-29T00:33:23.792+03:00 level=ERROR msg="grpc response" method=/godnota.session.v1.SessionService/GetSession error="rpc error: code = NotFound desc = session not found"
-time=2026-10-29T00:33:39.595+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/CreateSession
-time=2026-10-29T00:33:39.596+03:00 level=INFO msg="session-service: create session" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y
-time=2026-10-29T00:33:39.596+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/CreateSession status=OK
-time=2026-10-29T00:33:39.604+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:33:39.604+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:33:39.604+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:33:39.609+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:33:39.609+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:33:39.609+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:34:15.855+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:34:15.856+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=true cfg=true
-time=2026-10-29T00:34:15.856+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:34:15.868+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:34:15.868+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:34:15.868+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:34:15.869+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:34:15.869+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:34:15.869+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:34:30.525+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:34:30.526+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:34:30.526+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:34:30.527+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:34:30.527+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:34:30.528+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:34:59.750+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:34:59.751+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=true cfg=true
-time=2026-10-29T00:34:59.751+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:34:59.758+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:34:59.758+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:34:59.758+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:34:59.759+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:34:59.759+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:34:59.759+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:35:07.909+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:35:07.909+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:35:07.909+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:35:07.911+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:35:07.911+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:35:07.911+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:35:35.853+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:35:35.853+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=true cfg=true
-time=2026-10-29T00:35:35.854+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:35:35.859+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:35:35.859+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:35:35.859+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:35:35.860+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:35:35.860+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:35:35.860+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:35:41.891+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:35:41.891+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:35:41.891+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:35:41.891+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:35:41.891+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:35:41.892+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:36:15.172+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:36:15.172+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=true cfg=true
-time=2026-10-29T00:36:15.173+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:36:15.179+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:36:15.179+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:36:15.179+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:36:15.180+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:36:15.180+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:36:15.180+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:36:29.484+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:36:29.484+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:36:29.484+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:36:29.487+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:36:29.487+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:36:29.487+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:37:04.325+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:37:04.325+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=true cfg=true
-time=2026-10-29T00:37:04.325+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:37:04.332+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:37:04.332+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:37:04.332+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:37:04.332+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:37:04.333+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:37:04.333+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:37:14.791+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:37:14.791+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:37:14.791+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:37:14.792+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:37:14.792+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:37:14.792+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:37:43.230+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:37:43.230+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=true cfg=true
-time=2026-10-29T00:37:43.230+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:37:43.236+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:37:43.236+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:37:43.236+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:37:43.236+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:37:43.236+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:37:43.236+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:12.157+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:12.157+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:12.157+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:12.157+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:12.157+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:12.157+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:12.164+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:12.164+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:12.164+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:12.165+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:12.165+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:12.166+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:23.040+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:23.040+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:23.040+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:23.041+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:23.041+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:23.042+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:23.047+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:23.047+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:23.047+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:23.048+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:23.048+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:23.048+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:37.838+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:37.839+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:37.839+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:37.839+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:37.840+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:37.840+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:37.847+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:37.847+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:37.847+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:37.847+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:37.847+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:37.848+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:37.849+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:38:37.849+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=false cfg=true
-time=2026-10-29T00:38:37.849+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:38:37.853+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:37.853+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:37.853+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:37.853+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:37.853+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:37.853+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:37.854+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:38:37.854+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=false cfg=true
-time=2026-10-29T00:38:37.854+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:38:37.856+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:37.856+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:37.856+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:37.857+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:37.857+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:37.857+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T00:38:37.857+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:37.857+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:37.857+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:37.865+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T00:38:37.865+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=false cfg=true
-time=2026-10-29T00:38:37.865+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T00:38:37.873+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T00:38:37.873+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T00:38:37.873+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T00:38:37.873+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T00:38:37.873+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T00:38:37.874+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T01:10:36.084+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T01:10:36.084+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T01:10:36.084+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T01:10:36.086+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T01:10:36.086+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T01:10:36.086+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
-time=2026-10-29T01:12:15.289+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
-time=2026-10-29T01:12:15.290+03:00 level=INFO msg="session-service: save context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM messages=true summary=true cfg=true
-time=2026-10-29T01:12:15.290+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
-time=2026-10-29T01:12:15.300+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
-time=2026-10-29T01:12:15.300+03:00 level=INFO msg="session-service: get session" session_id=TKSKQSRKUWELJDI4TPEA42ANDM
-time=2026-10-29T01:12:15.300+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
-time=2026-10-29T01:12:15.300+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
-time=2026-10-29T01:12:15.300+03:00 level=INFO msg="session-service: get agent context" user_id=hIQcyQ6RJDB03QQ7pyffQPAAP-gFn3JHWeTHxrodq1Y chat_id=TKSKQSRKUWELJDI4TPEA42ANDM previous_limit=4
-time=2026-10-29T01:12:15.300+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T01:58:43.540+03:00 level=INFO msg="grpc server started" port=50052
+time=2026-10-29T02:04:20.880+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/CreateSession
+time=2026-10-29T02:04:20.880+03:00 level=INFO msg="session-service: create session" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0
+time=2026-10-29T02:04:20.880+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/CreateSession status=OK
+time=2026-10-29T02:04:20.886+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:04:20.886+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:04:20.886+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:04:20.891+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:04:20.891+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:04:20.891+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:05:16.892+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:05:16.892+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=true cfg=true
+time=2026-10-29T02:05:16.892+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:05:16.900+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:05:16.900+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:05:16.900+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:05:16.901+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:05:16.901+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:05:16.901+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:05:29.165+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:05:29.165+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:05:29.165+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:05:29.166+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:05:29.166+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:05:29.166+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:06:23.008+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:06:23.009+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=true cfg=true
+time=2026-10-29T02:06:23.009+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:06:23.017+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:06:23.017+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:06:23.017+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:06:23.018+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:06:23.018+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:06:23.018+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:06:33.848+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:06:33.848+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:06:33.848+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:06:33.849+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:06:33.849+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:06:33.849+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:07:38.256+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:07:38.257+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=true cfg=true
+time=2026-10-29T02:07:38.257+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:07:38.265+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:07:38.265+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:07:38.265+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:07:38.265+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:07:38.265+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:07:38.265+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:07:49.510+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:07:49.510+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:07:49.510+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:07:49.511+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:07:49.511+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:07:49.511+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:08:31.071+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:08:31.071+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=true cfg=true
+time=2026-10-29T02:08:31.071+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:08:31.079+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:08:31.079+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:08:31.079+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:08:31.079+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:08:31.079+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:08:31.079+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:08:40.426+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:08:40.426+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:08:40.426+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:08:40.427+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:08:40.427+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:08:40.427+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:08:40.435+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:08:40.435+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:08:40.435+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:08:40.436+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:08:40.436+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:08:40.436+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:08:40.437+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:08:40.437+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=false cfg=true
+time=2026-10-29T02:08:40.437+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:08:40.441+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:08:40.441+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:08:40.441+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:08:40.441+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:08:40.441+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:08:40.442+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:08:40.442+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:08:40.442+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=false cfg=true
+time=2026-10-29T02:08:40.442+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:08:40.445+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:08:40.446+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:08:40.446+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:08:40.446+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:08:40.446+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:08:40.446+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:08:40.447+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:08:40.447+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:08:40.447+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:08:40.455+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:08:40.455+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=false cfg=true
+time=2026-10-29T02:08:40.455+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:08:40.464+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:08:40.464+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:08:40.464+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:08:40.465+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:08:40.465+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:08:40.465+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:09:19.838+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:09:19.839+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:09:19.839+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:09:19.840+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:09:19.840+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF previous_limit=4
+time=2026-10-29T02:09:19.840+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:09:19.841+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:09:19.841+03:00 level=INFO msg="session-service: get session" session_id=H66HYZGZEBE3TP7NHV6GYHUQCF
+time=2026-10-29T02:09:19.841+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:09:19.842+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:09:19.842+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=H66HYZGZEBE3TP7NHV6GYHUQCF messages=true summary=false cfg=false
+time=2026-10-29T02:09:19.842+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:09:31.485+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/CreateSession
+time=2026-10-29T02:09:31.486+03:00 level=INFO msg="session-service: create session" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0
+time=2026-10-29T02:09:31.486+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/CreateSession status=OK
+time=2026-10-29T02:09:46.523+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:09:46.523+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:09:46.523+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:09:46.525+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:09:46.525+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:09:46.525+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:11:03.408+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:11:03.408+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=true cfg=true
+time=2026-10-29T02:11:03.408+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:11:03.415+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:11:03.415+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:11:03.415+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:11:03.416+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:11:03.416+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:11:03.416+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:11:10.102+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:11:10.103+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:11:10.103+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:11:10.104+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:11:10.104+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:11:10.104+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:11:54.936+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:11:54.936+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=true cfg=true
+time=2026-10-29T02:11:54.936+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:11:54.945+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:11:54.945+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:11:54.945+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:11:54.946+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:11:54.946+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:11:54.946+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:12:04.244+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:12:04.244+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:12:04.244+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:12:04.244+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:12:04.244+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:12:04.244+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:12:53.625+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:12:53.626+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=true cfg=true
+time=2026-10-29T02:12:53.626+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:12:53.633+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:12:53.633+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:12:53.633+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:12:53.634+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:12:53.634+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:12:53.635+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:13:40.425+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:13:40.425+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:13:40.425+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:13:40.427+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:13:40.427+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:13:40.427+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:14:47.494+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:14:47.495+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=true cfg=true
+time=2026-10-29T02:14:47.495+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:14:47.501+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:14:47.501+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:14:47.501+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:14:47.502+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:14:47.502+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:14:47.502+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:14:58.287+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:14:58.287+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:14:58.287+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:14:58.288+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:14:58.288+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:14:58.288+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:14:58.295+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:14:58.295+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:14:58.295+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:14:58.296+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:14:58.296+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:14:58.296+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:14:58.297+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:14:58.297+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=false cfg=true
+time=2026-10-29T02:14:58.297+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:14:58.300+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:14:58.300+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:14:58.300+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:14:58.301+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:14:58.301+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:14:58.301+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:14:58.302+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:14:58.302+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=false cfg=true
+time=2026-10-29T02:14:58.302+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:14:58.305+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:14:58.305+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:14:58.305+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:14:58.305+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:14:58.305+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:14:58.305+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:14:58.306+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:14:58.306+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:14:58.306+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:14:58.311+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:14:58.311+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=false cfg=true
+time=2026-10-29T02:14:58.311+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK
+time=2026-10-29T02:14:58.316+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:14:58.316+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:14:58.316+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:14:58.316+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:14:58.317+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:14:58.317+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:16:07.268+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:16:07.269+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:16:07.269+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:16:07.270+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetAgentContext
+time=2026-10-29T02:16:07.271+03:00 level=INFO msg="session-service: get agent context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 previous_limit=4
+time=2026-10-29T02:16:07.271+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetAgentContext status=OK
+time=2026-10-29T02:16:07.272+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/GetSession
+time=2026-10-29T02:16:07.272+03:00 level=INFO msg="session-service: get session" session_id=ZQOFAC36QRKZ56OYRG673WU6W6
+time=2026-10-29T02:16:07.272+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/GetSession status=OK
+time=2026-10-29T02:16:07.274+03:00 level=INFO msg="grpc request" method=/godnota.session.v1.SessionService/SaveContext
+time=2026-10-29T02:16:07.274+03:00 level=INFO msg="session-service: save context" user_id=RWc1jOgb9OoT9pmmAaK425KnTPQUwcakxyO7dSBHiP0 chat_id=ZQOFAC36QRKZ56OYRG673WU6W6 messages=true summary=false cfg=false
+time=2026-10-29T02:16:07.274+03:00 level=INFO msg="grpc response" method=/godnota.session.v1.SessionService/SaveContext status=OK

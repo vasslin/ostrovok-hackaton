@@ -219,7 +219,7 @@ func mergeTypoDates(base PlanningConfig, text, current string) (PlanningConfig, 
 
 func shiftReplyDate(base, literal canonical.TripRequest, text, current string) canonical.TripRequest {
 	start, end := typoDates(text, current)
-	if start != "" && end == "" && base.Dates.DepartureDate != "" && base.Dates.DepartureDate != start && base.Dates.ReturnDate == "" && literal.Dates.ReturnDate == "" {
+	if !namesDeparture(text) && start != "" && end == "" && base.Dates.DepartureDate != "" && base.Dates.DepartureDate != start && base.Dates.ReturnDate == "" && literal.Dates.ReturnDate == "" {
 		literal.Dates.ReturnDate = start
 		if literal.Dates.DepartureDate == start {
 			literal.Dates.DepartureDate = ""
@@ -281,13 +281,13 @@ var replyCityAliases = []struct {
 	phrase string
 	city   string
 }{
-	{"санкт-петербург", "Санкт-Петербург"},
 	{"северная столица", "Санкт-Петербург"},
+	{"санкт-петербург", "Санкт-Петербург"},
 	{"ленинград", "Санкт-Петербург"},
 	{"петербург", "Санкт-Петербург"},
 	{"питер", "Санкт-Петербург"},
 	{"спб", "Санкт-Петербург"},
-	{"москва", "Москва"},
+	{"москв", "Москва"},
 	{"мск", "Москва"},
 }
 
@@ -302,10 +302,11 @@ func replyCities(text string) []string {
 	for _, alias := range replyCityAliases {
 		phrase := []rune(alias.phrase)
 		for i := 1; i+len(phrase) < len(runes); i++ {
-			if !matchPhrase(runes, used, i, phrase) {
+			end, ok := matchPhrase(runes, used, i, phrase)
+			if !ok {
 				continue
 			}
-			for j := i; j < i+len(phrase); j++ {
+			for j := i; j < end; j++ {
 				used[j] = true
 			}
 			founds = append(founds, found{pos: i, city: alias.city})
@@ -328,39 +329,107 @@ func replyCities(text string) []string {
 	return cities
 }
 
-func matchPhrase(runes []rune, used []bool, start int, phrase []rune) bool {
-	if unicode.IsLetter(runes[start-1]) || unicode.IsLetter(runes[start+len(phrase)]) {
-		return false
+func matchPhrase(runes []rune, used []bool, start int, phrase []rune) (int, bool) {
+	if unicode.IsLetter(runes[start-1]) {
+		return 0, false
 	}
 	for j := 0; j < len(phrase); j++ {
 		if used[start+j] || runes[start+j] != phrase[j] {
-			return false
+			return 0, false
 		}
 	}
-	return true
+	end := start + len(phrase)
+	extra := 0
+	for end < len(runes) && unicode.IsLetter(runes[end]) && extra < 3 {
+		if used[end] {
+			return 0, false
+		}
+		end++
+		extra++
+	}
+	if end < len(runes) && unicode.IsLetter(runes[end]) {
+		return 0, false
+	}
+	return end, true
+}
+
+func namesOrigin(text string) bool {
+	return hasAny(norm(text), "город отправлен", "откуда", "выезжа", "вылета")
+}
+func namesDestination(text string) bool {
+	return hasAny(norm(text), "город назначен", "куда", "направление", "поехать")
+}
+func namesDeparture(text string) bool {
+	return hasAny(norm(text), "дата выезд", "дату выезд", "дата начал", "дату начал", "дата отправлен", "дату отправлен")
+}
+func namesReturn(text string) bool {
+	return hasAny(norm(text), "дата возвращ", "дату возвращ", "обратно", "дата окончан", "дату окончан")
 }
 
 func fillMissingFromReply(base canonical.TripRequest, text, current string) canonical.TripRequest {
 	cities := replyCities(text)
-	if strings.TrimSpace(base.Origin.City) == "" && len(cities) > 0 {
+	if namesOrigin(text) && len(cities) > 0 {
+		base.Origin.City = cities[len(cities)-1]
+		cities = cities[:len(cities)-1]
+	} else if strings.TrimSpace(base.Origin.City) == "" && len(cities) > 0 && !namesDestination(text) {
 		base.Origin.City = cities[0]
 		cities = cities[1:]
 	}
-	if (base.Destination == nil || strings.TrimSpace(base.Destination.City) == "") && len(cities) > 0 {
+	if namesDestination(text) && len(cities) > 0 {
+		base.Destination = &canonical.Destination{City: cities[len(cities)-1]}
+	} else if (base.Destination == nil || strings.TrimSpace(base.Destination.City) == "") && len(cities) > 0 {
 		base.Destination = &canonical.Destination{City: cities[0]}
 	}
 	start, end := typoDates(text, current)
-	if start != "" && end == "" && base.Dates.DepartureDate != "" && base.Dates.DepartureDate != start && base.Dates.ReturnDate == "" {
+	if namesReturn(text) && end == "" {
 		end = start
 		start = ""
 	}
-	if base.Dates.DepartureDate == "" && start != "" {
+	if !namesDeparture(text) && !namesReturn(text) && start != "" && end == "" && base.Dates.DepartureDate != "" && base.Dates.DepartureDate != start && base.Dates.ReturnDate == "" {
+		end = start
+		start = ""
+	}
+	if start != "" && (base.Dates.DepartureDate == "" || namesDeparture(text)) {
 		base.Dates.DepartureDate = start
 	}
-	if base.Dates.ReturnDate == "" && end != "" {
+	if end != "" && (base.Dates.ReturnDate == "" || namesReturn(text)) {
 		base.Dates.ReturnDate = end
 	}
+	if base.Travelers.Adults == 0 {
+		if count := loneAdults(text); count > 0 {
+			base.Travelers.Adults = count
+		}
+	}
 	return base
+}
+
+func keepSingleUnnamedDate(base canonical.TripRequest, keptDeparture, keptReturn, text, current string) canonical.TripRequest {
+	start, end := typoDates(text, current)
+	if namesDeparture(text) || start == "" || end != "" || keptDeparture == "" || keptDeparture == start {
+		return base
+	}
+	base.Dates.DepartureDate = keptDeparture
+	if namesReturn(text) || keptReturn == "" {
+		base.Dates.ReturnDate = start
+	} else {
+		base.Dates.ReturnDate = keptReturn
+	}
+	return base
+}
+
+var loneAdultPattern = regexp.MustCompile(`(?:^|[^0-9])([1-9])(?:[^0-9]|$)`)
+
+func loneAdults(text string) int {
+	cleaned := dayMonthPattern.ReplaceAllString(norm(text), " ")
+	matches := loneAdultPattern.FindAllStringSubmatch(cleaned, -1)
+	if len(matches) != 1 {
+		return 0
+	}
+	count, err := strconv.Atoi(matches[0][1])
+	if err != nil {
+		return 0
+	}
+	return count
 }
 
 var monthForms = [][]string{

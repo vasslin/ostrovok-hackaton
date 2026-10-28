@@ -27,7 +27,7 @@ const state = {
     loginEmail: '', loginError: '', loginBusy: false, authMode: 'login', pendingSend: null,
     sessionId: isDemo ? '' : getSessionId(), answerDraft: {}, pendingConfig: null, capabilities: null, reviewOpen: false, reviewDraft: null
 };
-let map, lastFocus, toastTimer, overlayOpen = false, overlayScroll = 0, overlayPage;
+let map, lastFocus, toastTimer, overlayOpen = false, overlayScroll = 0, overlayPage, chatDrag;
 function rememberFocus(element) {
     const attribute = ['data-action', 'data-map-stop', 'data-map-segment'].find(name => element?.hasAttribute(name));
     if (!attribute) { lastFocus = null; return; }
@@ -38,6 +38,8 @@ function restoreFocus() {
     if (!lastFocus) return;
     document.querySelectorAll(lastFocus.selector)[Math.max(0, lastFocus.index)]?.focus({ preventScroll: true });
 }
+let chatWidth = Number(readStorage('chat_width', 0));
+if (!Number.isFinite(chatWidth) || chatWidth < 240) chatWidth = 0;
 const price = amount => Number.isFinite(amount) ? money(amount, state.trip?.totals.currency || 'RUB') : 'цена неизвестна';
 const button = (text, action, cls = '', attrs = '') => view('button-button', {
     cls: cls,
@@ -123,6 +125,46 @@ function render() {
         const panel = $('[role="dialog"]');
         panel?.querySelector('input,button,select')?.focus();
     }
+    applyChatWidth();
+}
+function chatWidthFloor() {
+    const width = window.innerWidth;
+    if (width >= 1700) return 390;
+    if (width <= 1000) return 280;
+    if (width <= 1250) return 300;
+    return 340;
+}
+function chatWidthLimits() {
+    const workspace = document.querySelector('.workspace');
+    const min = chatWidthFloor();
+    const max = Math.max(min, (workspace?.clientWidth || window.innerWidth) - 320);
+    return { min, max };
+}
+function applyChatWidth() {
+    const workspace = document.querySelector('.workspace');
+    const handle = document.querySelector('.chat-resize');
+    if (!workspace || window.innerWidth <= 760) return;
+    const { min, max } = chatWidthLimits();
+    const width = chatWidth > 0 ? Math.min(max, Math.max(min, chatWidth)) : min;
+    if (chatWidth > 0) workspace.style.setProperty('--chat-width', `${Math.round(width)}px`);
+    if (!handle) return;
+    handle.setAttribute('aria-valuemin', String(min));
+    handle.setAttribute('aria-valuemax', String(Math.round(max)));
+    handle.setAttribute('aria-valuenow', String(Math.round(width)));
+}
+function setChatWidth(next) {
+    const workspace = document.querySelector('.workspace');
+    if (!workspace || window.innerWidth <= 760) return;
+    const { min, max } = chatWidthLimits();
+    const width = Math.min(max, Math.max(min, next));
+    if (width - min < 2) {
+        chatWidth = 0;
+        workspace.style.removeProperty('--chat-width');
+    } else {
+        chatWidth = width;
+        workspace.style.setProperty('--chat-width', `${Math.round(width)}px`);
+    }
+    applyChatWidth();
 }
 function renderPlanner() {
     return view('render-planner-workspace', {
@@ -1066,6 +1108,37 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && (state.mod
         first.focus();
     }
 } });
+document.addEventListener('pointerdown', e => {
+    const handle = e.target.closest?.('.chat-resize');
+    const workspace = handle?.closest('.workspace');
+    const panel = workspace?.querySelector('.chat-panel');
+    if (!handle || !workspace || !panel || window.innerWidth <= 760) return;
+    e.preventDefault();
+    chatDrag = { id: e.pointerId, x: e.clientX, width: panel.getBoundingClientRect().width, workspace };
+    handle.setPointerCapture(e.pointerId);
+    workspace.classList.add('resizing');
+});
+document.addEventListener('pointermove', e => {
+    if (!chatDrag || e.pointerId !== chatDrag.id) return;
+    setChatWidth(chatDrag.width + e.clientX - chatDrag.x);
+});
+function finishChatDrag(e) {
+    if (!chatDrag || e.pointerId !== chatDrag.id) return;
+    chatDrag.workspace.classList.remove('resizing');
+    writeStorage('chat_width', chatWidth);
+    chatDrag = null;
+}
+document.addEventListener('pointerup', finishChatDrag);
+document.addEventListener('pointercancel', finishChatDrag);
+app.addEventListener('keydown', e => {
+    if (!e.target.classList.contains('chat-resize')) return;
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const current = document.querySelector('.chat-panel')?.getBoundingClientRect().width || chatWidthFloor();
+    setChatWidth(current + (e.key === 'ArrowRight' ? 32 : -32));
+    writeStorage('chat_width', chatWidth);
+});
+window.addEventListener('resize', () => applyChatWidth());
 window.addEventListener('hashchange', () => { if (location.hash === '#planner')
     navigate('planner'); });
 loadViews().then(() => {

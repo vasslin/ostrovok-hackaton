@@ -142,6 +142,8 @@ func (s *Service) AnalyzeCanonical(ctx context.Context, in PlanningInput) (*Plan
 	if err != nil {
 		return nil, err
 	}
+	keptDeparture := base.Dates.DepartureDate
+	keptReturn := base.Dates.ReturnDate
 	legacy := legacyFromRequest(base)
 	modelInput := in
 	modelInput.Config = legacy
@@ -173,6 +175,7 @@ func (s *Service) AnalyzeCanonical(ctx context.Context, in PlanningInput) (*Plan
 	if err != nil {
 		return nil, err
 	}
+	base = keepSingleUnnamedDate(base, keptDeparture, keptReturn, collectedText(in), in.CurrentDate)
 	if base.Dates.DepartureDate != "" && base.Dates.ReturnDate == "" && base.Dates.Nights > 0 && base.Dates.Nights <= 30 {
 		if date, e := time.Parse(time.DateOnly, base.Dates.DepartureDate); e == nil {
 			base.Dates.ReturnDate = date.AddDate(0, 0, base.Dates.Nights).Format(time.DateOnly)
