@@ -77,7 +77,7 @@ func canonicalIssues(r canonical.TripRequest, day time.Time) []PlanningQuestion 
 		add("/destination/city", "В какой город хотите поехать?")
 	}
 	if r.Dates.DepartureDate == "" {
-		add("/dates/departure_date", "Укажите точную дату отправления в формате ГГГГ-ММ-ДД.")
+		add("/dates/departure_date", "Когда хотите отправиться?")
 	}
 	if r.Dates.ReturnDate == "" && (r.Transport == nil || r.Transport.RoundTrip == nil || *r.Transport.RoundTrip || r.Hotel == nil || r.Hotel.Needed == nil || *r.Hotel.Needed) {
 		add("/dates/return_date", "Укажите дату возвращения или число ночей.")
@@ -94,7 +94,7 @@ func canonicalIssues(r canonical.TripRequest, day time.Time) []PlanningQuestion 
 				if path == "/dates/departure_month" && r.Dates.DepartureDate == "" {
 					continue
 				}
-				add(path, "Уточните корректное значение поля "+path+".")
+				add(path, "Уточните это значение своими словами.")
 			}
 		}
 		for _, line := range strings.Split(err.Error(), "\n") {
@@ -201,7 +201,9 @@ func (s *Service) AnalyzeCanonical(ctx context.Context, in PlanningInput) (*Plan
 		resolved = nil
 	}
 	out.Config = &PlanningConfig{Version: "1.0", Request: &base, Resolved: resolved}
-	out.Summary = planningSummary(in)
+	if text := strings.TrimSpace(out.Summary); text == "" || notesMemory(text) {
+		out.Summary = describeTrip(base)
+	}
 	for i := range out.Assumptions {
 		out.Assumptions[i].Field = canonicalPath(out.Assumptions[i].Field)
 	}

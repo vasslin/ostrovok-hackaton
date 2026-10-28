@@ -25,6 +25,5 @@ func limitClarifications(loaded *sessionv1.GetAgentContextResponse, result *agen
 	if rounds >= limit && len(result.Questions) > 0 {
 		result.Questions = nil
 		result.Status = "questions"
-		result.Warnings = append(result.Warnings, "Лимит уточнений достигнут. Заполните недостающие параметры в карточке поездки; неизвестные значения не подставляются автоматически.")
 	}
 }
