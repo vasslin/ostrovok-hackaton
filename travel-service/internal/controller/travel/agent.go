@@ -57,7 +57,11 @@ func tail(value string, limit int) string {
 	return value
 }
 func conversation(agent *sessionv1.GetAgentContextResponse) *aiv1.ConversationContext {
-	out := &aiv1.ConversationContext{Summary: tail(agent.GetChatSummary(), 3000)}
+	summary := tail(agent.GetChatSummary(), 3000)
+	if question, ok := previousQuestion(agent); ok {
+		summary = tail(question, 3000)
+	}
+	out := &aiv1.ConversationContext{Summary: summary}
 	history := agent.GetChatHistory()
 	total := 0
 	for i := len(history) - 1; i >= 0 && len(out.Messages) < 20; i-- {
@@ -78,6 +82,71 @@ func conversation(agent *sessionv1.GetAgentContextResponse) *aiv1.ConversationCo
 		total += size
 	}
 	return out
+}
+func previousQuestion(agent *sessionv1.GetAgentContextResponse) (string, bool) {
+	history := agent.GetChatHistory()
+	for i := len(history) - 1; i >= 0; i-- {
+		if history[i].GetRole() != "assistant" {
+			continue
+		}
+		return spokenAssistant(history[i].GetText())
+	}
+	return "", false
+}
+func spokenAssistant(text string) (string, bool) {
+	var turn agentTurn
+	if json.Unmarshal([]byte(text), &turn) != nil || turn.Kind != "planning_turn" {
+		return "", false
+	}
+	var response struct {
+		Summary       string   `json:"summary"`
+		MissingFields []string `json:"missing_fields"`
+	}
+	_ = json.Unmarshal(turn.Response, &response)
+	lines := []string{}
+	if description := strings.TrimSpace(response.Summary); description != "" {
+		lines = append(lines, description)
+	}
+	fields := missingFieldLines(response.MissingFields, turn.Questions)
+	if fields != "" {
+		lines = append(lines, "Недостающие поля: "+fields)
+	}
+	if len(lines) == 0 {
+		return "", false
+	}
+	return strings.Join(lines, "\n"), true
+}
+func missingFieldLines(fields []string, questions []*commonv1.Question) string {
+	labels := map[string]string{
+		"/origin/city": "город отправления", "trip.origin.city": "город отправления",
+		"/destination/city": "направление", "trip.destinations": "направление",
+		"/dates/departure_date": "дата выезда", "trip.date_range.start_date": "дата выезда",
+		"/dates/return_date": "дата возвращения", "trip.date_range.end_date": "дата возвращения",
+		"/travelers/adults": "число взрослых", "trip.travelers.adults": "число взрослых",
+	}
+	asked := map[string]string{}
+	for _, question := range questions {
+		if text := strings.TrimSpace(question.GetText()); text != "" {
+			asked[question.GetField()] = text
+		}
+	}
+	parts := []string{}
+	seen := map[string]bool{}
+	for _, field := range fields {
+		if seen[field] {
+			continue
+		}
+		seen[field] = true
+		label := labels[field]
+		if label == "" {
+			label = asked[field]
+		}
+		if label == "" {
+			label = field
+		}
+		parts = append(parts, label+" ("+field+")")
+	}
+	return strings.Join(parts, "; ")
 }
 func lastTurn(agent *sessionv1.GetAgentContextResponse) agentTurn {
 	history := agent.GetChatHistory()
@@ -168,7 +237,7 @@ func (c *PlanningController) PlanTrip(ctx context.Context, r *pb.PlanTripRequest
 	if c.ai == nil {
 		return nil, status.Error(codes.Unavailable, "AI client not configured")
 	}
-	got, err := c.ai.GenerateOrUpdateConfig(c.agentContext(ctx), &aiv1.GenerateOrUpdateConfigRequest{SessionId: r.GetSessionId(), Text: r.GetText(), Config: modelConfig(loaded.GetCfg()), Context: conversation(loaded), CurrentDate: time.Now().UTC().Format(time.DateOnly)})
+	got, err := c.ai.GenerateOrUpdateConfig(c.agentContext(ctx), &aiv1.GenerateOrUpdateConfigRequest{SessionId: r.GetSessionId(), Text: r.GetText(), Config: modelConfig(loaded.GetCfg()), Context: conversation(loaded), Questions: lastTurn(loaded).Questions, CurrentDate: time.Now().UTC().Format(time.DateOnly)})
 	if err != nil {
 		return nil, err
 	}
@@ -260,6 +329,9 @@ func (c *PlanningController) SelectIdea(ctx context.Context, r *pb.SelectIdeaReq
 }
 
 func modelHistory(text string) string {
+	if spoken, ok := spokenAssistant(text); ok {
+		return spoken
+	}
 	var value any
 	if json.Unmarshal([]byte(text), &value) != nil {
 		return text

@@ -196,6 +196,20 @@ func TestHistoryMessageEnvelope(t *testing.T) {
 	}
 }
 
+func TestPlanningHistoryIsPreviousQuestion(t *testing.T) {
+	response := `{"summary":"Вот описание вашей поездки: вы едете в париж с выездом 2026-11-03. Вам ещё нужно назвать: город отправления, дата возвращения, число взрослых.","missing_fields":["/origin/city","/dates/return_date","/travelers/adults"],"config":{"resolved":{"private_code":"secret"}}}`
+	turn := agentTurn{Kind: "planning_turn", Response: json.RawMessage(response), Questions: []*commonv1.Question{{Id: "origin", Field: "/origin/city", Text: "Из какого города отправляемся?"}}}
+	data, _ := json.Marshal(turn)
+	loaded := &sessionv1.GetAgentContextResponse{ChatSummary: "старое описание", ChatHistory: []*sessionv1.DialogMessage{{Role: "assistant", Text: string(data)}}}
+	got := conversation(loaded)
+	text := got.GetSummary() + "\n" + got.GetMessages()[0].GetContent()
+	if strings.Contains(text, "secret") || strings.Contains(text, "resolved") || strings.Contains(text, `"kind"`) {
+		t.Fatal("json snapshot sent to model")
+	}
+	if !strings.Contains(text, "вы едете в париж") || !strings.Contains(text, "город отправления (/origin/city)") || !strings.Contains(text, "дата возвращения") || !strings.Contains(text, "число взрослых") {
+		t.Fatal(text)
+	}
+}
 func TestBackendResolvedDoesNotEnterModelHistory(t *testing.T) {
 	loaded := &sessionv1.GetAgentContextResponse{ChatHistory: []*sessionv1.DialogMessage{{Role: "assistant", Text: `{"kind":"travel_response","response":{"config":{"request":{"origin":{"city":"Москва"}},"resolved":{"private_code":"secret-code"}}}}`}}}
 	got := conversation(loaded).GetMessages()[0].GetContent()

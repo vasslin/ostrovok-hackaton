@@ -1,5 +1,10 @@
-2026/10/28 23:43:43 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
-2026/10/28 23:44:34 model usage: prompt=1355 completion=229 total=1584
-2026/10/28 23:45:41 model usage: prompt=1937 completion=386 total=2323
-2026/10/28 23:46:40 model usage: prompt=2414 completion=349 total=2763
-2026/10/28 23:47:21 model usage: prompt=2741 completion=218 total=2959
+2026/10/29 01:58:43 travel-ai HTTP=:8090 gRPC=:50055 model=travel-qwen:4b configured=true
+2026/10/29 02:05:16 model usage: prompt=1627 completion=230 total=1857
+2026/10/29 02:06:23 model usage: prompt=2002 completion=326 total=2328
+2026/10/29 02:07:38 model usage: prompt=2145 completion=398 total=2543
+2026/10/29 02:08:31 model usage: prompt=2097 completion=229 total=2326
+2026/10/29 02:10:42 model usage: prompt=1640 completion=400 total=2040
+2026/10/29 02:11:03 model usage: prompt=557 completion=100 total=657
+2026/10/29 02:11:54 model usage: prompt=1927 completion=274 total=2201
+2026/10/29 02:12:53 model usage: prompt=2144 completion=281 total=2425
+2026/10/29 02:14:47 model usage: prompt=2288 completion=391 total=2679

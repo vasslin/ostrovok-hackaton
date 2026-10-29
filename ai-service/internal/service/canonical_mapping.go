@@ -231,6 +231,7 @@ func canonicalLiteral(base canonical.TripRequest, in PlanningInput) (canonical.T
 	if err != nil {
 		return base, err
 	}
+	literal = shiftReplyDate(base, literal, collectedText(in), in.CurrentDate)
 	patch := requestMap(literal)
 	if legacy.Trip == nil || legacy.Trip.Travelers == nil || legacy.Trip.Travelers.Adults == nil {
 		if guests, ok := patch["travelers"].(map[string]any); ok {
@@ -275,5 +276,7 @@ func canonicalLiteral(base canonical.TripRequest, in PlanningInput) (canonical.T
 			out.Budget.Scope = "per_night"
 		}
 	}
-	return extendedLiterals(out, in), nil
+	out = extendedLiterals(out, in)
+	out = fillMissingFromReply(out, collectedText(in), in.CurrentDate)
+	return out, nil
 }

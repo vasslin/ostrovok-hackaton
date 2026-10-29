@@ -1,1 +1,53 @@
-time=2026-10-28T23:43:43.414+03:00 level=INFO msg="grpc server started" port=50054
+time=2026-10-29T01:58:43.483+03:00 level=INFO msg="grpc server started" port=50054
+time=2026-10-29T02:09:19.846+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/CreateOrder
+time=2026-10-29T02:09:19.847+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/CreateOrder status=OK
+time=2026-10-29T02:09:19.852+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:19.852+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:09:19.853+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:19.853+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:09:21.010+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:21.010+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:09:21.011+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:21.011+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:09:22.543+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:22.544+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:09:22.544+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:22.544+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:09:26.992+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:26.993+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:09:26.993+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:09:26.993+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:07.276+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/CreateOrder
+time=2026-10-29T02:16:07.277+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/CreateOrder status=OK
+time=2026-10-29T02:16:07.283+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:07.284+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:07.285+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:07.285+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:07.285+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:07.285+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:07.286+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:07.286+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:08.705+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:08.705+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:08.706+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:08.706+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:08.706+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:08.706+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:08.706+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:08.707+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:40.370+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:40.370+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:40.371+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:40.371+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:40.372+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:40.372+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:40.373+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:40.373+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:47.386+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:47.387+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:47.387+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:47.387+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:47.387+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:47.387+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
+time=2026-10-29T02:16:47.388+03:00 level=INFO msg="grpc request" method=/godnota.order.v1.OrderService/GetOrder
+time=2026-10-29T02:16:47.388+03:00 level=INFO msg="grpc response" method=/godnota.order.v1.OrderService/GetOrder status=OK
