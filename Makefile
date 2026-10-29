@@ -1,4 +1,4 @@
-.PHONY: run build test smoke help e2e test-ai doctor model
+.PHONY: run build test smoke help e2e test-ai doctor model up down seed
 .DEFAULT_GOAL := run
 MODE ?= demo
 ENV_FILE ?= .env
@@ -79,3 +79,12 @@ test-ai:
 
 doctor:
 	go run ./cmd/dev doctor -env-file "$(ENV_FILE)"
+
+up:
+	docker compose up --build
+
+down:
+	docker compose down
+
+seed:
+	@printf '%s\n' 'Схема PostgreSQL создаётся при старте session-service. Демо-билеты и отели синтетические и отдельной загрузки не требуют.'
