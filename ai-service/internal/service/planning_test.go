@@ -338,3 +338,20 @@ func TestChildWithoutAgeCannotGenerate(t *testing.T) {
 		t.Fatal("child without age did not block generation")
 	}
 }
+
+func TestOfflinePlannerUsesLiterals(t *testing.T) {
+	svc := New(agent.NewOffline())
+	out, err := svc.Analyze(context.Background(), PlanningInput{
+		Text:        "Хочу из Москвы в Сочи с 10 по 17 ноября 2026, двое взрослых, бюджет 80000 рублей",
+		CurrentDate: "2026-10-28",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Config == nil || out.Config.Trip == nil || out.Config.Trip.Origin == nil || out.Config.Trip.Origin.City != "Москва" {
+		t.Fatalf("origin was not taken from the text: %+v", out)
+	}
+	if len(out.Config.Trip.Destinations) == 0 || out.Config.Trip.Destinations[0].City != "Сочи" {
+		t.Fatalf("destination was not taken from the text: %+v", out.Config)
+	}
+}

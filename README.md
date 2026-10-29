@@ -1,32 +1,74 @@
 # О!дин запрос
 
-Видео с демонстрацией работы приложения
-https://drive.google.com/file/d/1IZKVosGVRkv-xpQUUQEoMyVvkYlHbZcO/view?usp=share_link
+Сервис собирает поездку из одного запроса: чат уточняет параметры, карта показывает маршрут, демо-провайдеры отдают билеты и отели, заказ можно оплатить и отменить внутри приложения.
 
-## Запуск
+Видео с демонстрацией работы приложения: https://drive.google.com/file/d/1IZKVosGVRkv-xpQUUQEoMyVvkYlHbZcO/view?usp=share_link
 
-Для запуска екобходим Go 1.26.5+
+## Быстрый старт
 
-Запуск в режиме `demo` (по умолчанию; использует синтетические данные)
+Нужны Git и Docker с поддержкой `docker compose`. Другие установки не требуются.
 
 ```sh
-make
+git clone git@github.com:ostrovok-hackathon-2026/godnota.git
+cd godnota
+cp .env.example .env
+docker compose up --build
 ```
 
-Запуск в режиме `live` (необходим файл `.env` с ключами; использует данные из API провайдеров)
-```sh
- make MODE=live
-```
+Откройте http://localhost:8080. Проверка: `curl -s http://localhost:8080/health` возвращает `{"status":"ok"}`.
 
-Откройте **http://localhost:5173**. Gateway: http://127.0.0.1:8080/docs. Прямой Swagger AI: http://127.0.0.1:8090/docs
+Остановка: `docker compose down` или `make down`. Повторный запуск: `make up`.
 
-## Ключи для организаторов
+## Ресурсы
 
-В корне хранится бинарный `secrets.env.age`, зашифрованный публичным ключом организаторов. Исходный `.env.jury` и локальный `.env` исключены из Git и Docker build context; `.env.example` содержит только пустые значения. После изменения настроек выполните `./scripts/encrypt-secrets.sh`. Расшифровка доступна владельцу закрытого ключа организаторов; подробности — [docs/SECRETS.md](docs/SECRETS.md).
+Для `docker compose up --build` достаточно 2 CPU и 4 ГБ RAM. GPU не нужен. Образы Go и Postgres скачиваются при сборке; веса модели в репозиторий не входят.
 
-Основной AI — **Ollama**, модель **travel-qwen:4b** на основе Qwen3 4B. В этом режиме LLM-ключ не используется. Облачная альтернатива — **Groq**, модель **openai/gpt-oss-20b**; для неё нужны отдельный ключ жюри и согласованные `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`. Ранее опубликованные ключи необходимо перевыпустить: шифрование не устраняет прежнюю утечку.
+Пустой `LLM_PROVIDER` в `.env` включает встроенный режим `offline`: параметры поездки берутся из текста запроса, внешняя модель не вызывается. Билеты и отели синтетические (`PROVIDER_MODE=demo`).
 
-## Проверка
+Чтобы подключить настоящую модель, в `.env` задайте `LLM_PROVIDER=ollama` и запущенный на хосте Ollama с моделью `travel-qwen:4b` (`LLM_BASE_URL=http://host.docker.internal:11434/v1`) либо `LLM_PROVIDER=groq` или `openai` и `LLM_API_KEY`. Для Ollama на хосте лучше иметь 16 ГБ RAM.
+
+## Переменные окружения
+
+Файл `.env` создаётся копированием `.env.example`. Секреты в Git не хранятся. Пустое значение означает значение по умолчанию из `docker-compose.yml`.
+
+| Переменная | По умолчанию в Compose | Назначение |
+| --- | --- | --- |
+| `LLM_PROVIDER` | `offline` | `offline`, `ollama`, `groq` или `openai` |
+| `LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Адрес OpenAI-совместимого API, если провайдер не `offline` |
+| `LLM_MODEL` | `travel-qwen:4b` | Имя модели |
+| `LLM_API_KEY` | пусто | Ключ Groq или OpenAI |
+| `LLM_TIMEOUT` | `180s` | Таймаут ответа модели |
+| `PROVIDER_MODE` | `demo` | `demo` не ходит во внешние API билетов и отелей |
+| `SESSION_DB_PASSWORD` | `local-session` | Пароль PostgreSQL для контекста сессий |
+| `MAX_CLARIFICATION_ROUNDS` | `3` | Лимит раундов уточнения, допустимо 1–10 |
+| `TRAVELPAYOUTS_TOKEN`, `YANDEX_RASP_API_KEY` | пусто | Живой транспорт, если `PROVIDER_MODE=live` |
+| `HOTELBEDS_*`, `RATEHAWK_*` | пусто | Живые отели; без ключей полный поиск с проживанием недоступен |
+
+Зашифрованный файл организаторов `secrets.env.age` и порядок его обновления описаны в [docs/SECRETS.md](docs/SECRETS.md).
+
+## Начальные данные
+
+Отдельная загрузка данных не нужна. `session-service` создаёт схему PostgreSQL при старте. Демо-билеты, отели и заказы появляются в момент поиска и бронирования. `make seed` только сообщает об этом и ничего не записывает.
+
+## Маршруты
+
+| Метод и путь | Ответ |
+| --- | --- |
+| `GET /` | интерфейс |
+| `GET /health` | `{"status":"ok"}` |
+| `GET /docs` | документация gateway |
+| `GET /openapi.json` | спецификация gateway |
+| `/api/...` | HTTP API для интерфейса |
+
+Swagger AI-сервиса при запущенном Compose доступен на http://127.0.0.1:8090/docs.
+
+## Тестовый вход
+
+Готовой учётной записи в базе нет. На главной странице откройте регистрацию и создайте пользователя. Пароль — от 12 до 128 символов. Пример: `jury@example.com` / `jury-demo-pass`. Тот же адрес и пароль подходят для повторного входа.
+
+## Локальная разработка без Docker
+
+`make` поднимает стек на машине в режиме `demo` и при необходимости ставит Ollama. Интерфейс в этом режиме: http://localhost:5173. Живые провайдеры: `make MODE=live` и ключи в `.env`. `make doctor` только проверяет Ollama и модель, сервисы не запускает.
 
 ```sh
 make build
@@ -36,12 +78,7 @@ make smoke
 make test-ai
 ```
 
-`make test` проверяет все Go-модули и запускает vet.
-`make e2e` поднимает изолированные процессы и проверяет авторизацию, права владельца, выдачу кандидатов, несколько городов, демозаказ/повтор/оплату/отмену и остановку полного стека. Внешние LLM при этом не вызываются.
-`make smoke` проверяет уже запущенный gateway. 
-`make test-ai` вызывает настоящую модель через gateway: уточнения → ответы → сохранённый конфиг → подтверждение → поиск. Для другого порта нужно задать `API_URL`, например `make test-ai API_URL=http://127.0.0.1:12345`; можно передать адрес UI, чтобы проверить и его прокси. Эти проверки создают только синтетические тестовые аккаунты и сессии.
-
-Без make: `go run ./cmd/dev build`, `go run ./cmd/dev test`, `go run ./cmd/dev e2e`, `go run ./cmd/dev smoke`, `go run ./cmd/dev ai-smoke`. Проверка гонок: `go run ./cmd/dev test -race`. Для frontend-тестов нужен Node.js 20+: `cd frontend`, затем `npm test` и `npm run check`.
+`make test` проверяет все Go-модули и запускает vet. `make e2e` проверяет авторизацию, права владельца, кандидатов, несколько городов, демозаказ, повтор, оплату и отмену без внешней модели. `make test-ai` вызывает настоящую модель через gateway. Для frontend-тестов нужен Node.js 20+: `cd frontend`, затем `npm test`.
 
 ## Архитектура системы
 

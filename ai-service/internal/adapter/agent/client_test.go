@@ -68,3 +68,20 @@ func TestLocalQueueHonorsDeadline(t *testing.T) {
 	}
 	go func() { <-done }()
 }
+
+func TestOfflineCompletion(t *testing.T) {
+	client := NewOffline()
+	if !client.Configured() {
+		t.Fatal("offline mode must be configured without a key")
+	}
+	var plan struct {
+		Status  string `json:"status"`
+		Summary string `json:"summary"`
+	}
+	if err := client.Complete(context.Background(), "Ты извлекаешь", map[string]string{"message": "Москва Сочи"}, &plan); err != nil {
+		t.Fatal(err)
+	}
+	if plan.Status != "questions" || plan.Summary == "" {
+		t.Fatalf("unexpected plan: %+v", plan)
+	}
+}
