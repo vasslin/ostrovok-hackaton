@@ -17,6 +17,7 @@ type Client struct {
 	BaseURL, APIKey, Model string
 	HTTP                   *http.Client
 	Local                  bool
+	Offline                bool
 	slots                  chan struct{}
 }
 
@@ -38,9 +39,29 @@ func NewLocal(url, model string) *Client {
 	c.HTTP.Timeout = 180 * time.Second
 	return c
 }
-func (c *Client) Configured() bool { return c.Local || c.APIKey != "" }
+
+func NewOffline() *Client {
+	c := New("http://127.0.0.1", "", "offline")
+	c.Offline = true
+	return c
+}
+
+func (c *Client) Configured() bool { return c.Local || c.Offline || c.APIKey != "" }
+
+func offlinePayload(prompt string) string {
+	if strings.Contains(prompt, "Предложи 2") {
+		return `{"advice":[{"id":"idea-1","city":"Казань","theme":"culture"},{"id":"idea-2","city":"Калининград","theme":"relax"},{"id":"idea-3","city":"Мурманск","theme":"nature"}]}`
+	}
+	if strings.Contains(prompt, "Rank only") {
+		return `{"results":[]}`
+	}
+	return `{"status":"questions","config":{"version":"1.0"},"questions":[],"advice":[],"summary":"Вот описание вашей поездки. Проверяю, каких сведений ещё не хватает."}`
+}
 
 func (c *Client) Complete(ctx context.Context, prompt string, input, output any) error {
+	if c.Offline {
+		return json.Unmarshal([]byte(offlinePayload(prompt)), output)
+	}
 	ctx, cancel := context.WithTimeout(ctx, c.HTTP.Timeout)
 	defer cancel()
 	if c.Local {

@@ -48,28 +48,32 @@ func Run() error {
 		return nil
 	}
 	provider := env("LLM_PROVIDER", "ollama")
-	defaultURL, defaultModel := "http://localhost:11434/v1", "travel-qwen:4b"
-	if provider == "groq" || provider == "openai" {
-		defaultURL = "https://api.groq.com/openai/v1"
-		defaultModel = "openai/gpt-oss-20b"
-	} else if provider != "ollama" {
-		return errors.New("LLM_PROVIDER must be ollama, groq or openai")
-	}
-	baseURL := env("LLM_BASE_URL", defaultURL)
-	parsed, err := url.Parse(baseURL)
-	if err != nil || parsed.Host == "" || (parsed.Scheme != "https" && parsed.Scheme != "http") || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {
-		return errors.New("invalid LLM_BASE_URL")
+	var client *agent.Client
+	if provider == "offline" {
+		client = agent.NewOffline()
+	} else {
+		defaultURL, defaultModel := "http://localhost:11434/v1", "travel-qwen:4b"
+		if provider == "groq" || provider == "openai" {
+			defaultURL = "https://api.groq.com/openai/v1"
+			defaultModel = "openai/gpt-oss-20b"
+		} else if provider != "ollama" {
+			return errors.New("LLM_PROVIDER must be offline, ollama, groq or openai")
+		}
+		baseURL := env("LLM_BASE_URL", defaultURL)
+		parsed, err := url.Parse(baseURL)
+		if err != nil || parsed.Host == "" || (parsed.Scheme != "https" && parsed.Scheme != "http") || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {
+			return errors.New("invalid LLM_BASE_URL")
+		}
+		client = agent.New(baseURL, os.Getenv("LLM_API_KEY"), env("LLM_MODEL", defaultModel))
+		if provider == "ollama" {
+			client = agent.NewLocal(baseURL, env("LLM_MODEL", defaultModel))
+		}
 	}
 
 	for _, file := range []string{"openapi.json", "index.html", "swagger/swagger-ui-bundle.js", "swagger/swagger-ui.css"} {
 		if _, err := os.Stat(env("WEB_DIR", "web") + "/" + file); err != nil {
 			return err
 		}
-	}
-
-	client := agent.New(baseURL, os.Getenv("LLM_API_KEY"), env("LLM_MODEL", defaultModel))
-	if provider == "ollama" {
-		client = agent.NewLocal(baseURL, env("LLM_MODEL", defaultModel))
 	}
 	timeout, err := time.ParseDuration(env("LLM_TIMEOUT", client.HTTP.Timeout.String()))
 	if err != nil || timeout < time.Second || timeout > 10*time.Minute {

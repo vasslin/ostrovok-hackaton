@@ -1,1 +1,5 @@
-time=2026-10-28T23:43:43.428+03:00 level=INFO msg="grpc server started" port=50057
+time=2026-10-29T01:58:43.499+03:00 level=INFO msg="grpc server started" port=50057
+time=2026-10-29T02:08:40.451+03:00 level=INFO msg="grpc request" method=/godnota.route.v1.RouteService/BuildRoutes
+time=2026-10-29T02:08:40.453+03:00 level=INFO msg="grpc response" method=/godnota.route.v1.RouteService/BuildRoutes status=OK
+time=2026-10-29T02:14:58.308+03:00 level=INFO msg="grpc request" method=/godnota.route.v1.RouteService/BuildRoutes
+time=2026-10-29T02:14:58.309+03:00 level=INFO msg="grpc response" method=/godnota.route.v1.RouteService/BuildRoutes status=OK

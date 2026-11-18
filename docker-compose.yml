@@ -1,5 +1,9 @@
+x-amd64: &amd64
+  platform: linux/amd64
+
 services:
   gateway:
+    <<: *amd64
     build:
       context: .
       dockerfile: gateway/Dockerfile
@@ -14,8 +18,6 @@ services:
       AUTH_DATA_FILE: /app/data/auth.json
     volumes:
       - auth-data:/app/data
-    ports:
-      - "8080:8080"
     env_file:
       - path: .env
         required: false
@@ -38,6 +40,7 @@ services:
       start_period: 10s
 
   travel-service:
+    <<: *amd64
     env_file:
       - path: .env
         required: false
@@ -70,6 +73,7 @@ services:
       start_period: 5s
 
   session-db:
+    <<: *amd64
     image: postgres:16.6-alpine
     environment:
       POSTGRES_USER: session
@@ -85,6 +89,7 @@ services:
       start_period: 5s
 
   session-service:
+    <<: *amd64
     build:
       context: .
       dockerfile: session-service/Dockerfile
@@ -104,6 +109,7 @@ services:
       start_period: 5s
 
   user-service:
+    <<: *amd64
     build:
       context: .
       dockerfile: user-service/Dockerfile
@@ -117,6 +123,7 @@ services:
       start_period: 5s
 
   order-service:
+    <<: *amd64
     build:
       context: .
       dockerfile: order-service/Dockerfile
@@ -130,6 +137,7 @@ services:
       start_period: 5s
 
   ai-service:
+    <<: *amd64
     build: ./ai-service
     env_file:
       - path: .env
@@ -137,7 +145,7 @@ services:
     environment:
       APP_PORT: "8090"
       GRPC_PORT: "50055"
-      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_PROVIDER: ${LLM_PROVIDER:-offline}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434/v1}
       LLM_MODEL: ${LLM_MODEL:-travel-qwen:4b}
       LLM_TIMEOUT: ${LLM_TIMEOUT:-180s}
@@ -153,6 +161,7 @@ services:
       retries: 12
 
   map-service:
+    <<: *amd64
     build:
       context: .
       dockerfile: map-service/Dockerfile
@@ -166,6 +175,7 @@ services:
       start_period: 5s
 
   route-service:
+    <<: *amd64
     build:
       context: .
       dockerfile: route-service/Dockerfile
@@ -183,6 +193,7 @@ services:
       start_period: 5s
 
   provider-service:
+    <<: *amd64
     build:
       context: .
       dockerfile: provider-service/Dockerfile
@@ -201,14 +212,15 @@ services:
       start_period: 5s
 
   frontend:
+    <<: *amd64
     build: ./frontend
     ports:
-      - "5173:80"
+      - "8080:8080"
     depends_on:
       gateway:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
       interval: 5s
       timeout: 3s
       retries: 12

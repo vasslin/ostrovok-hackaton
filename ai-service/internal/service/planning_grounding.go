@@ -94,6 +94,14 @@ func quoteSupports(path string, value any, quote string) bool {
 			if hasAny(q, "завтра", "послезавтра", "через ", "на неделю", "на две недели") {
 				return true
 			}
+			if month, ok := quoteMonth(q); ok {
+				if int(d.Month()) != month {
+					return false
+				}
+				if hasNumber(q, float64(d.Day())) {
+					return true
+				}
+			}
 			months := []string{"январ", "феврал", "март", "апрел", "мая", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр"}
 			seenMonth, correctMonth := false, false
 			for index, month := range months {
@@ -193,6 +201,9 @@ func quotedFieldAccepts(path string, value any, quote string) bool {
 			if err != nil || monthWithoutDay(norm(quote), parsed) {
 				return false
 			}
+			if month, ok := quoteMonth(quote); ok && (int(parsed.Month()) != month || !hasNumber(quote, float64(parsed.Day()))) {
+				return false
+			}
 			return true
 		}
 	case []any:
@@ -219,6 +230,15 @@ func monthWithoutDay(quote string, date time.Time) bool {
 	}
 	if hasAny(quote, "завтра", "послезавтра", "через ", "на неделю", "на две недели", "выходн", "понедельник", "вторник", "сред", "четверг", "пятниц", "суббот", "воскрес") {
 		return false
+	}
+	if month, ok := quoteMonth(quote); ok {
+		if int(date.Month()) != month {
+			return true
+		}
+		if hasNumber(quote, float64(date.Day())) || hasAny(quote, "перв", "второ", "треть", "четверт", "пятнадцат", "двадцат", "тридцат") {
+			return false
+		}
+		return true
 	}
 	months := []string{"январ", "феврал", "март", "апрел", "мая", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр"}
 	seenMonth, correctMonth := false, false

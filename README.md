@@ -1,73 +1,76 @@
 # О!дин запрос
 
-Объединённый проект: интерфейс, gateway, AI, контекст сессий, поставщики, сборка маршрутов и демозаказы. В режиме `demo` **Qwen настоящий**, а цены, билеты и отели синтетические. Оплата и бронирование также демонстрационные.
 
-Видео с демонстрацией работы приложения
-https://drive.google.com/file/d/1IZKVosGVRkv-xpQUUQEoMyVvkYlHbZcO/view?usp=share_link
+Сервис собирает поездку из одного запроса: чат уточняет параметры, карта показывает маршрут, демо-провайдеры отдают билеты и отели, заказ можно оплатить и отменить внутри приложения.
 
-## Требования
+Видео с демонстрацией работы приложения: https://drive.google.com/file/d/1IZKVosGVRkv-xpQUUQEoMyVvkYlHbZcO/view?usp=share_link
 
-Для локального запуска необходимы среда Go версии 1.26.5 или выше, а также среда выполнения Ollama с моделью `travel-qwen:4b`, собранной на основе `qwen3:4b`. Рекомендуемый объём оперативной памяти для этой модели составляет 16 GB; продолжительность ответа зависит от конфигурации оборудования. При отсутствии Ollama или модели команда `make` выполняет установку среды, запуск службы и создание модели. Ручная подготовка описана в [LOCAL_QWEN.md](LOCAL_QWEN.md).
+## Быстрый старт
 
-Запуск через `make` или `go run` выполняется средствами Go. Для проверки интерфейса требуется Node.js версии 20 или выше (`npm test`, `npm run check`).
-
-Файл `.env` для режима `demo` необязателен: при его отсутствии применяются значения, заданные в приложении. Образец `.env.example` содержит пустые поля. Для режима `live` в `.env` необходимы `TRAVELPAYOUTS_TOKEN` и `YANDEX_RASP_API_KEY`. Поиск проживания дополнительно требует учётных данных Hotelbeds (`HOTELBEDS_MODE=evaluation`, `HOTELBEDS_API_KEY`, `HOTELBEDS_SECRET`) либо RateHawk (`RATEHAWK_MODE`, `RATEHAWK_KEY_ID`, `RATEHAWK_API_KEY`). При отсутствии гостиничных учётных данных доступен только поиск транспорта.
-
-Для контейнерного запуска необходимы Docker Engine либо Docker Desktop и Docker Compose версии 2.24 или выше. Модель размещается в Ollama на хосте.
-
-## Запуск на своём компьютере
-
-Подготовка модели вручную:
+Нужны Git и Docker с поддержкой `docker compose`. Другие установки не требуются.
 
 ```sh
-ollama pull qwen3:4b
-ollama create travel-qwen:4b -f ai-service/ollama/Modelfile
+git clone git@github.com:ostrovok-hackathon-2026/godnota.git
+cd godnota
+cp .env.example .env
+docker compose up --build
 ```
 
-Режим `demo`, синтетические билеты и отели:
 
-```sh
-make
-```
+Откройте http://localhost:8080. Проверка: `curl -s http://localhost:8080/health` возвращает `{"status":"ok"}`.
 
-Режим `live`, данные провайдеров. Перечень ключей приведён в разделе «Требования».
+Остановка: `docker compose down` или `make down`. Повторный запуск: `make up`.
 
-```sh
-make MODE=live
-```
+## Ресурсы
 
-`make doctor` сервисы не поднимает. Команда проверяет, что Ollama отвечает и модель `travel-qwen:4b` установлена.
+Для `docker compose up --build` достаточно 2 CPU и 4 ГБ RAM. GPU не нужен. Образы Go и Postgres скачиваются при сборке; веса модели в репозиторий не входят.
 
-Откройте **http://localhost:5173**. Gateway: http://127.0.0.1:8080/docs. Прямой Swagger AI: http://127.0.0.1:8090/docs. Ctrl+C останавливает все дочерние сервисы и UI; Ollama остаётся работать отдельно. Нативный запуск хранит контекст и демозаказы в памяти, аккаунты — в `data/auth.json`.
+Пустой `LLM_PROVIDER` в `.env` включает встроенный режим `offline`: параметры поездки берутся из текста запроса, внешняя модель не вызывается. Билеты и отели синтетические (`PROVIDER_MODE=demo`).
 
-Без make, в том числе в Windows PowerShell:
+Чтобы подключить настоящую модель, в `.env` задайте `LLM_PROVIDER=ollama` и запущенный на хосте Ollama с моделью `travel-qwen:4b` (`LLM_BASE_URL=http://host.docker.internal:11434/v1`) либо `LLM_PROVIDER=groq` или `openai` и `LLM_API_KEY`. Для Ollama на хосте лучше иметь 16 ГБ RAM.
 
-```text
-go run ./cmd/dev run -full
-go run ./cmd/dev run -full -mode live
-```
+## Переменные окружения
 
-Проверка модели без запуска: `go run ./cmd/dev doctor`.
+Файл `.env` создаётся копированием `.env.example`. Секреты в Git не хранятся. Пустое значение означает значение по умолчанию из `docker-compose.yml`.
 
-При занятых портах: `make RUN_FLAGS=-random-ports` или `go run ./cmd/dev run -full -random-ports`; используйте напечатанный адрес UI. Пользовательские порты: `make WEB_PORT=5174 AI_HTTP_PORT=8091`. Конфигурация: `ENV_FILE=...`; переменные окружения имеют приоритет над файлом. Логи — `data/logs/`.
+| Переменная | По умолчанию в Compose | Назначение |
+| --- | --- | --- |
+| `LLM_PROVIDER` | `offline` | `offline`, `ollama`, `groq` или `openai` |
+| `LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Адрес OpenAI-совместимого API, если провайдер не `offline` |
+| `LLM_MODEL` | `travel-qwen:4b` | Имя модели |
+| `LLM_API_KEY` | пусто | Ключ Groq или OpenAI |
+| `LLM_TIMEOUT` | `180s` | Таймаут ответа модели |
+| `PROVIDER_MODE` | `demo` | `demo` не ходит во внешние API билетов и отелей |
+| `SESSION_DB_PASSWORD` | `local-session` | Пароль PostgreSQL для контекста сессий |
+| `MAX_CLARIFICATION_ROUNDS` | `3` | Лимит раундов уточнения, допустимо 1–10 |
+| `TRAVELPAYOUTS_TOKEN`, `YANDEX_RASP_API_KEY` | пусто | Живой транспорт, если `PROVIDER_MODE=live` |
+| `HOTELBEDS_*`, `RATEHAWK_*` | пусто | Живые отели; без ключей полный поиск с проживанием недоступен |
 
-## Docker
+Зашифрованный файл организаторов `secrets.env.age` и порядок его обновления описаны в [docs/SECRETS.md](docs/SECRETS.md).
 
-Ollama выполняется на хосте. На macOS это позволяет использовать Metal. Установка модели на машине, выполняющей AI, описана в разделе «Требования».
+## Начальные данные
 
-```sh
-docker compose up --build -d --wait
-```
+Отдельная загрузка данных не нужна. `session-service` создаёт схему PostgreSQL при старте. Демо-билеты, отели и заказы появляются в момент поиска и бронирования. `make seed` только сообщает об этом и ничего не записывает.
 
-Тот же UI: http://localhost:5173. Compose запускает все сервисы и PostgreSQL; история/конфиг сохраняются в volume `session-data`, аккаунты — в `auth-data`. `docker compose down` останавливает стек с сохранением volumes. Для Linux настройка доступа контейнера к Ollama описана в LOCAL_QWEN.md.
+## Маршруты
 
-## Ключи для организаторов
+| Метод и путь | Ответ |
+| --- | --- |
+| `GET /` | интерфейс |
+| `GET /health` | `{"status":"ok"}` |
+| `GET /docs` | документация gateway |
+| `GET /openapi.json` | спецификация gateway |
+| `/api/...` | HTTP API для интерфейса |
 
-В корне хранится бинарный `secrets.env.age`, зашифрованный публичным ключом организаторов. Исходный `.env.jury` и локальный `.env` исключены из Git и Docker build context; `.env.example` содержит только пустые значения. После изменения настроек выполните `./scripts/encrypt-secrets.sh`. Расшифровка доступна владельцу закрытого ключа организаторов; подробности — [docs/SECRETS.md](docs/SECRETS.md).
+Swagger AI-сервиса при запущенном Compose доступен на http://127.0.0.1:8090/docs.
 
-Основной AI — **Ollama**, модель **travel-qwen:4b** на основе Qwen3 4B. В этом режиме LLM-ключ не используется. Облачная альтернатива — **Groq**, модель **openai/gpt-oss-20b**; для неё нужны отдельный ключ жюри и согласованные `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`. Ранее опубликованные ключи необходимо перевыпустить: шифрование не устраняет прежнюю утечку.
+## Тестовый вход
 
-## Проверка
+Готовой учётной записи в базе нет. На главной странице откройте регистрацию и создайте пользователя. Пароль — от 12 до 128 символов. Пример: `jury@example.com` / `jury-demo-pass`. Тот же адрес и пароль подходят для повторного входа.
+
+## Локальная разработка без Docker
+
+`make` поднимает стек на машине в режиме `demo` и при необходимости ставит Ollama. Интерфейс в этом режиме: http://localhost:5173. Живые провайдеры: `make MODE=live` и ключи в `.env`. `make doctor` только проверяет Ollama и модель, сервисы не запускает.
 
 ```sh
 make build
@@ -77,12 +80,7 @@ make smoke
 make test-ai
 ```
 
-`make test` проверяет все Go-модули и запускает vet.
-`make e2e` поднимает изолированные процессы и проверяет авторизацию, права владельца, выдачу кандидатов, несколько городов, демозаказ/повтор/оплату/отмену и остановку полного стека. Внешние LLM при этом не вызываются.
-`make smoke` проверяет уже запущенный gateway. 
-`make test-ai` вызывает настоящую модель через gateway: уточнения → ответы → сохранённый конфиг → подтверждение → поиск. Для другого порта нужно задать `API_URL`, например `make test-ai API_URL=http://127.0.0.1:12345`; можно передать адрес UI, чтобы проверить и его прокси. Эти проверки создают только синтетические тестовые аккаунты и сессии.
-
-Без make: `go run ./cmd/dev build`, `go run ./cmd/dev test`, `go run ./cmd/dev e2e`, `go run ./cmd/dev smoke`, `go run ./cmd/dev ai-smoke`. Проверка гонок: `go run ./cmd/dev test -race`. Для frontend-тестов нужен Node.js 20+: `cd frontend`, затем `npm test` и `npm run check`.
+`make test` проверяет все Go-модули и запускает vet. `make e2e` проверяет авторизацию, права владельца, кандидатов, несколько городов, демозаказ, повтор, оплату и отмену без внешней модели. `make test-ai` вызывает настоящую модель через gateway. Для frontend-тестов нужен Node.js 20+: `cd frontend`, затем `npm test`.
 
 ## Что показать
 

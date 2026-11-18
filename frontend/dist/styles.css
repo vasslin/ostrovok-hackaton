@@ -280,8 +280,9 @@ p {
 }
 
 .workspace {
+  --chat-width: 340px;
   display: grid;
-  grid-template-columns: 340px minmax(0,1fr);
+  grid-template-columns: var(--chat-width) minmax(0,1fr);
   min-height: calc(100vh - 133px)
 }
 
@@ -296,8 +297,47 @@ p {
   flex-direction: column;
   position: sticky;
   top: 0;
+  z-index: 2;
   height: calc(100dvh - 88px);
   min-height: 600px
+}
+
+.chat-resize {
+  position: absolute;
+  top: 0;
+  right: -7px;
+  bottom: 0;
+  width: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 3
+}
+
+.chat-resize::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  width: 4px;
+  height: 36px;
+  margin-top: -18px;
+  border-radius: 4px;
+  background: #ddd8e6
+}
+
+.chat-resize:hover::before,
+.chat-resize:focus-visible::before,
+.workspace.resizing .chat-resize::before {
+  background: var(--purple)
+}
+
+.workspace.resizing,
+.workspace.resizing * {
+  cursor: col-resize;
+  user-select: none
 }
 
 .chat-heading {
@@ -2592,7 +2632,7 @@ select {
 
 @media(min-width:1700px) {
   .workspace {
-    grid-template-columns: 390px minmax(0,1fr)
+    --chat-width: 390px
   }
 
   .chat-heading {
@@ -2699,7 +2739,7 @@ select {
   }
 
   .workspace {
-    grid-template-columns: 300px minmax(0,1fr)
+    --chat-width: 300px
   }
 
   .trip-panel {
@@ -2879,7 +2919,7 @@ select {
 
 @media(max-width:1000px) and (min-width:761px) {
   .workspace {
-    grid-template-columns: 280px minmax(0,1fr)
+    --chat-width: 280px
   }
 
   .trip-panel {
@@ -3167,6 +3207,10 @@ select {
     min-height: 450px;
     position: relative;
     top: auto
+  }
+
+  .chat-resize {
+    display: none
   }
 
   .workspace.mobile-chat .chat-panel {

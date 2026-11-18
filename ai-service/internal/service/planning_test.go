@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -219,6 +220,86 @@ func TestParaphrasedOriginUpdatesConfig(t *testing.T) {
 		t.Fatalf("free wording was dropped: %+v", out.Config)
 	}
 }
+func TestTypoMonthBecomesNovember(t *testing.T) {
+	paris := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Destinations: []PlanningPlace{{City: "Париж"}}}}
+	wrong := PlanningConfig{Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, DateRange: &PlanningDates{StartDate: ptr("2026-10-29")}, Travelers: &PlanningTravelers{Adults: ptr(2)}}}
+	completion := planningCompletion{Status: "questions", Summary: "Вот описание вашей поездки: вы едете из санкт-петербург в париж с выездом 2026-10-29, 2 взрослых.", Config: &wrong, Evidence: []PlanningEvidence{{Field: "trip.origin.city", Quote: "питер"}, {Field: "trip.date_range.start_date", Quote: "1 нябра"}, {Field: "trip.travelers.adults", Quote: "1 нябра"}}}
+	svc, _ := planningService(t, completion, nil)
+	out, err := svc.AnalyzeCanonical(context.Background(), PlanningInput{Text: "питер, 1 нябра", Config: paris, CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := out.Config.Request
+	if request.Origin.City != "Санкт-Петербург" || request.Dates.DepartureDate != "2026-11-01" || request.Travelers.Adults != 0 || strings.Contains(out.Summary, "2026-10-29") || strings.Contains(out.Summary, "2 взрослых") {
+		t.Fatalf("typo was not corrected: %+v summary=%s", request, out.Summary)
+	}
+}
+func TestBareNicknameFillsMissingOrigin(t *testing.T) {
+	paris := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Destinations: []PlanningPlace{{City: "Париж"}}, DateRange: &PlanningDates{StartDate: ptr("2026-11-03")}}}
+	echo := paris
+	summary := "Вот описание вашей поездки: вы едете в париж с выездом 2026-11-03. Вам ещё нужно назвать: город отправления, дата возвращения, число взрослых."
+	svc, _ := planningService(t, planningCompletion{Status: "questions", Config: &echo, Summary: summary}, nil)
+	out, err := svc.AnalyzeCanonical(context.Background(), PlanningInput{Text: "питер", Config: paris, Context: PlanningContext{Summary: summary}, CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := out.Config.Request
+	if request.Origin.City != "Санкт-Петербург" || request.Destination == nil || request.Destination.City != "Париж" || request.Dates.DepartureDate != "2026-11-03" || request.Dates.ReturnDate != "" || request.Travelers.Adults != 0 {
+		t.Fatalf("nickname was not stored: %+v", request)
+	}
+	if !strings.Contains(out.Summary, "Санкт-Петербург") || !strings.Contains(out.Summary, "2026-11-03") || !strings.Contains(out.Summary, "дата возвращения") || !strings.Contains(out.Summary, "число взрослых") {
+		t.Fatal(out.Summary)
+	}
+}
+func TestNamedOriginReplacesPreviousCity(t *testing.T) {
+	two := 2
+	current := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, Destinations: []PlanningPlace{{City: "Париж"}}, DateRange: &PlanningDates{StartDate: ptr("2026-11-05"), EndDate: ptr("2026-11-08")}, Travelers: &PlanningTravelers{Adults: &two}}}
+	echo := current
+	summary := "Вот описание вашей поездки: вы едете из Санкт-Петербург в париж с 2026-11-05 по 2026-11-08, 2 взрослых."
+	svc, _ := planningService(t, planningCompletion{Status: "generate", Config: &echo, Summary: summary, Evidence: []PlanningEvidence{{Field: "trip.origin.city", Quote: "Санкт-Петербург"}, {Field: "trip.destinations", Quote: "париж"}, {Field: "trip.date_range.start_date", Quote: "2026-11-05"}, {Field: "trip.date_range.end_date", Quote: "2026-11-08"}, {Field: "trip.travelers.adults", Quote: "2 взрослых"}}}, nil)
+	out, err := svc.AnalyzeCanonical(context.Background(), PlanningInput{Text: "измени город отправления на москву", Config: current, Context: PlanningContext{Summary: summary}, CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := out.Config.Request
+	if request.Origin.City != "Москва" || request.Destination == nil || request.Destination.City != "Париж" || request.Dates.DepartureDate != "2026-11-05" || request.Dates.ReturnDate != "2026-11-08" || request.Travelers.Adults != 2 {
+		t.Fatalf("origin was not replaced: %+v", request)
+	}
+	if !strings.Contains(out.Summary, "Москва") {
+		t.Fatal(out.Summary)
+	}
+}
+func TestSingleDateFillsReturnAndKeepsDeparture(t *testing.T) {
+	current := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, Destinations: []PlanningPlace{{City: "Париж"}}, DateRange: &PlanningDates{StartDate: ptr("2026-11-03")}}}
+	both := "2026-11-10"
+	echo := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, Destinations: []PlanningPlace{{City: "Париж"}}, DateRange: &PlanningDates{StartDate: &both, EndDate: &both}, Travelers: &PlanningTravelers{Adults: ptr(2)}}}
+	summary := "Вот описание вашей поездки: вы едете из Санкт-Петербург в париж с выездом 2026-11-03. Вам ещё нужно назвать: дата возвращения, число взрослых."
+	svc, _ := planningService(t, planningCompletion{Status: "questions", Config: &echo, Summary: summary, Evidence: []PlanningEvidence{{Field: "trip.date_range.start_date", Quote: "10 нябра"}, {Field: "trip.date_range.end_date", Quote: "10 нябра"}, {Field: "trip.travelers.adults", Quote: "10 нябра, 2"}}}, nil)
+	out, err := svc.AnalyzeCanonical(context.Background(), PlanningInput{Text: "10 нябра, 2", Config: current, Context: PlanningContext{Summary: summary}, CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := out.Config.Request
+	if request.Dates.DepartureDate != "2026-11-03" || request.Dates.ReturnDate != "2026-11-10" || request.Travelers.Adults != 2 || request.Origin.City != "Санкт-Петербург" {
+		t.Fatalf("return date replaced departure: %+v", request)
+	}
+}
+func TestNamedDepartureReplacesPreviousDate(t *testing.T) {
+	two := 2
+	current := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, Destinations: []PlanningPlace{{City: "Париж"}}, DateRange: &PlanningDates{StartDate: ptr("2026-11-03"), EndDate: ptr("2026-11-08")}, Travelers: &PlanningTravelers{Adults: &two}}}
+	next := "2026-11-10"
+	echo := PlanningConfig{Version: "1.0", Trip: &PlanningTrip{Origin: &PlanningPlace{City: "Санкт-Петербург"}, Destinations: []PlanningPlace{{City: "Париж"}}, DateRange: &PlanningDates{StartDate: &next, EndDate: ptr("2026-11-08")}, Travelers: &PlanningTravelers{Adults: &two}}}
+	summary := "Вот описание вашей поездки: вы едете из Санкт-Петербург в париж с 2026-11-03 по 2026-11-08, 2 взрослых."
+	svc, _ := planningService(t, planningCompletion{Status: "generate", Config: &echo, Summary: summary, Evidence: []PlanningEvidence{{Field: "trip.date_range.start_date", Quote: "10 ноября"}, {Field: "trip.date_range.end_date", Quote: "2026-11-08"}, {Field: "trip.travelers.adults", Quote: "2 взрослых"}}}, nil)
+	out, err := svc.AnalyzeCanonical(context.Background(), PlanningInput{Text: "измени дату выезда на 10 ноября", Config: current, Context: PlanningContext{Summary: summary}, CurrentDate: "2026-10-28"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := out.Config.Request
+	if request.Dates.DepartureDate != "2026-11-10" || request.Dates.ReturnDate != "2026-11-08" || request.Travelers.Adults != 2 {
+		t.Fatalf("named departure was not replaced: %+v", request)
+	}
+}
 func TestInventedQuoteIsNotEvidence(t *testing.T) {
 	patch := PlanningConfig{Trip: &PlanningTrip{Travelers: &PlanningTravelers{Adults: ptr(2)}}}
 	svc, _ := planningService(t, planningCompletion{Status: "generate", Config: &patch, Evidence: []PlanningEvidence{{Field: "trip.travelers.adults", Quote: "двое взрослых"}}}, nil)
@@ -255,5 +336,22 @@ func TestChildWithoutAgeCannotGenerate(t *testing.T) {
 	}
 	if out.Status != "questions" || !containsString(out.MissingFields, "trip.travelers.children_ages") {
 		t.Fatal("child without age did not block generation")
+	}
+}
+
+func TestOfflinePlannerUsesLiterals(t *testing.T) {
+	svc := New(agent.NewOffline())
+	out, err := svc.Analyze(context.Background(), PlanningInput{
+		Text:        "Хочу из Москвы в Сочи с 10 по 17 ноября 2026, двое взрослых, бюджет 80000 рублей",
+		CurrentDate: "2026-10-28",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Config == nil || out.Config.Trip == nil || out.Config.Trip.Origin == nil || out.Config.Trip.Origin.City != "Москва" {
+		t.Fatalf("origin was not taken from the text: %+v", out)
+	}
+	if len(out.Config.Trip.Destinations) == 0 || out.Config.Trip.Destinations[0].City != "Сочи" {
+		t.Fatalf("destination was not taken from the text: %+v", out.Config)
 	}
 }
